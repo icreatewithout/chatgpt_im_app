@@ -1,8 +1,18 @@
-import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:chatgpt_im/common/common_utils.dart';
+import 'package:chatgpt_im/routes/index_page.dart';
+import 'package:chatgpt_im/routes/login_page.dart';
+import 'package:chatgpt_im/routes/routes.dart';
+import 'package:chatgpt_im/states/LocaleModel.dart';
+import 'package:chatgpt_im/states/UserModel.dart';
+import 'package:provider/provider.dart';
+import 'common/global.dart';
+import 'generated/l10n.dart';
 
 void main() {
-  runApp(const MyApp());
+  Global.init().then((e) => runApp(const MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -11,64 +21,55 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-
-    OpenAIChatMessageRole.assistant
-
-    setState(() {
-      _counter++;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserModel()),
+        ChangeNotifierProvider(create: (_) => LocaleModel()),
+      ],
+      child: Consumer2<UserModel, LocaleModel>(
+        builder: (BuildContext context, UserModel userModel,
+            LocaleModel localeModel, Widget? child) {
+          return MaterialApp(
+            theme: ThemeData(
+                brightness: Brightness.light,
+                primarySwatch: CommonUtils.white()
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
+            debugShowCheckedModeBanner: false,
+            locale: localeModel.getLocale(),
+            localizationsDelegates: const [
+              //本地化代理类
+              GlobalMaterialLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              //生成的代理类
+              S.delegate
+            ],
+            supportedLocales: S.delegate.supportedLocales,
+            localeResolutionCallback: (local, supportedLocales) {
+              if (localeModel.getLocale() != null) {
+                return localeModel.getLocale();
+              } else {
+                //跟随系统
+                Locale tempLocale;
+                if (supportedLocales.contains(local)) {
+                  tempLocale = local!;
+                } else {
+                  //如果系统语言不是中文简体或美国英语，则默认使用美国英语
+                  tempLocale = const Locale.fromSubtags(
+                    languageCode: 'zh',
+                    countryCode: 'CN',
+                  );
+                }
+                return tempLocale;
+              }
+            },
+            // initialRoute: IndexPage.path,
+            initialRoute: IndexPage.path,
+            onGenerateRoute: routeFactory,
+            builder: FToastBuilder(),
+          );
+        },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

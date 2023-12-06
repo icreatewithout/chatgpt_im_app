@@ -1,27 +1,26 @@
-
-import 'package:chatgpt_im/db/message_table.dart';
-import 'package:chatgpt_im/states/MessageModel.dart';
-import 'package:chatgpt_im/widgets/find/menu_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../generated/l10n.dart';
-import '../models/message.dart';
-import '../states/LocaleModel.dart';
-import '../widgets/find/select_models_widgets.dart';
-import '../widgets/ui/open_cn_button.dart';
-import '../widgets/ui/open_cn_text_field.dart';
+import '../../db/message_table.dart';
+import '../../generated/l10n.dart';
+import '../../models/message.dart';
+import '../../states/LocaleModel.dart';
+import '../../states/MessageModel.dart';
+import '../../widgets/find/menu_widgets.dart';
+import '../../widgets/find/select_models_widgets.dart';
+import '../../widgets/ui/open_cn_button.dart';
+import '../../widgets/ui/open_cn_text_field.dart';
 
-class CreateAssistant extends StatefulWidget {
-  static const String path = "/create/assistant";
+class CreateAudio extends StatefulWidget {
+  static const String path = "/create/audio";
 
-  const CreateAssistant({super.key});
+  const CreateAudio({super.key});
 
   @override
-  State<CreateAssistant> createState() => _CreateAssistantState();
+  State<CreateAudio> createState() => _CreateAudioState();
 }
 
-class _CreateAssistantState extends State<CreateAssistant> {
+class _CreateAudioState extends State<CreateAudio> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _desController = TextEditingController();
   final TextEditingController _keyController = TextEditingController();
@@ -45,9 +44,9 @@ class _CreateAssistantState extends State<CreateAssistant> {
 
     Message message = Message(
       null,
-      MenuItems.assistant.text,
+      MenuItems.audio.text,
       _nameController.text.isEmpty
-          ? MenuItems.assistant.text
+          ? MenuItems.audio.text
           : _nameController.text,
       _desController.text,
       val,
@@ -292,7 +291,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
       margin: const EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 5),
       decoration: BoxDecoration(
           border:
-              Border(top: BorderSide(width: 0.3, color: Colors.grey.shade400))),
+          Border(top: BorderSide(width: 0.3, color: Colors.grey.shade400))),
     );
   }
 }

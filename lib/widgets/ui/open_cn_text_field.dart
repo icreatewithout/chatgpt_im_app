@@ -126,7 +126,7 @@ class _OpenCnTextFieldState extends State<OpenCnTextField> {
               keyboardType: TextInputType.text,
               onTap: () {},
               // 输入框内容改变回调
-              onChanged: (val) => widget.onChanged!(val),
+              onChanged: (val) => widget.onChanged??{},
               onSubmitted: (val) {},
               onEditingComplete: () {
                 FocusScopeNode currentFocus = FocusScope.of(context);

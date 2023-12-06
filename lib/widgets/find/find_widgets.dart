@@ -18,13 +18,13 @@ class FindWidgets extends StatefulWidget {
 class _FindWidgetsState extends State<FindWidgets> {
   @override
   void initState() {
-    timeAgo.setLocaleMessages('zh_CN', timeAgo.ZhMessages());
-    timeAgo.setLocaleMessages('fr', timeAgo.FR());
-    timeAgo.setLocaleMessages('de', timeAgo.ZhMessages());
-    timeAgo.setLocaleMessages('it', timeAgo.ZhMessages());
-    timeAgo.setLocaleMessages('ja', timeAgo.ZhMessages());
-    timeAgo.setLocaleMessages('ko', timeAgo.ZhMessages());
-    timeAgo.setLocaleMessages('ru', timeAgo.ZhMessages());
+    timeAgo.setLocaleMessages('zh_CN', timeAgo.ZhCnMessages());
+    timeAgo.setLocaleMessages('fr', timeAgo.FrShortMessages());
+    timeAgo.setLocaleMessages('de', timeAgo.DeShortMessages());
+    timeAgo.setLocaleMessages('it', timeAgo.ItShortMessages());
+    timeAgo.setLocaleMessages('ja', timeAgo.JaMessages());
+    timeAgo.setLocaleMessages('ko', timeAgo.KoMessages());
+    timeAgo.setLocaleMessages('ru', timeAgo.RuShortMessages());
     super.initState();
   }
 
@@ -62,56 +62,62 @@ class _FindWidgetsState extends State<FindWidgets> {
   }
 
   buildItem(Message message, LocaleModel localeModel) {
-    debugPrint(localeModel.locale);
-    return Container(
-      padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border:
-            Border(top: BorderSide(width: 0.3, color: Colors.grey.shade500)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(
-            MenuItems.getIcon(message.type),
-            size: 40,
-            color: Colors.grey,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      message.name ?? '...',
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
-                    Text(
-                      timeAgo.format(
-                        DateTime.fromMillisecondsSinceEpoch(
-                            message.createTime ?? 0),
-                        locale: localeModel.locale,
-                        allowFromNow: true,
-                      ),
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  message.des ?? '...',
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
+    MenuItem? menuItem = MenuItems.getMenuItem(message.type);
+    return GestureDetector(
+      onTap: () => Navigator.of(context).pushNamed(menuItem!.path,
+          arguments: {'id': message.id, 'title': message.name}),
+      child: Container(
+        padding:
+            const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border:
+              Border(top: BorderSide(width: 0.2, color: Colors.grey.shade400)),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(
+              menuItem?.icon,
+              size: 40,
+              color: Colors.grey,
             ),
-          ),
-        ],
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        message.name ?? '...',
+                        style: const TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500),
+                      ),
+                      Text(
+                        timeAgo.format(
+                          DateTime.fromMillisecondsSinceEpoch(
+                              message.createTime ?? 0),
+                          locale: localeModel.locale,
+                          allowFromNow: true,
+                        ),
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    message.des ?? '...',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

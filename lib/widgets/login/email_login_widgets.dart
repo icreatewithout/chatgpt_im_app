@@ -204,8 +204,6 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                       const SizedBox(height: 8),
                       OpenCnTextField(
                         height: 50,
-                        left: 0,
-                        right: 0,
                         radius: 10,
                         maxLength: 45,
                         padding: const EdgeInsets.only(left: 10, right: 10),
@@ -224,8 +222,6 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                             flex: 3,
                             child: OpenCnTextField(
                               height: 45,
-                              left: 0,
-                              right: 0,
                               bottom: 0,
                               radius: 10,
                               maxLength: 6,

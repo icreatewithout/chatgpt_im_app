@@ -1,6 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:chatgpt_im/models/user_vo.dart';
-import "user.dart";
+
+import 'message.dart';
+
 part 'profile.g.dart';
 
 @JsonSerializable()
@@ -14,7 +16,11 @@ class Profile {
   String? token;
 
   String? locale;
-  
-  factory Profile.fromJson(Map<String,dynamic> json) => _$ProfileFromJson(json);
+
+  List<Message> messages = List.of([], growable: true);
+
+  factory Profile.fromJson(Map<String, dynamic> json) =>
+      _$ProfileFromJson(json);
+
   Map<String, dynamic> toJson() => _$ProfileToJson(this);
 }

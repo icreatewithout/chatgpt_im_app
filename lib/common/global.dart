@@ -5,12 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:chatgpt_im/common/dio_util.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../db/sqlite.dart';
 import '../models/profile.dart';
 
 class Global {
   static late SharedPreferences _preferences;
 
   static Profile profile = Profile();
+  static SqliteDb sqliteDb = SqliteDb();
 
   //是否为release版本
   static bool get isRelease => const bool.fromEnvironment("dart.vm.product");
@@ -22,6 +24,7 @@ class Global {
     //从SharedPreferences中取出全局变量
     _preferences = await SharedPreferences.getInstance();
     String? storeProfile = _preferences.getString("profile");
+    debugPrint(storeProfile);
     if (storeProfile != null) {
       try {
         Map<String, dynamic> map = jsonDecode(storeProfile);
@@ -34,6 +37,7 @@ class Global {
     }
 
     DioUtil.init();
+    await sqliteDb.init();
 
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
@@ -46,5 +50,4 @@ class Global {
   //持久化Profile信息
   static saveProfile() =>
       _preferences.setString("profile", jsonEncode(profile.toJson()));
-
 }

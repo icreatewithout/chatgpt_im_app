@@ -1,3 +1,4 @@
+import 'package:chatgpt_im/states/MessageModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -25,15 +26,15 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => UserModel()),
         ChangeNotifierProvider(create: (_) => LocaleModel()),
+        ChangeNotifierProvider(create: (_) => MessageModel()),
       ],
-      child: Consumer2<UserModel, LocaleModel>(
-        builder: (BuildContext context, UserModel userModel,
-            LocaleModel localeModel, Widget? child) {
+      child: Consumer<LocaleModel>(
+        builder:
+            (BuildContext context, LocaleModel localeModel, Widget? child) {
           return MaterialApp(
             theme: ThemeData(
                 brightness: Brightness.light,
-                primarySwatch: CommonUtils.white()
-            ),
+                primarySwatch: CommonUtils.white()),
             debugShowCheckedModeBanner: false,
             locale: localeModel.getLocale(),
             localizationsDelegates: const [

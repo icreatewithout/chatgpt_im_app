@@ -1,12 +1,12 @@
-import 'package:chatgpt_im/widgets/ui/open_cn_drag_box.dart';
+import 'package:chatgpt_im/states/LocaleModel.dart';
+import 'package:chatgpt_im/widgets/find/menu_widgets.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:chatgpt_im/common/assets.dart';
-import 'package:chatgpt_im/common/global.dart';
 import 'package:provider/provider.dart';
 
 import '../../generated/l10n.dart';
-import '../../states/UserModel.dart';
+import '../../models/message.dart';
+import '../../states/MessageModel.dart';
+import 'package:timeago/timeago.dart' as timeAgo;
 
 class FindWidgets extends StatefulWidget {
   const FindWidgets({super.key});
@@ -18,7 +18,13 @@ class FindWidgets extends StatefulWidget {
 class _FindWidgetsState extends State<FindWidgets> {
   @override
   void initState() {
-    debugPrint('locale ==== > ${Global.profile.locale}');
+    timeAgo.setLocaleMessages('zh_CN', timeAgo.ZhMessages());
+    timeAgo.setLocaleMessages('fr', timeAgo.FR());
+    timeAgo.setLocaleMessages('de', timeAgo.ZhMessages());
+    timeAgo.setLocaleMessages('it', timeAgo.ZhMessages());
+    timeAgo.setLocaleMessages('ja', timeAgo.ZhMessages());
+    timeAgo.setLocaleMessages('ko', timeAgo.ZhMessages());
+    timeAgo.setLocaleMessages('ru', timeAgo.ZhMessages());
     super.initState();
   }
 
@@ -34,23 +40,78 @@ class _FindWidgetsState extends State<FindWidgets> {
         elevation: 0,
         centerTitle: true,
         title: Text(S.of(context).find),
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.add_circle_outline,
-              color: Colors.red,
-            ),
-            onPressed: () {},
+        actions: const [
+          Padding(
+            padding: EdgeInsets.only(right: 18),
+            child: MenuWidgets(),
           ),
         ],
       ),
-      body: Container(
-        padding: const EdgeInsets.all(20),
-        height: 500,
-        width: double.infinity,
-        child: DragMoveBox(
-          child: Text('1'),
-        ),
+      body: Consumer2<MessageModel, LocaleModel>(
+        builder: (BuildContext context, MessageModel messageModel,
+            LocaleModel localeModel, Widget? child) {
+          return ListView(
+            shrinkWrap: true,
+            children: [
+              ...messageModel.messages.map((e) => buildItem(e, localeModel)),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  buildItem(Message message, LocaleModel localeModel) {
+    debugPrint(localeModel.locale);
+    return Container(
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border:
+            Border(top: BorderSide(width: 0.3, color: Colors.grey.shade500)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Icon(
+            MenuItems.getIcon(message.type),
+            size: 40,
+            color: Colors.grey,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      message.name ?? '...',
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w500),
+                    ),
+                    Text(
+                      timeAgo.format(
+                        DateTime.fromMillisecondsSinceEpoch(
+                            message.createTime ?? 0),
+                        locale: localeModel.locale,
+                        allowFromNow: true,
+                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  message.des ?? '...',
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

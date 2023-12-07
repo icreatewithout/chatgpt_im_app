@@ -1,11 +1,11 @@
-import 'package:chatgpt_im/db/message_table.dart';
-import 'package:chatgpt_im/states/MessageModel.dart';
+import 'package:chatgpt_im/db/chat_table.dart';
+import 'package:chatgpt_im/states/ChatModel.dart';
 import 'package:chatgpt_im/widgets/find/menu_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../generated/l10n.dart';
-import '../../models/message.dart';
+import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
 import '../../widgets/find/select_models_widgets.dart';
 import '../../widgets/ui/open_cn_button.dart';
@@ -41,18 +41,18 @@ class _CreateAssistantState extends State<CreateAssistant> {
   }
 
   void init() async {
-    Message? message = await MessageProvider().get(widget.arguments?['id']);
-    if (message != null) {
+    Chat? chat = await ChatProvider().get(widget.arguments?['id']);
+    if (chat != null) {
       setState(() {
-        _nameController.text = message.name!;
-        _desController.text = message.des!;
-        _keyController.text = message.apiKey!;
-        _temperatureController.text = message.temperature!;
-        _seedController.text = message.seed!;
-        _maxTokensController.text = message.maxToken!;
-        _nController.text = message.n!;
-        _sizeController.text = message.size!;
-        modelsGlobalKey.currentState?.setVal(message.model!);
+        _nameController.text = chat.name!;
+        _desController.text = chat.des!;
+        _keyController.text = chat.apiKey!;
+        _temperatureController.text = chat.temperature!;
+        _seedController.text = chat.seed!;
+        _maxTokensController.text = chat.maxToken!;
+        _nController.text = chat.n!;
+        _sizeController.text = chat.size!;
+        modelsGlobalKey.currentState?.setVal(chat.model!);
       });
     }
   }
@@ -64,7 +64,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
       val = modelsGlobalKey.currentState?.selectedValue;
     }
 
-    Message message = Message(
+    Chat chat = Chat(
       null,
       MenuItems.assistant.text,
       _nameController.text.isEmpty
@@ -82,17 +82,17 @@ class _CreateAssistantState extends State<CreateAssistant> {
       '0',
     );
 
-    if (widget.arguments!=null) {
+    if (widget.arguments != null) {
       // update set id
-      message.id = widget.arguments!['id'];
-      await MessageProvider().update(message);
+      chat.id = widget.arguments!['id'];
+      await ChatProvider().update(chat);
     } else {
-      await MessageProvider().insert(message);
+      await ChatProvider().insert(chat);
     }
 
-    List<Message> messages = await MessageProvider().findList();
+    List<Chat> chats = await ChatProvider().findList();
     if (context.mounted) {
-      Provider.of<MessageModel>(context, listen: false).setMessages = messages;
+      Provider.of<ChatModel>(context, listen: false).setChats = chats;
       Navigator.of(context).pop();
     }
   }
@@ -117,7 +117,10 @@ class _CreateAssistantState extends State<CreateAssistant> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Create Chat Completion',style: TextStyle(fontSize: 16),),
+        title: const Text(
+          'Create Chat Completion',
+          style: TextStyle(fontSize: 16),
+        ),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
@@ -177,7 +180,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         controller: _nameController,
                       ),
                       Container(
-                        padding: const EdgeInsets.only(top: 8,bottom: 8),
+                        padding: const EdgeInsets.only(top: 8, bottom: 8),
                         child: const Text('指示（Instructions）'),
                       ),
                       OpenCnTextField(
@@ -190,7 +193,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         controller: _desController,
                       ),
                       Container(
-                        padding: const EdgeInsets.only(top: 8,bottom: 8),
+                        padding: const EdgeInsets.only(top: 8, bottom: 8),
                         child: const Text('API Key'),
                       ),
                       OpenCnTextField(
@@ -230,7 +233,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         controller: _temperatureController,
                       ),
                       Container(
-                        padding: const EdgeInsets.only(top: 8,bottom: 8),
+                        padding: const EdgeInsets.only(top: 8, bottom: 8),
                         child: const Text('Seed（Seed）'),
                       ),
                       OpenCnTextField(
@@ -244,7 +247,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         controller: _seedController,
                       ),
                       Container(
-                        padding: const EdgeInsets.only(top: 8,bottom: 8),
+                        padding: const EdgeInsets.only(top: 8, bottom: 8),
                         child: const Text('Token数量（maxTokens）'),
                       ),
                       OpenCnTextField(
@@ -258,7 +261,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         controller: _maxTokensController,
                       ),
                       Container(
-                        padding: const EdgeInsets.only(top: 8,bottom: 8),
+                        padding: const EdgeInsets.only(top: 8, bottom: 8),
                         child: const Text('返回结果数量（n）'),
                       ),
                       OpenCnTextField(

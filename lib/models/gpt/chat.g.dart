@@ -1,12 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'message.dart';
+part of 'chat.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Message _$MessageFromJson(Map<String, dynamic> json) => Message(
+Chat _$ChatFromJson(Map<String, dynamic> json) => Chat(
       json['id'] as int?,
       json['type'] as String?,
       json['name'] as String?,
@@ -22,7 +22,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       json['message_size'] as String?,
     );
 
-Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
+Map<String, dynamic> _$ChatToJson(Chat instance) => <String, dynamic>{
       'id': instance.id,
       'type': instance.type,
       'model': instance.model,

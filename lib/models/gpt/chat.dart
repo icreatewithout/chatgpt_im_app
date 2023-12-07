@@ -1,9 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'message.g.dart';
+part 'chat.g.dart';
 
 @JsonSerializable(genericArgumentFactories: true)
-class Message {
+class Chat {
   late int? id;
   late String? type;
   late String? model;
@@ -23,7 +23,7 @@ class Message {
   @JsonKey(name: 'message_size')
   late String? messageSize;
 
-  Message(
+  Chat(
     this.id,
     this.type,
     this.name,
@@ -39,6 +39,6 @@ class Message {
     this.messageSize,
   );
 
-  factory Message.fromJson(Map<String,dynamic> json) => _$MessageFromJson(json);
-  Map<String, dynamic> toJson() => _$MessageToJson(this);
+  factory Chat.fromJson(Map<String,dynamic> json) => _$ChatFromJson(json);
+  Map<String, dynamic> toJson() => _$ChatToJson(this);
 }

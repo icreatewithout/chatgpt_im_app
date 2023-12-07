@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../db/message_table.dart';
+import '../../db/chat_table.dart';
 import '../../generated/l10n.dart';
-import '../../models/message.dart';
+import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
-import '../../states/MessageModel.dart';
+import '../../states/ChatModel.dart';
 import '../../widgets/find/menu_widgets.dart';
 import '../../widgets/find/select_models_widgets.dart';
 import '../../widgets/ui/open_cn_button.dart';
@@ -42,7 +42,7 @@ class _CreateEditsState extends State<CreateEdits> {
       val = modelsGlobalKey.currentState?.selectedValue;
     }
 
-    Message message = Message(
+    Chat message = Chat(
       null,
       MenuItems.edits.text,
       _nameController.text.isEmpty
@@ -60,10 +60,10 @@ class _CreateEditsState extends State<CreateEdits> {
       '0',
     );
 
-    await MessageProvider().insert(message);
-    List<Message> messages = await MessageProvider().findList();
+    await ChatProvider().insert(message);
+    List<Chat> chats = await ChatProvider().findList();
     if (context.mounted) {
-      Provider.of<MessageModel>(context, listen: false).setMessages = messages;
+      Provider.of<ChatModel>(context, listen: false).setChats = chats;
       Navigator.of(context).pop();
     }
   }
@@ -291,7 +291,7 @@ class _CreateEditsState extends State<CreateEdits> {
       margin: const EdgeInsets.only(top: 10, bottom: 10, left: 5, right: 5),
       decoration: BoxDecoration(
           border:
-          Border(top: BorderSide(width: 0.3, color: Colors.grey.shade400))),
+              Border(top: BorderSide(width: 0.3, color: Colors.grey.shade400))),
     );
   }
 }

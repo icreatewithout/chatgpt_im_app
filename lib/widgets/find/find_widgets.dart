@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../generated/l10n.dart';
-import '../../models/message.dart';
-import '../../states/MessageModel.dart';
+import '../../models/gpt/chat.dart';
+import '../../states/ChatModel.dart';
 import 'package:timeago/timeago.dart' as timeAgo;
 
 class FindWidgets extends StatefulWidget {
@@ -50,13 +50,13 @@ class _FindWidgetsState extends State<FindWidgets> {
           ),
         ],
       ),
-      body: Consumer2<MessageModel, LocaleModel>(
-        builder: (BuildContext context, MessageModel messageModel,
+      body: Consumer2<ChatModel, LocaleModel>(
+        builder: (BuildContext context, ChatModel chatModel,
             LocaleModel localeModel, Widget? child) {
           return ListView(
             shrinkWrap: true,
             children: [
-              ...messageModel.messages.map((e) => buildItem(e, localeModel)),
+              ...chatModel.chats.map((e) => buildItem(e, localeModel)),
             ],
           );
         },
@@ -64,11 +64,11 @@ class _FindWidgetsState extends State<FindWidgets> {
     );
   }
 
-  buildItem(Message message, LocaleModel localeModel) {
-    MenuItem? menuItem = MenuItems.getMenuItem(message.type);
+  buildItem(Chat chat, LocaleModel localeModel) {
+    MenuItem? menuItem = MenuItems.getMenuItem(chat.type);
     return GestureDetector(
       onTap: () => Navigator.of(context).pushNamed(menuItem!.path,
-          arguments: {'id': message.id, 'title': message.name}),
+          arguments: {'id': chat.id, 'title': chat.name}),
       child: Container(
         padding:
             const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
@@ -95,14 +95,14 @@ class _FindWidgetsState extends State<FindWidgets> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        message.name ?? '...',
+                        chat.name ?? '...',
                         style: const TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                       Text(
                         timeAgo.format(
                           DateTime.fromMillisecondsSinceEpoch(
-                              message.createTime ?? 0),
+                              chat.createTime ?? 0),
                           locale: localeModel.locale,
                           allowFromNow: true,
                         ),
@@ -113,7 +113,7 @@ class _FindWidgetsState extends State<FindWidgets> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    message.des ?? '...',
+                    chat.des ?? '...',
                     style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],

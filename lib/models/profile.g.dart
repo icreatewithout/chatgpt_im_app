@@ -13,8 +13,8 @@ Profile _$ProfileFromJson(Map<String, dynamic> json) => Profile()
   ..status = json['status'] as bool
   ..token = json['token'] as String?
   ..locale = json['locale'] as String?
-  ..messages = (json['messages'] as List<dynamic>)
-      .map((e) => Message.fromJson(e as Map<String, dynamic>))
+  ..chats = (json['chats'] as List<dynamic>)
+      .map((e) => Chat.fromJson(e as Map<String, dynamic>))
       .toList();
 
 Map<String, dynamic> _$ProfileToJson(Profile instance) => <String, dynamic>{
@@ -22,5 +22,5 @@ Map<String, dynamic> _$ProfileToJson(Profile instance) => <String, dynamic>{
       'status': instance.status,
       'token': instance.token,
       'locale': instance.locale,
-      'messages': instance.messages,
+      'chats': instance.chats,
     };

@@ -7,6 +7,7 @@ class SqliteDb {
   static int version = 1;
 
   static String messageSetting = 'message_setting';
+  static String chat = 'chat';
 
   void _onUpgrade(Database db, int oldVersion, int newVersion) async {
     // var batch = db.batch();

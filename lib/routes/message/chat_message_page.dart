@@ -1,5 +1,6 @@
-import 'package:chatgpt_im/widgets/ui/open_cn_button.dart';
-import 'package:chatgpt_im/widgets/ui/open_cn_text_field.dart';
+
+import 'package:chatgpt_im/db/chat_table.dart';
+import 'package:chatgpt_im/models/gpt/chat.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -27,19 +28,51 @@ class _ChatMessageState extends State<ChatMessage> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
+  late final Chat _chat;
+
   @override
   void initState() {
     super.initState();
+    init();
     _focusNode.addListener(() => setState(() {}));
     _textController.addListener(() {
       setState(() {});
     });
   }
 
+  void init() async {
+    Chat? chat = await ChatProvider().get(widget.arguments['id']);
+    if (chat != null) {
+      setState(() {
+        _chat = chat;
+      });
+    }
+  }
+
   @override
   void dispose() {
     super.dispose();
     _textController.dispose();
+  }
+
+  void send(val) {
+    if (_textController.text.isEmpty) {
+      return;
+    }
+
+
+
+    setState(() {
+      _textController.text = '';
+    });
+  }
+
+  void unFocus(BuildContext context) {
+    FocusScopeNode currentFocus = FocusScope.of(context);
+    // 键盘是否是弹起状态,弹出且输入完成时收起键盘
+    if (!currentFocus.hasPrimaryFocus && currentFocus.focusedChild != null) {
+      FocusManager.instance.primaryFocus!.unfocus();
+    }
   }
 
   @override
@@ -101,14 +134,17 @@ class _ChatMessageState extends State<ChatMessage> {
           Consumer<LocaleModel>(
             builder:
                 (BuildContext context, LocaleModel localeModel, Widget? child) {
-              return SizedBox(
-                height: double.infinity,
-                child: ListView(
-                  children: [
-                    Center(
-                      child: Text('1'),
-                    )
-                  ],
+              return GestureDetector(
+                onTap: () => unFocus(context),
+                child: SizedBox(
+                  height: double.infinity,
+                  child: ListView(
+                    children: [
+                      Center(
+                        child: Text('1'),
+                      )
+                    ],
+                  ),
                 ),
               );
             },
@@ -118,22 +154,18 @@ class _ChatMessageState extends State<ChatMessage> {
             right: 0,
             bottom: 0,
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(10),
               color: Colors.grey.shade100,
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  GestureDetector(
-                    onTap: () => {},
-                    child: const Icon(Icons.file_present_outlined,
-                        color: Colors.grey,size: 26,),
-                  ),
+                  buildFileButton(),
                   const SizedBox(width: 6),
                   Expanded(
                     child: Container(
                       constraints: const BoxConstraints(
-                        minHeight: 50,
+                        minHeight: 42,
                       ),
                       alignment: Alignment.centerLeft,
                       padding: const EdgeInsets.all(8),
@@ -153,13 +185,33 @@ class _ChatMessageState extends State<ChatMessage> {
     );
   }
 
+  buildFileButton() {
+    return GestureDetector(
+      onTap: () => {},
+      child: Container(
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(
+          Icons.file_present_outlined,
+          color: Colors.grey,
+          size: 26,
+        ),
+      ),
+    );
+  }
+
   buildTextField() {
     return TextField(
       cursorColor: Colors.grey,
       autofocus: false,
       focusNode: _focusNode,
       maxLength: 2000,
-      maxLines: null,
+      minLines: 1,
+      maxLines: 6,
       controller: _textController,
       decoration: const InputDecoration(
         border: InputBorder.none,
@@ -173,19 +225,8 @@ class _ChatMessageState extends State<ChatMessage> {
       style: const TextStyle(fontSize: 14),
       textInputAction: TextInputAction.send,
       keyboardType: TextInputType.multiline,
-      onTap: () {},
-      // 输入框内容改变回调
-      onChanged: (val) => {},
-      onSubmitted: (val) {},
-      onEditingComplete: () {
-        FocusScopeNode currentFocus = FocusScope.of(context);
-
-        /// 键盘是否是弹起状态,弹出且输入完成时收起键盘
-        if (!currentFocus.hasPrimaryFocus &&
-            currentFocus.focusedChild != null) {
-          FocusManager.instance.primaryFocus!.unfocus();
-        }
-      },
+      onSubmitted: (val) => send(val),
+      onEditingComplete: () {},
     );
   }
 

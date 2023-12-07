@@ -1,12 +1,12 @@
 
-import 'package:chatgpt_im/db/message_table.dart';
-import 'package:chatgpt_im/states/MessageModel.dart';
+import 'package:chatgpt_im/db/chat_table.dart';
+import 'package:chatgpt_im/states/ChatModel.dart';
 import 'package:chatgpt_im/widgets/find/menu_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../generated/l10n.dart';
-import '../../models/message.dart';
+import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
 import '../../widgets/find/select_models_widgets.dart';
 import '../../widgets/ui/open_cn_button.dart';

@@ -1,16 +1,16 @@
 import 'package:chatgpt_im/db/sqlite.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../models/message.dart';
+import '../models/gpt/chat.dart';
 
 
 
-class MessageProvider {
+class ChatProvider {
   final Database? db = SqliteDb().db;
 
-  Future<List<Message>> findList() async {
+  Future<List<Chat>> findList() async {
     List<Map<String,dynamic>> maps = await db!.query(
-      SqliteDb.messageSetting,
+      SqliteDb.chat,
       columns: [
         'id',
         'type',
@@ -29,19 +29,19 @@ class MessageProvider {
       orderBy: 'create_time desc',
     );
     if (maps.isNotEmpty) {
-      return maps.map((e) => Message.fromJson(e)).toList();
+      return maps.map((e) => Chat.fromJson(e)).toList();
     }
     return [];
   }
 
-  Future<Message?> insert(Message message) async {
-    message.id = await db?.insert(SqliteDb.messageSetting, message.toJson());
-    return message;
+  Future<Chat?> insert(Chat chat) async {
+    chat.id = await db?.insert(SqliteDb.chat, chat.toJson());
+    return chat;
   }
 
-  Future<Message?> get(int id) async {
+  Future<Chat?> get(int id) async {
     List<Map<String,dynamic>> maps = await db!.query(
-      SqliteDb.messageSetting,
+      SqliteDb.chat,
       columns: [
         'id',
         'type',
@@ -62,19 +62,19 @@ class MessageProvider {
       orderBy: 'id desc',
     );
     if (maps.isNotEmpty) {
-      return Message.fromJson(maps.first);
+      return Chat.fromJson(maps.first);
     }
     return null;
   }
 
   Future<int> delete(int id) async {
     return await db!
-        .delete(SqliteDb.messageSetting, where: 'id = ?', whereArgs: [id]);
+        .delete(SqliteDb.chat, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<int> update(Message message) async {
-    return await db!.update(SqliteDb.messageSetting, message.toJson(),
-        where: 'id = ?', whereArgs: [message.id]);
+  Future<int> update(Chat chat) async {
+    return await db!.update(SqliteDb.chat, chat.toJson(),
+        where: 'id = ?', whereArgs: [chat.id]);
   }
 
   Future close() async => db!.close();

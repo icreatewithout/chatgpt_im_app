@@ -1,4 +1,4 @@
-import 'package:chatgpt_im/states/MessageModel.dart';
+import 'package:chatgpt_im/states/ChatModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => UserModel()),
         ChangeNotifierProvider(create: (_) => LocaleModel()),
-        ChangeNotifierProvider(create: (_) => MessageModel()),
+        ChangeNotifierProvider(create: (_) => ChatModel()),
       ],
       child: Consumer<LocaleModel>(
         builder:

@@ -1,4 +1,3 @@
-
 import 'package:chatgpt_im/db/message_table.dart';
 import 'package:chatgpt_im/states/MessageModel.dart';
 import 'package:chatgpt_im/widgets/find/menu_widgets.dart';
@@ -15,7 +14,9 @@ import '../../widgets/ui/open_cn_text_field.dart';
 class CreateAssistant extends StatefulWidget {
   static const String path = "/create/assistant";
 
-  const CreateAssistant({super.key});
+  const CreateAssistant({super.key, this.arguments});
+
+  final Map? arguments;
 
   @override
   State<CreateAssistant> createState() => _CreateAssistantState();
@@ -33,7 +34,27 @@ class _CreateAssistantState extends State<CreateAssistant> {
 
   @override
   void initState() {
+    if (widget.arguments != null) {
+      init();
+    }
     super.initState();
+  }
+
+  void init() async {
+    Message? message = await MessageProvider().get(widget.arguments?['id']);
+    if (message != null) {
+      setState(() {
+        _nameController.text = message.name!;
+        _desController.text = message.des!;
+        _keyController.text = message.apiKey!;
+        _temperatureController.text = message.temperature!;
+        _seedController.text = message.seed!;
+        _maxTokensController.text = message.maxToken!;
+        _nController.text = message.n!;
+        _sizeController.text = message.size!;
+        modelsGlobalKey.currentState?.setVal(message.model!);
+      });
+    }
   }
 
   void pop(BuildContext context) async {
@@ -61,7 +82,14 @@ class _CreateAssistantState extends State<CreateAssistant> {
       '0',
     );
 
-    await MessageProvider().insert(message);
+    if (widget.arguments!=null) {
+      // update set id
+      message.id = widget.arguments!['id'];
+      await MessageProvider().update(message);
+    } else {
+      await MessageProvider().insert(message);
+    }
+
     List<Message> messages = await MessageProvider().findList();
     if (context.mounted) {
       Provider.of<MessageModel>(context, listen: false).setMessages = messages;
@@ -89,11 +117,12 @@ class _CreateAssistantState extends State<CreateAssistant> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Create Chat Completion'),
+        title: const Text('Create Chat Completion',style: TextStyle(fontSize: 16),),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
             Icons.arrow_back_ios,
+            size: 20,
           ),
           onPressed: () {
             Navigator.of(context).pop();
@@ -136,28 +165,34 @@ class _CreateAssistantState extends State<CreateAssistant> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('基本信息'),
-                      const SizedBox(height: 10),
+                      const Text('名称（Name）'),
+                      const SizedBox(height: 8),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,
                         maxLength: 20,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '名称（name）',
+                        hintText: '输入一个名称',
                         controller: _nameController,
                       ),
-                      buildLine(),
+                      Container(
+                        padding: const EdgeInsets.only(top: 8,bottom: 8),
+                        child: const Text('指示（Instructions）'),
+                      ),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,
                         maxLength: 20,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '描述（des）,例如：翻译助手',
+                        hintText: '翻译助手',
                         controller: _desController,
                       ),
-                      buildLine(),
+                      Container(
+                        padding: const EdgeInsets.only(top: 8,bottom: 8),
+                        child: const Text('API Key'),
+                      ),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,
@@ -182,7 +217,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('配置项'),
+                      const Text('随机性（temperature）'),
                       const SizedBox(height: 10),
                       OpenCnTextField(
                         height: 46,
@@ -191,10 +226,13 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         maxLength: 200,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '随机性（temperature），默认值：1.0',
+                        hintText: '默认值：1.0',
                         controller: _temperatureController,
                       ),
-                      buildLine(),
+                      Container(
+                        padding: const EdgeInsets.only(top: 8,bottom: 8),
+                        child: const Text('Seed（Seed）'),
+                      ),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,
@@ -202,10 +240,13 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         maxLength: 200,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '确定性采样（seed）',
+                        hintText: '',
                         controller: _seedController,
                       ),
-                      buildLine(),
+                      Container(
+                        padding: const EdgeInsets.only(top: 8,bottom: 8),
+                        child: const Text('Token数量（maxTokens）'),
+                      ),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,
@@ -213,10 +254,13 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         maxLength: 200,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: 'token数量（maxTokens），默认值：500',
+                        hintText: '默认值：500',
                         controller: _maxTokensController,
                       ),
-                      buildLine(),
+                      Container(
+                        padding: const EdgeInsets.only(top: 8,bottom: 8),
+                        child: const Text('返回结果数量（n）'),
+                      ),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,
@@ -225,7 +269,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         maxLength: 200,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '返回结果数量（n），默认值：1',
+                        hintText: '默认值：1',
                         controller: _nController,
                       ),
                     ],
@@ -243,7 +287,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text('消息集合'),
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,

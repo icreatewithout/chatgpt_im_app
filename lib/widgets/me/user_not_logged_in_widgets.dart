@@ -51,7 +51,7 @@ class _UserNotLoggedInState extends State<UserNotLoggedIn> {
               ),
               const SizedBox(width: 20),
               const Text(
-                'Hi,游客',
+                '你还没有登录',
                 style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
               ),
             ],

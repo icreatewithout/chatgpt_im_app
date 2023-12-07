@@ -1,4 +1,3 @@
-
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 
@@ -63,9 +62,15 @@ class _SelectModelsState extends State<SelectModels> {
   }
 
   Future<bool> validator() async {
-    return _formKey.currentState!.validate() ?? false;
+    return _formKey.currentState!.validate();
   }
 
+  void setVal(String val) {
+    setState(() {
+      selectedValue = val;
+      _formKey.currentState!.deactivate();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -87,15 +92,17 @@ class _SelectModelsState extends State<SelectModels> {
             style: TextStyle(fontSize: 14),
           ),
           items: _models
-              .map((item) => DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(
-                      item,
-                      style: const TextStyle(
-                        fontSize: 14,
-                      ),
+              .map(
+                (item) => DropdownMenuItem<String>(
+                  value: item,
+                  child: Text(
+                    item,
+                    style: const TextStyle(
+                      fontSize: 14,
                     ),
-                  ))
+                  ),
+                ),
+              )
               .toList(),
           validator: (value) {
             if (value == null) {

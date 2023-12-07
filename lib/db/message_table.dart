@@ -39,7 +39,7 @@ class MessageProvider {
     return message;
   }
 
-  Future<Message?> get(String id) async {
+  Future<Message?> get(int id) async {
     List<Map<String,dynamic>> maps = await db!.query(
       SqliteDb.messageSetting,
       columns: [

@@ -25,7 +25,7 @@ final routes = <String, WidgetBuilder>{
   LanguageSettingPage.path: (BuildContext context, {arguments}) =>
       const LanguageSettingPage(),
   CreateAssistant.path: (BuildContext context, {arguments}) =>
-      const CreateAssistant(),
+      CreateAssistant(arguments: arguments),
   CreateAudio.path: (BuildContext context, {arguments}) => const CreateAudio(),
   CreateEdits.path: (BuildContext context, {arguments}) => const CreateEdits(),
   CreateFine.path: (BuildContext context, {arguments}) => const CreateFine(),

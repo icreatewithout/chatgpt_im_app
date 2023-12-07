@@ -39,7 +39,10 @@ class _FindWidgetsState extends State<FindWidgets> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: Text(S.of(context).find),
+        title: Text(
+          S.of(context).find,
+          style: const TextStyle(fontSize: 16),
+        ),
         actions: const [
           Padding(
             padding: EdgeInsets.only(right: 18),

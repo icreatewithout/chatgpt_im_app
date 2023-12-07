@@ -38,8 +38,7 @@ class _MenuWidgetsState extends State<MenuWidgets> {
       child: DropdownButton2(
         customButton: const Icon(
           Icons.add_circle_outline,
-          color: Colors.grey,
-          size: 26,
+          size: 22,
         ),
         items: [
           ...MenuItems.firstItems.map(

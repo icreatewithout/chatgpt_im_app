@@ -1,8 +1,12 @@
-
+import 'package:chatgpt_im/common/assets.dart';
 import 'package:chatgpt_im/db/chat_table.dart';
+import 'package:chatgpt_im/db/message_table.dart';
 import 'package:chatgpt_im/models/gpt/chat.dart';
+import 'package:chatgpt_im/models/gpt/message.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:provider/provider.dart';
 
 import '../../generated/l10n.dart';
@@ -27,8 +31,10 @@ enum SampleItem { itemOne, itemTwo, itemThree }
 class _ChatMessageState extends State<ChatMessage> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-
+  final ScrollController _scrollController = ScrollController();
   late final Chat _chat;
+  late String imageUrl = '';
+  final List<dynamic> messages = List.of([], growable: true);
 
   @override
   void initState() {
@@ -55,14 +61,85 @@ class _ChatMessageState extends State<ChatMessage> {
     _textController.dispose();
   }
 
-  void send(val) {
+  void send(val) async {
     if (_textController.text.isEmpty) {
       return;
     }
+    try {
 
+      final systemMessage = OpenAIChatCompletionChoiceMessageModel(
+        content: [
+          OpenAIChatCompletionChoiceMessageContentItemModel.text(_chat.des!),
+        ],
+        role: OpenAIChatMessageRole.system,
+      );
+
+      List<OpenAIChatCompletionChoiceMessageContentItemModel>? list = [];
+
+      list.add(
+          OpenAIChatCompletionChoiceMessageContentItemModel.text(
+              _textController.text
+          ),
+      );
+
+      if(imageUrl!=''){
+        list.add(
+            OpenAIChatCompletionChoiceMessageContentItemModel.text(
+                imageUrl
+            ),
+        );
+      }
+
+      final userMessage = OpenAIChatCompletionChoiceMessageModel(
+        content: [
+          ...list,
+        ],
+        role: OpenAIChatMessageRole.user,
+      );
+
+      //保存并显示发送的信息，发起openai请求，生成一条请求信息并显示请求中，接受返回的数据结果，保存返回结果并更新页面显示结果
+      Message message = Message(null, _chat.id, '1', _textController.text,
+          '200', DateTime
+              .now()
+              .millisecondsSinceEpoch);
+
+      ///save sqlite
+      Message? res = await MessageProvider().insert(message);
+      setState(() {
+        _textController.text = '';
+        messages.add(res);
+        jump();
+        receive('ImeCallback=ImeOnBackInvokedCallback@139008201', '200');
+      });
+    } on RequestFailedException catch (e) {
+      debugPrint(e.message);
+      debugPrint('${e.statusCode}');
+      receive(e.message, '${e.statusCode}');
+    }
+  }
+
+  void receive(String msg, String status) async {
+    Message message = Message(null, _chat.id, '2', msg, status,
+        DateTime
+            .now()
+            .millisecondsSinceEpoch);
+
+    ///save sqlite
+    Message? res = await MessageProvider().insert(message);
     setState(() {
-      _textController.text = '';
+      messages.add(res);
+      jump();
     });
+  }
+
+  void jump() {
+    Future.delayed(
+        const Duration(milliseconds: 500),
+            () =>
+        {
+          _scrollController
+              .jumpTo(_scrollController.position.maxScrollExtent)
+        });
   }
 
   void unFocus(BuildContext context) {
@@ -76,6 +153,9 @@ class _ChatMessageState extends State<ChatMessage> {
   @override
   Widget build(BuildContext context) {
     var gm = S.of(context);
+    Size size = MediaQuery
+        .of(context)
+        .size;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -99,32 +179,7 @@ class _ChatMessageState extends State<ChatMessage> {
           },
         ),
         actions: [
-          MenuAnchor(
-            builder: (BuildContext context, MenuController controller,
-                Widget? child) {
-              return IconButton(
-                onPressed: () {
-                  if (controller.isOpen) {
-                    controller.close();
-                  } else {
-                    controller.open();
-                  }
-                },
-                icon: const Icon(Icons.more_horiz),
-              );
-            },
-            menuChildren: [
-              GestureDetector(
-                onTap: () => {},
-                child: buildMenu('删除项目', Icons.delete_forever),
-              ),
-              const PopupMenuDivider(),
-              GestureDetector(
-                onTap: () => {},
-                child: buildMenu('更新配置', Icons.settings),
-              ),
-            ],
-          ),
+          buildMenuAnchor(),
         ],
       ),
       body: Stack(
@@ -137,48 +192,169 @@ class _ChatMessageState extends State<ChatMessage> {
                 child: SizedBox(
                   height: double.infinity,
                   child: ListView(
+                    controller: _scrollController,
+                    shrinkWrap: true,
+                    padding:
+                    const EdgeInsets.only(left: 10, right: 10, bottom: 70),
                     children: [
-                      Center(
-                        child: Text('1'),
-                      )
+                      ...messages.map((e) => buildChatMessage(e)),
                     ],
                   ),
                 ),
               );
             },
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
+          buildTextField(),
+        ],
+      ),
+    );
+  }
+
+  buildChatMessage(Message message) {
+    if (message.type == '1') {
+      return userMessage(message);
+    } else {
+      return chatMessage(message);
+    }
+  }
+
+  Widget userMessage(Message message) {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Flexible(
             child: Container(
-              padding: const EdgeInsets.all(10),
-              color: Colors.grey.shade100,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  buildFileButton(),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Container(
-                      constraints: const BoxConstraints(
-                        minHeight: 42,
-                      ),
-                      alignment: Alignment.centerLeft,
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.white,
-                      ),
-                      child: buildTextField(),
-                    ),
-                  ),
-                ],
+              alignment: Alignment.centerRight,
+              child: Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Text(message.message!),
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.person),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget chatMessage(Message message) {
+    return Container(
+      padding: const EdgeInsets.all(8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Image.asset(
+            Assets.ic_launcher_48,
+          ),
+          Flexible(
+            child: Container(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: const EdgeInsets.only(left: 8),
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: mdMessage(message.message!),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget mdMessage(String? message) {
+    return MarkdownBody(
+      data: message ?? '',
+      selectable: true,
+      onTapText: () {},
+      styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
+      styleSheet: MarkdownStyleSheet(
+        codeblockDecoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(4),
+          color: Colors.white,
+        ),
+        code: const TextStyle(
+            color: Colors.blue, backgroundColor: Colors.transparent),
+        p: Theme
+            .of(context)
+            .textTheme
+            .titleSmall
+            ?.copyWith(color: Colors.black),
+      ),
+    );
+  }
+
+  buildTextField() {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        color: Colors.grey.shade100,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            buildFileButton(),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Container(
+                constraints: const BoxConstraints(
+                  minHeight: 42,
+                ),
+                alignment: Alignment.centerLeft,
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.white,
+                ),
+                child: TextField(
+                  cursorColor: Colors.grey,
+                  autofocus: false,
+                  focusNode: _focusNode,
+                  maxLength: 2000,
+                  minLines: 1,
+                  maxLines: 6,
+                  controller: _textController,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    counterText: '',
+                    hintText: '请输入内容',
+                    enabledBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    isDense: true,
+                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                  style: const TextStyle(fontSize: 14),
+                  textInputAction: TextInputAction.send,
+                  keyboardType: TextInputType.multiline,
+                  onSubmitted: (val) => send(val),
+                  onEditingComplete: () {},
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -194,37 +370,11 @@ class _ChatMessageState extends State<ChatMessage> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: const Icon(
-          Icons.file_present_outlined,
+          Icons.image,
           color: Colors.grey,
           size: 26,
         ),
       ),
-    );
-  }
-
-  buildTextField() {
-    return TextField(
-      cursorColor: Colors.grey,
-      autofocus: false,
-      focusNode: _focusNode,
-      maxLength: 2000,
-      minLines: 1,
-      maxLines: 6,
-      controller: _textController,
-      decoration: const InputDecoration(
-        border: InputBorder.none,
-        counterText: '',
-        hintText: '请输入内容',
-        enabledBorder: InputBorder.none,
-        contentPadding: EdgeInsets.zero,
-        isDense: true,
-        hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
-      ),
-      style: const TextStyle(fontSize: 14),
-      textInputAction: TextInputAction.send,
-      keyboardType: TextInputType.multiline,
-      onSubmitted: (val) => send(val),
-      onEditingComplete: () {},
     );
   }
 
@@ -243,6 +393,35 @@ class _ChatMessageState extends State<ChatMessage> {
               style: const TextStyle(fontSize: 14, color: Colors.grey)),
         ],
       ),
+    );
+  }
+
+  buildMenuAnchor() {
+    return MenuAnchor(
+      builder:
+          (BuildContext context, MenuController controller, Widget? child) {
+        return IconButton(
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          icon: const Icon(Icons.more_horiz),
+        );
+      },
+      menuChildren: [
+        GestureDetector(
+          onTap: () => {},
+          child: buildMenu('删除项目', Icons.delete_forever),
+        ),
+        const PopupMenuDivider(),
+        GestureDetector(
+          onTap: () => {},
+          child: buildMenu('更新配置', Icons.settings),
+        ),
+      ],
     );
   }
 }

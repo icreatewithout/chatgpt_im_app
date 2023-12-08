@@ -6,13 +6,14 @@ part of 'message.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Message _$MessageFromJson(Map<String, dynamic> json) => Message()
-  ..id = json['id'] as int?
-  ..chatId = json['chat_id'] as int?
-  ..type = json['type'] as String?
-  ..message = json['message'] as String?
-  ..status = json['status'] as String?
-  ..createTime = json['create_time'] as int?;
+Message _$MessageFromJson(Map<String, dynamic> json) => Message(
+      json['id'] as int?,
+      json['chat_id'] as int?,
+      json['type'] as String?,
+      json['message'] as String?,
+      json['status'] as String?,
+      json['create_time'] as int?,
+    )..file = json['file'] as String?;
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'id': instance.id,
@@ -20,5 +21,6 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'type': instance.type,
       'message': instance.message,
       'status': instance.status,
+      'file': instance.file,
       'create_time': instance.createTime,
     };

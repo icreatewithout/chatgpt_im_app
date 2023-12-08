@@ -60,8 +60,6 @@ class _ChatMessageState extends State<ChatMessage> {
       return;
     }
 
-
-
     setState(() {
       _textController.text = '';
     });

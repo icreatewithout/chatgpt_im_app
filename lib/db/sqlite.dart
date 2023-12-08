@@ -6,7 +6,7 @@ class SqliteDb {
   static String dataBase = "chatgpt.im.db";
   static int version = 1;
 
-  static String messageSetting = 'message_setting';
+  static String message = 'message';
   static String chat = 'chat';
 
   void _onUpgrade(Database db, int oldVersion, int newVersion) async {
@@ -47,7 +47,7 @@ class SqliteDb {
   void _createTable(Database db) async{
     await db.execute(
         '''
-            CREATE TABLE IF NOT EXISTS $messageSetting(
+            CREATE TABLE IF NOT EXISTS $chat(
               id INTEGER PRIMARY KEY AUTOINCREMENT,
               type TEXT,
               model TEXT,
@@ -61,6 +61,19 @@ class SqliteDb {
               size TEXT,
               create_time INTEGER,
               message_size TEXT
+            );
+            
+        '''
+    );
+    await db.execute(
+        '''
+            CREATE TABLE IF NOT EXISTS $message(
+              id INTEGER PRIMARY KEY AUTOINCREMENT,
+              chat_id INTEGER,
+              type TEXT,
+              message TEXT,
+              status TEXT,
+              create_time INTEGER
             );
             
         '''

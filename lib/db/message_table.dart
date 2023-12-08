@@ -1,45 +1,40 @@
+
 import 'package:chatgpt_im/db/sqlite.dart';
 import 'package:sqflite/sqflite.dart';
 
-import '../models/gpt/chat.dart';
+import '../models/gpt/message.dart';
 
 const columns = [
   'id',
+  'chat_id',
   'type',
-  'name',
-  'des',
-  'model',
-  'api_key',
-  'temperature',
-  'seed',
-  'max_token',
-  'n',
-  'size',
-  'create_time',
-  'message_size'
+  'message',
+  'status',
+  'create_time'
 ];
 
-class ChatProvider {
+class MessageProvider{
+
   final Database? db = SqliteDb().db;
 
-  Future<List<Chat>> findList() async {
+  Future<List<Message>> findList() async {
     List<Map<String, dynamic>> maps = await db!.query(
       SqliteDb.chat,
       columns: columns,
       orderBy: 'create_time desc',
     );
     if (maps.isNotEmpty) {
-      return maps.map((e) => Chat.fromJson(e)).toList();
+      return maps.map((e) => Message.fromJson(e)).toList();
     }
     return [];
   }
 
-  Future<Chat?> insert(Chat chat) async {
-    chat.id = await db?.insert(SqliteDb.chat, chat.toJson());
-    return chat;
+  Future<Message?> insert(Message message) async {
+    message.id = await db?.insert(SqliteDb.chat, message.toJson());
+    return message;
   }
 
-  Future<Chat?> get(int id) async {
+  Future<Message?> get(int id) async {
     List<Map<String, dynamic>> maps = await db!.query(
       SqliteDb.chat,
       columns: columns,
@@ -48,7 +43,7 @@ class ChatProvider {
       orderBy: 'id desc',
     );
     if (maps.isNotEmpty) {
-      return Chat.fromJson(maps.first);
+      return Message.fromJson(maps.first);
     }
     return null;
   }
@@ -57,10 +52,8 @@ class ChatProvider {
     return await db!.delete(SqliteDb.chat, where: 'id = ?', whereArgs: [id]);
   }
 
-  Future<int> update(Chat chat) async {
-    return await db!.update(SqliteDb.chat, chat.toJson(),
-        where: 'id = ?', whereArgs: [chat.id]);
+  Future<int> update(Message message) async {
+    return await db!.update(SqliteDb.chat, message.toJson(),
+        where: 'id = ?', whereArgs: [message.id]);
   }
-
-  Future close() async => db!.close();
 }

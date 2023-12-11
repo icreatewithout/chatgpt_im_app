@@ -4,9 +4,11 @@ import 'package:chatgpt_im/db/message_table.dart';
 import 'package:chatgpt_im/models/gpt/chat.dart';
 import 'package:chatgpt_im/models/gpt/message.dart';
 import 'package:dart_openai/dart_openai.dart';
+import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../generated/l10n.dart';
@@ -29,17 +31,25 @@ class ChatMessage extends StatefulWidget {
 enum SampleItem { itemOne, itemTwo, itemThree }
 
 class _ChatMessageState extends State<ChatMessage> {
+  final _listenable = IndicatorStateListenable();
+  bool _shrinkWrap = false;
+  double? _viewportDimension;
+
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  final ScrollController _scrollController = ScrollController();
+
   late final Chat _chat;
-  late String imageUrl = '';
+  late String? imageUrl = '';
   final List<dynamic> messages = List.of([], growable: true);
+
+  int _offset = 1;
+  int limit = 10;
 
   @override
   void initState() {
     super.initState();
     init();
+    _listenable.addListener(_onHeaderChange);
     _focusNode.addListener(() => setState(() {}));
     _textController.addListener(() {
       setState(() {});
@@ -52,13 +62,47 @@ class _ChatMessageState extends State<ChatMessage> {
       setState(() {
         _chat = chat;
       });
+      await findPage(chat.id!, _offset, limit);
+    }
+  }
+
+  Future<void> findPage(int chatId, int offset, int limit) async {
+    debugPrint('---------- ${offset}');
+    debugPrint('---------- ${limit}');
+
+    debugPrint('---------- ${(offset - 1) * limit}');
+    debugPrint('---------- ${limit * offset - 1}');
+
+    List<Message> list =
+        await MessageProvider().findPage(chatId, offset, limit);
+    if (list.isNotEmpty) {
+      setState(() {
+        messages.addAll(list);
+        _offset = offset + 1;
+      });
+    }
+  }
+
+  void _onHeaderChange() {
+    final state = _listenable.value;
+    if (state != null) {
+      final position = state.notifier.position;
+      _viewportDimension ??= position.viewportDimension;
+      final shrinkWrap = state.notifier.position.maxScrollExtent == 0;
+      if (_shrinkWrap != shrinkWrap &&
+          _viewportDimension == position.viewportDimension) {
+        setState(() {
+          _shrinkWrap = shrinkWrap;
+        });
+      }
     }
   }
 
   @override
   void dispose() {
-    super.dispose();
     _textController.dispose();
+    _listenable.removeListener(_onHeaderChange);
+    super.dispose();
   }
 
   void send(val) async {
@@ -66,7 +110,6 @@ class _ChatMessageState extends State<ChatMessage> {
       return;
     }
     try {
-
       final systemMessage = OpenAIChatCompletionChoiceMessageModel(
         content: [
           OpenAIChatCompletionChoiceMessageContentItemModel.text(_chat.des!),
@@ -77,16 +120,13 @@ class _ChatMessageState extends State<ChatMessage> {
       List<OpenAIChatCompletionChoiceMessageContentItemModel>? list = [];
 
       list.add(
-          OpenAIChatCompletionChoiceMessageContentItemModel.text(
-              _textController.text
-          ),
+        OpenAIChatCompletionChoiceMessageContentItemModel.text(
+            _textController.text),
       );
 
-      if(imageUrl!=''){
+      if (imageUrl != '') {
         list.add(
-            OpenAIChatCompletionChoiceMessageContentItemModel.text(
-                imageUrl
-            ),
+          OpenAIChatCompletionChoiceMessageContentItemModel.text(imageUrl!),
         );
       }
 
@@ -99,15 +139,13 @@ class _ChatMessageState extends State<ChatMessage> {
 
       //保存并显示发送的信息，发起openai请求，生成一条请求信息并显示请求中，接受返回的数据结果，保存返回结果并更新页面显示结果
       Message message = Message(null, _chat.id, '1', _textController.text,
-          '200', DateTime
-              .now()
-              .millisecondsSinceEpoch);
+          imageUrl, '200', DateTime.now().millisecondsSinceEpoch);
 
       ///save sqlite
       Message? res = await MessageProvider().insert(message);
       setState(() {
-        _textController.text = '';
-        messages.add(res);
+        _textController.clear();
+        messages.insert(0, res);
         jump();
         receive('ImeCallback=ImeOnBackInvokedCallback@139008201', '200');
       });
@@ -119,27 +157,20 @@ class _ChatMessageState extends State<ChatMessage> {
   }
 
   void receive(String msg, String status) async {
-    Message message = Message(null, _chat.id, '2', msg, status,
-        DateTime
-            .now()
-            .millisecondsSinceEpoch);
+    Message message = Message(null, _chat.id, '2', msg, '', status,
+        DateTime.now().millisecondsSinceEpoch);
 
     ///save sqlite
     Message? res = await MessageProvider().insert(message);
     setState(() {
-      messages.add(res);
+      messages.insert(0, res);
       jump();
     });
   }
 
   void jump() {
-    Future.delayed(
-        const Duration(milliseconds: 500),
-            () =>
-        {
-          _scrollController
-              .jumpTo(_scrollController.position.maxScrollExtent)
-        });
+    Future.delayed(const Duration(milliseconds: 100),
+        () => PrimaryScrollController.of(context).jumpTo(0));
   }
 
   void unFocus(BuildContext context) {
@@ -153,9 +184,6 @@ class _ChatMessageState extends State<ChatMessage> {
   @override
   Widget build(BuildContext context) {
     var gm = S.of(context);
-    Size size = MediaQuery
-        .of(context)
-        .size;
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -182,30 +210,80 @@ class _ChatMessageState extends State<ChatMessage> {
           buildMenuAnchor(),
         ],
       ),
-      body: Stack(
-        children: [
-          Consumer<LocaleModel>(
-            builder:
-                (BuildContext context, LocaleModel localeModel, Widget? child) {
-              return GestureDetector(
-                onTap: () => unFocus(context),
-                child: SizedBox(
-                  height: double.infinity,
-                  child: ListView(
-                    controller: _scrollController,
-                    shrinkWrap: true,
-                    padding:
-                    const EdgeInsets.only(left: 10, right: 10, bottom: 70),
-                    children: [
-                      ...messages.map((e) => buildChatMessage(e)),
-                    ],
+      body: SizedBox(
+        height: double.infinity,
+        child: Stack(
+          children: [
+            Consumer<LocaleModel>(
+              builder:
+                  (BuildContext context, LocaleModel localeModel, Widget? child) {
+                return GestureDetector(
+                  onTap: () => unFocus(context),
+                  child: EasyRefresh(
+                    clipBehavior: Clip.none,
+                    onRefresh: () {},
+                    onLoad: () async {
+                      return await findPage(
+                          widget.arguments['id'], _offset, limit);
+                    },
+                    header: ListenerHeader(
+                      listenable: _listenable,
+                      triggerOffset: 100000,
+                      clamping: false,
+                    ),
+                    footer: BuilderFooter(
+                      triggerOffset: 40,
+                      clamping: false,
+                      position: IndicatorPosition.above,
+                      infiniteOffset: null,
+                      processedDuration: Duration.zero,
+                      builder: (context, state) {
+                        return Stack(
+                          children: [
+                            SizedBox(
+                              height: state.offset,
+                              width: double.infinity,
+                            ),
+                            Positioned(
+                              bottom: 0,
+                              left: 0,
+                              right: 0,
+                              child: Container(
+                                alignment: Alignment.center,
+                                width: double.infinity,
+                                child: LoadingAnimationWidget.stretchedDots(
+                                    color: Colors.red, size: 30),
+                              ),
+                            )
+                          ],
+                        );
+                      },
+                    ),
+                    child: Container(
+                      padding: const EdgeInsets.only(bottom: 70),
+                      child: CustomScrollView(
+                        reverse: true,
+                        shrinkWrap: _shrinkWrap,
+                        clipBehavior: Clip.none,
+                        slivers: [
+                          SliverList(
+                            delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                return buildChatMessage(messages[index]);
+                              },
+                              childCount: messages.length,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ),
-              );
-            },
-          ),
-          buildTextField(),
-        ],
+                );
+              },
+            ),
+            buildTextField(),
+          ],
+        ),
       ),
     );
   }
@@ -287,19 +365,7 @@ class _ChatMessageState extends State<ChatMessage> {
       selectable: true,
       onTapText: () {},
       styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
-      styleSheet: MarkdownStyleSheet(
-        codeblockDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4),
-          color: Colors.white,
-        ),
-        code: const TextStyle(
-            color: Colors.blue, backgroundColor: Colors.transparent),
-        p: Theme
-            .of(context)
-            .textTheme
-            .titleSmall
-            ?.copyWith(color: Colors.black),
-      ),
+
     );
   }
 

@@ -23,7 +23,7 @@ class Message {
   @JsonKey(name: 'create_time')
   late int? createTime;
 
-  Message(this.id, this.chatId, this.type, this.message, this.status,
+  Message(this.id, this.chatId, this.type, this.message, this.file, this.status,
       this.createTime);
 
   factory Message.fromJson(Map<String, dynamic> json) =>

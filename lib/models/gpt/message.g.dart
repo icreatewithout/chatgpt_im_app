@@ -11,9 +11,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       json['chat_id'] as int?,
       json['type'] as String?,
       json['message'] as String?,
+      json['file'] as String?,
       json['status'] as String?,
       json['create_time'] as int?,
-    )..file = json['file'] as String?;
+    );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
       'id': instance.id,

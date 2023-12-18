@@ -1,10 +1,9 @@
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
-import 'package:chatgpt_im/common/assets.dart';
 import 'package:chatgpt_im/db/chat_table.dart';
-import 'package:chatgpt_im/db/message_table.dart';
-import 'package:chatgpt_im/models/gpt/chat.dart';
-import 'package:chatgpt_im/models/gpt/message.dart';
-import 'package:chatgpt_im/routes/create/create_assistant.dart';
+import 'package:chatgpt_im/routes/create/create_transcription.dart';
+import 'package:chatgpt_im/states/ChatModel.dart';
+import 'package:chatgpt_im/widgets/find/menu_widgets.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
@@ -14,32 +13,33 @@ import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
+import '../../common/assets.dart';
+import '../../db/message_table.dart';
 import '../../generated/l10n.dart';
-import '../../states/ChatModel.dart';
+import '../../models/gpt/chat.dart';
+import '../../models/gpt/message.dart';
 import '../../states/LocaleModel.dart';
+import '../../widgets/find/select_models_widgets.dart';
+import '../../widgets/ui/open_cn_button.dart';
+import '../../widgets/ui/open_cn_text_field.dart';
 
-class ChatMessage extends StatefulWidget {
-  static const String path = "/gpt/chat";
+class WhisperMessage extends StatefulWidget {
+  static const String path = "/gpt/whisper";
 
-  const ChatMessage({
-    super.key,
-    required this.arguments,
-  });
-
+  const WhisperMessage({super.key, required this.arguments});
   final Map arguments;
 
   @override
-  State<ChatMessage> createState() => _ChatMessageState();
+  State<WhisperMessage> createState() => _WhisperMessageState();
 }
 
-class _ChatMessageState extends State<ChatMessage> {
+class _WhisperMessageState extends State<WhisperMessage> {
   final _listenable = IndicatorStateListenable();
   bool _shrinkWrap = false;
   double? _viewportDimension;
-  final ImagePicker picker = ImagePicker();
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-
+  final ImagePicker picker = ImagePicker();
   late final Chat _chat;
   late String? imageName = '';
   late String? imageUrl = '';
@@ -47,7 +47,6 @@ class _ChatMessageState extends State<ChatMessage> {
 
   int _offset = 1;
   int limit = 20;
-
   @override
   void initState() {
     super.initState();
@@ -58,7 +57,6 @@ class _ChatMessageState extends State<ChatMessage> {
       setState(() {});
     });
   }
-
   void init() async {
     Chat? chat = await ChatProvider().get(widget.arguments['id']);
     if (chat != null) {
@@ -71,7 +69,7 @@ class _ChatMessageState extends State<ChatMessage> {
 
   Future<void> findPage(int chatId, int limit, int offset) async {
     List<Message> list =
-        await MessageProvider().findPage(chatId, limit, offset);
+    await MessageProvider().findPage(chatId, limit, offset);
     if (list.isNotEmpty) {
       setState(() {
         messages.addAll(list);
@@ -97,7 +95,7 @@ class _ChatMessageState extends State<ChatMessage> {
 
   void selectImage() async {
     XFile? file =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
+    await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (file != null) {
       setState(() {
         imageName = file.name;
@@ -111,13 +109,6 @@ class _ChatMessageState extends State<ChatMessage> {
       imageName = '';
       imageUrl = '';
     });
-  }
-
-  @override
-  void dispose() {
-    _textController.dispose();
-    _listenable.removeListener(_onHeaderChange);
-    super.dispose();
   }
 
   void send(val) async {
@@ -187,7 +178,7 @@ class _ChatMessageState extends State<ChatMessage> {
 
   void jump() {
     Future.delayed(const Duration(milliseconds: 100),
-        () => PrimaryScrollController.of(context).jumpTo(0));
+            () => PrimaryScrollController.of(context).jumpTo(0));
   }
 
   void unFocus(BuildContext context) {
@@ -216,7 +207,15 @@ class _ChatMessageState extends State<ChatMessage> {
   void updateChat(BuildContext context, MenuController controller) async {
     controller.close();
     Navigator.of(context)
-        .pushNamed(CreateAssistant.path, arguments: {'id': _chat.id});
+        .pushNamed(CreateWhisper.path, arguments: {'id': _chat.id});
+  }
+  
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _listenable.removeListener(_onHeaderChange);
+    super.dispose();
   }
 
   @override
@@ -246,19 +245,20 @@ class _ChatMessageState extends State<ChatMessage> {
           },
         ),
         actions: [
-          buildMenuAnchor(context),
+          buildMenuAnchor(),
         ],
       ),
-      body: SizedBox(
-        height: double.infinity,
-        child: Stack(
-          children: [
-            Consumer<LocaleModel>(
-              builder: (BuildContext context, LocaleModel localeModel,
-                  Widget? child) {
-                return GestureDetector(
-                  onTap: () => unFocus(context),
-                  child: EasyRefresh(
+      body: GestureDetector(
+        onTap: () => unFocus(context),
+        child: SizedBox(
+          height: double.infinity,
+          width: double.infinity,
+          child: Stack(
+            children: [
+              Consumer<LocaleModel>(
+                builder: (BuildContext context, LocaleModel localeModel,
+                    Widget? child) {
+                  return EasyRefresh(
                     clipBehavior: Clip.none,
                     onRefresh: () {},
                     onLoad: () async {
@@ -300,7 +300,7 @@ class _ChatMessageState extends State<ChatMessage> {
                     ),
                     child: Container(
                       padding:
-                          const EdgeInsets.only(bottom: 70, left: 8, right: 8),
+                      const EdgeInsets.only(bottom: 70, left: 8, right: 8),
                       child: CustomScrollView(
                         reverse: true,
                         shrinkWrap: _shrinkWrap,
@@ -308,7 +308,7 @@ class _ChatMessageState extends State<ChatMessage> {
                         slivers: [
                           SliverList(
                             delegate: SliverChildBuilderDelegate(
-                              (context, index) {
+                                  (context, index) {
                                 return buildChatMessage(messages[index]);
                               },
                               childCount: messages.length,
@@ -317,12 +317,12 @@ class _ChatMessageState extends State<ChatMessage> {
                         ],
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-            buildTextField(),
-          ],
+                  );
+                },
+              ),
+              buildTextField(),
+            ],
+          ),
         ),
       ),
     );
@@ -491,29 +491,30 @@ class _ChatMessageState extends State<ChatMessage> {
 
   buildSelectFile() {
     return Visibility(
-        visible: imageName != '',
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                imageName!,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
+      visible: imageName != '',
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              imageName!,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.grey, fontSize: 12),
             ),
-            GestureDetector(
-              onTap: () => delete(),
-              child: const Icon(
-                Icons.clear,
-                color: Colors.red,
-                size: 14,
-              ),
+          ),
+          GestureDetector(
+            onTap: () => delete(),
+            child: const Icon(
+              Icons.clear,
+              color: Colors.red,
+              size: 14,
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 
-  buildMenuAnchor(BuildContext context) {
+  buildMenuAnchor() {
     late MenuController menuController;
     return MenuAnchor(
       builder:

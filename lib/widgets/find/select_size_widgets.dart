@@ -1,58 +1,24 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 
-GlobalKey<_SelectModelsState> modelsGlobalKey = GlobalKey();
+GlobalKey<_SelectSizeState> sizeGlobalKey = GlobalKey();
 
-class SelectModels extends StatefulWidget {
-  const SelectModels({super.key});
+class SelectSize extends StatefulWidget {
+  const SelectSize({super.key});
 
   @override
-  State<SelectModels> createState() => _SelectModelsState();
+  State<SelectSize> createState() => _SelectSizeState();
 }
 
-class _SelectModelsState extends State<SelectModels> {
+class _SelectSizeState extends State<SelectSize> {
   String? selectedValue;
   final _formKey = GlobalKey<FormState>();
   final List<String> _models = [
-    'gpt-3.5-turbo-16k',
-    'gpt-3.5-turbo-0301',
-    'gpt-3.5-turbo',
-    'gpt-3.5-turbo-0613',
-    'gpt-3.5-turbo-1106',
-    'gpt-4-0314	',
-    'gpt-4-0613	',
-    'gpt-4-32k	',
-    'gpt-4-32k-0314	',
-    'tts-1',
-    'whisper-1',
-    'davinci',
-    'dall-e-2',
-    'tts-1-1106',
-    'tts-1-hd-1106',
-    'dall-e-3'
-    'davinci-search-document',
-    'curie-search-document',
-    'babbage-code-search-code',
-    'text-search-ada-query-001',
-    'code-search-ada-text-001',
-    'babbage-code-search-text',
-    'code-search-babbage-code-001',
-    'ada-search-query',
-    'ada-code-search-text',
-    'tts-1-hd',
-    'gpt-3.5-turbo-16k-0613',
-    'text-search-curie-query-001',
-    'text-davinci-002',
-    'text-davinci-edit-001',
-    'code-search-babbage-text-001',
-    'ada',
-    'text-ada-001',
-    'ada-similarity',
-    'code-search-ada-code-001',
-    'text-similarity-ada-001',
-    'text-search-curie-doc-001',
-    'text-curie-001',
-    'curie',
+    '256x256',
+    '512x512',
+    '1024x1024',
+    '1792x1024(dall-e-3)',
+    '1024x1792(dall-e-3)',
   ];
 
   @override
@@ -92,7 +58,7 @@ class _SelectModelsState extends State<SelectModels> {
             // Add more decoration..
           ),
           hint: const Text(
-            'Select Your Model',
+            'Select Image Size',
             style: TextStyle(fontSize: 14),
           ),
           items: _models
@@ -110,7 +76,7 @@ class _SelectModelsState extends State<SelectModels> {
               .toList(),
           validator: (value) {
             if (value == null) {
-              return 'Please select model.';
+              return 'Please select size.';
             }
             return null;
           },

@@ -59,6 +59,10 @@ class SqliteDb {
               max_token TEXT,
               n TEXT,
               size TEXT,
+              style TEXT,
+              speed TEXT,
+              voice TEXT,
+              response_format TEXT,
               create_time INTEGER,
               message_size TEXT
             );

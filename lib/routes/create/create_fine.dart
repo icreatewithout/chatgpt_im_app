@@ -14,8 +14,8 @@ import '../../widgets/ui/open_cn_text_field.dart';
 class CreateFine extends StatefulWidget {
   static const String path = "/create/fine";
 
-  const CreateFine({super.key});
-
+  const CreateFine({super.key, this.arguments});
+  final Map? arguments;
   @override
   State<CreateFine> createState() => _CreateFineState();
 }
@@ -42,25 +42,32 @@ class _CreateFineState extends State<CreateFine> {
       val = modelsGlobalKey.currentState?.selectedValue;
     }
 
-    Chat chat = Chat(
-      null,
-      MenuItems.fine.text,
-      _nameController.text.isEmpty
-          ? MenuItems.fine.text
-          : _nameController.text,
-      _desController.text,
-      val,
-      _keyController.text,
-      _temperatureController.text.isEmpty ? '1.0' : _temperatureController.text,
-      _seedController.text,
-      _maxTokensController.text.isEmpty ? '500' : _maxTokensController.text,
-      _nController.text.isEmpty ? '1' : _nController.text,
-      _sizeController.text.isEmpty ? '1' : _sizeController.text,
-      DateTime.now().millisecondsSinceEpoch,
-      '0',
-    );
+    Chat chat = Chat();
+    chat.type = MenuItems.assistant.text;
+    chat.name = _nameController.text.isEmpty
+        ? MenuItems.assistant.text
+        : _nameController.text;
+    chat.des = _desController.text.isEmpty ? '一个有用的AI助手' : _desController.text;
+    chat.model = val;
+    chat.apiKey = _keyController.text;
+    chat.temperature = _temperatureController.text.isEmpty
+        ? '1.0'
+        : _temperatureController.text;
+    chat.seed = _seedController.text;
+    chat.maxToken =
+    _maxTokensController.text.isEmpty ? '500' : _maxTokensController.text;
+    chat.n = _nController.text.isEmpty ? '1' : _nController.text;
+    chat.size = _sizeController.text.isEmpty ? '1' : _sizeController.text;
+    chat.createTime = DateTime.now().millisecondsSinceEpoch;
+    chat.messageSize = '0';
 
-    await ChatProvider().insert(chat);
+    if (widget.arguments != null && widget.arguments!['id'] != null) {
+      // update set id
+      chat.id = widget.arguments!['id'];
+      await ChatProvider().update(chat);
+    } else {
+      await ChatProvider().insert(chat);
+    }
     List<Chat> chats = await ChatProvider().findList();
     if (context.mounted) {
       Provider.of<ChatModel>(context, listen: false).setChats = chats;
@@ -88,7 +95,7 @@ class _CreateFineState extends State<CreateFine> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Create Chat Completion'),
+        title: const Text('Create FineTuning'),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(

@@ -4,41 +4,39 @@ part 'chat.g.dart';
 
 @JsonSerializable(genericArgumentFactories: true)
 class Chat {
-  late int? id;
-  late String? type;
-  late String? model;
-  late String? name;
-  late String? des;
+  int? id;
+  String? type;
+  String? model;
+  String? name;
+  String? des;
 
   @JsonKey(name: 'api_key')
-  late String? apiKey;
-  late String? temperature;
-  late String? seed;
+  String? apiKey;
+
+  String? temperature;
+  String? seed;
+
   @JsonKey(name: 'max_token')
-  late String? maxToken;
-  late String? n;
-  late String? size;
+  String? maxToken;
+
+  String? n;
+  String? size; //消息集合、图片size
+  String? style;
+  String? speed;
+  String? voice;
+
+  @JsonKey(name: 'response_format')
+  String? responseFormat;
+
   @JsonKey(name: 'create_time')
-  late int? createTime;
+  int? createTime;
+
   @JsonKey(name: 'message_size')
-  late String? messageSize;
+  String? messageSize;
 
-  Chat(
-    this.id,
-    this.type,
-    this.name,
-    this.des,
-    this.model,
-    this.apiKey,
-    this.temperature,
-    this.seed,
-    this.maxToken,
-    this.n,
-    this.size,
-    this.createTime,
-    this.messageSize,
-  );
+  Chat();
 
-  factory Chat.fromJson(Map<String,dynamic> json) => _$ChatFromJson(json);
+  factory Chat.fromJson(Map<String, dynamic> json) => _$ChatFromJson(json);
+
   Map<String, dynamic> toJson() => _$ChatToJson(this);
 }

@@ -1,15 +1,13 @@
 import 'package:chatgpt_im/routes/create/create_assistant.dart';
-import 'package:chatgpt_im/routes/create/create_audio.dart';
-import 'package:chatgpt_im/routes/create/create_edits.dart';
+import 'package:chatgpt_im/routes/create/create_speech.dart';
 import 'package:chatgpt_im/routes/create/create_fine.dart';
 import 'package:chatgpt_im/routes/create/create_images.dart';
-import 'package:chatgpt_im/routes/create/create_whisper.dart';
-import 'package:chatgpt_im/routes/message/audio_message_page.dart';
+import 'package:chatgpt_im/routes/create/create_transcription.dart';
+import 'package:chatgpt_im/routes/message/speech_message_page.dart';
 import 'package:chatgpt_im/routes/message/chat_message_page.dart';
-import 'package:chatgpt_im/routes/message/edits_message_page.dart';
 import 'package:chatgpt_im/routes/message/fine_message_page.dart';
 import 'package:chatgpt_im/routes/message/images_message_page.dart';
-import 'package:chatgpt_im/routes/message/whisper_message_page.dart';
+import 'package:chatgpt_im/routes/message/transcription_message_page.dart';
 import 'package:chatgpt_im/routes/my_files.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
@@ -58,7 +56,7 @@ class _MenuWidgetsState extends State<MenuWidgets> {
         onChanged: (val) => MenuItems.onChanged(context, val as MenuItem),
         dropdownStyleData: DropdownStyleData(
           direction: DropdownDirection.left,
-          width: 160,
+          width: 180,
           padding: const EdgeInsets.symmetric(vertical: 2),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
@@ -95,26 +93,23 @@ class MenuItem {
 class MenuItems {
   static const List<MenuItem> firstItems = [
     assistant,
-    edits,
     images,
     whisper,
     audio,
-    fine
+    // fine
   ];
   static const List<MenuItem> secondItems = [files];
 
   static const assistant =
       MenuItem(text: 'Chat', path: ChatMessage.path, icon: Icons.assistant);
-  static const edits = MenuItem(
-      text: 'Edits', path: EditsMessage.path, icon: Icons.edit_document);
   static const images =
       MenuItem(text: 'Images', path: ImagesMessage.path, icon: Icons.image);
   static const audio =
-      MenuItem(text: 'Audio', path: AudioMessage.path, icon: Icons.audio_file);
+      MenuItem(text: 'Speech', path: AudioMessage.path, icon: Icons.audio_file);
   static const whisper = MenuItem(
-      text: 'Whisper', path: WhisperMessage.path, icon: Icons.text_fields);
-  static const fine =
-      MenuItem(text: 'FineTunes', path: FineMessage.path, icon: Icons.settings);
+      text: 'Transcription', path: WhisperMessage.path, icon: Icons.text_fields);
+  // static const fine =
+  //     MenuItem(text: 'FineTunes', path: FineMessage.path, icon: Icons.settings);
   static const files =
       MenuItem(text: 'Files', path: MyFiles.path, icon: Icons.file_present);
 
@@ -123,9 +118,6 @@ class MenuItems {
     switch (text) {
       case 'Chat':
         iconData = Icons.assistant;
-        break;
-      case 'Edits':
-        iconData = Icons.edit;
         break;
       case 'Images':
         iconData = Icons.image;
@@ -136,9 +128,9 @@ class MenuItems {
       case 'Whisper':
         iconData = Icons.audio_file;
         break;
-      case 'FineTunes':
-        iconData = Icons.settings;
-        break;
+      // case 'FineTunes':
+      //   iconData = Icons.settings;
+      //   break;
       case 'Files':
         iconData = Icons.file_present;
         break;
@@ -150,16 +142,14 @@ class MenuItems {
     switch (text) {
       case 'Chat':
         return assistant;
-      case 'Edits':
-        return edits;
       case 'Images':
         return images;
       case 'Audio':
         return audio;
       case 'Whisper':
         return whisper;
-      case 'FineTunes':
-        return fine;
+      // case 'FineTunes':
+      //   return fine;
       case 'Files':
         return files;
     }
@@ -188,9 +178,6 @@ class MenuItems {
       case MenuItems.assistant:
         Navigator.of(context).pushNamed(CreateAssistant.path);
         break;
-      case MenuItems.edits:
-        Navigator.of(context).pushNamed(CreateEdits.path);
-        break;
       case MenuItems.images:
         Navigator.of(context).pushNamed(CreateImages.path);
         break;
@@ -200,9 +187,9 @@ class MenuItems {
       case MenuItems.audio:
         Navigator.of(context).pushNamed(CreateAudio.path);
         break;
-      case MenuItems.fine:
-        Navigator.of(context).pushNamed(CreateFine.path);
-        break;
+      // case MenuItems.fine:
+      //   Navigator.of(context).pushNamed(CreateFine.path);
+      //   break;
       case MenuItems.files:
         Navigator.of(context).pushNamed(MyFiles.path);
         break;

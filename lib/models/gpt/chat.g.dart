@@ -6,21 +6,21 @@ part of 'chat.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Chat _$ChatFromJson(Map<String, dynamic> json) => Chat(
-      json['id'] as int?,
-      json['type'] as String?,
-      json['name'] as String?,
-      json['des'] as String?,
-      json['model'] as String?,
-      json['api_key'] as String?,
-      json['temperature'] as String?,
-      json['seed'] as String?,
-      json['max_token'] as String?,
-      json['n'] as String?,
-      json['size'] as String?,
-      json['create_time'] as int?,
-      json['message_size'] as String?,
-    );
+Chat _$ChatFromJson(Map<String, dynamic> json) => Chat()
+  ..id = json['id'] as int?
+  ..type = json['type'] as String?
+  ..model = json['model'] as String?
+  ..name = json['name'] as String?
+  ..des = json['des'] as String?
+  ..apiKey = json['api_key'] as String?
+  ..temperature = json['temperature'] as String?
+  ..seed = json['seed'] as String?
+  ..maxToken = json['max_token'] as String?
+  ..n = json['n'] as String?
+  ..size = json['size'] as String?
+  ..style = json['style'] as String?
+  ..createTime = json['create_time'] as int?
+  ..messageSize = json['message_size'] as String?;
 
 Map<String, dynamic> _$ChatToJson(Chat instance) => <String, dynamic>{
       'id': instance.id,
@@ -34,6 +34,7 @@ Map<String, dynamic> _$ChatToJson(Chat instance) => <String, dynamic>{
       'max_token': instance.maxToken,
       'n': instance.n,
       'size': instance.size,
+      'style': instance.style,
       'create_time': instance.createTime,
       'message_size': instance.messageSize,
     };

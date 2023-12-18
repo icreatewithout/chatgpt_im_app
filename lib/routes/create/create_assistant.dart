@@ -64,25 +64,27 @@ class _CreateAssistantState extends State<CreateAssistant> {
       val = modelsGlobalKey.currentState?.selectedValue;
     }
 
-    Chat chat = Chat(
-      null,
-      MenuItems.assistant.text,
-      _nameController.text.isEmpty
-          ? MenuItems.assistant.text
-          : _nameController.text,
-      _desController.text,
-      val,
-      _keyController.text,
-      _temperatureController.text.isEmpty ? '1.0' : _temperatureController.text,
-      _seedController.text,
-      _maxTokensController.text.isEmpty ? '500' : _maxTokensController.text,
-      _nController.text.isEmpty ? '1' : _nController.text,
-      _sizeController.text.isEmpty ? '1' : _sizeController.text,
-      DateTime.now().millisecondsSinceEpoch,
-      '0',
-    );
+    Chat chat = Chat();
+    chat.id = null;
+    chat.type = MenuItems.assistant.text;
+    chat.name = _nameController.text.isEmpty
+        ? MenuItems.assistant.text
+        : _nameController.text;
+    chat.des = _desController.text.isEmpty ? '一个有用的AI助手' : _desController.text;
+    chat.model = val;
+    chat.apiKey = _keyController.text;
+    chat.temperature = _temperatureController.text.isEmpty
+        ? '1.0'
+        : _temperatureController.text;
+    chat.seed = _seedController.text;
+    chat.maxToken =
+        _maxTokensController.text.isEmpty ? '500' : _maxTokensController.text;
+    chat.n = _nController.text.isEmpty ? '1' : _nController.text;
+    chat.size = _sizeController.text.isEmpty ? '1' : _sizeController.text;
+    chat.createTime = DateTime.now().millisecondsSinceEpoch;
+    chat.messageSize = '0';
 
-    if (widget.arguments != null) {
+    if (widget.arguments != null && widget.arguments!['id'] != null) {
       // update set id
       chat.id = widget.arguments!['id'];
       await ChatProvider().update(chat);
@@ -128,7 +130,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
             size: 20,
           ),
           onPressed: () {
-            Navigator.of(context).pop();
+            Navigator.pop(context);
           },
         ),
       ),

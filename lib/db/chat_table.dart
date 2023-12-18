@@ -15,6 +15,10 @@ const columns = [
   'max_token',
   'n',
   'size',
+  'style',
+  'speed',
+  'voice',
+  'response_format',
   'create_time',
   'message_size'
 ];

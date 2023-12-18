@@ -16,15 +16,15 @@ const columns = [
 class MessageProvider {
   final Database? db = SqliteDb().db;
 
-  Future<List<Message>> findPage(int chatId, int offset, int limit) async {
+  Future<List<Message>> findPage(int chatId, int limit, int offset) async {
     List<Map<String, dynamic>> maps = await db!.query(
       SqliteDb.message,
       columns: columns,
       where: 'chat_id = ?',
       whereArgs: [chatId],
       orderBy: 'create_time desc',
-      limit: limit * offset - 1,
-      offset: (offset - 1) * limit,
+      limit: limit,
+      offset: ((offset - 1) * limit),
     );
     if (maps.isNotEmpty) {
       return maps.map((e) => Message.fromJson(e)).toList();

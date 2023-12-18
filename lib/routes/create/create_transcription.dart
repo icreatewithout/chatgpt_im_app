@@ -8,13 +8,16 @@ import '../../states/LocaleModel.dart';
 import '../../states/ChatModel.dart';
 import '../../widgets/find/menu_widgets.dart';
 import '../../widgets/find/select_models_widgets.dart';
+import '../../widgets/find/select_transcription_response_format_widgets.dart';
 import '../../widgets/ui/open_cn_button.dart';
 import '../../widgets/ui/open_cn_text_field.dart';
 
 class CreateWhisper extends StatefulWidget {
   static const String path = "/create/whisper";
 
-  const CreateWhisper({super.key});
+  const CreateWhisper({super.key, this.arguments});
+
+  final Map? arguments;
 
   @override
   State<CreateWhisper> createState() => _CreateWhisperState();
@@ -25,10 +28,6 @@ class _CreateWhisperState extends State<CreateWhisper> {
   final TextEditingController _desController = TextEditingController();
   final TextEditingController _keyController = TextEditingController();
   final TextEditingController _temperatureController = TextEditingController();
-  final TextEditingController _seedController = TextEditingController();
-  final TextEditingController _maxTokensController = TextEditingController();
-  final TextEditingController _nController = TextEditingController();
-  final TextEditingController _sizeController = TextEditingController();
 
   @override
   void initState() {
@@ -36,31 +35,29 @@ class _CreateWhisperState extends State<CreateWhisper> {
   }
 
   void pop(BuildContext context) async {
-    bool? b = await modelsGlobalKey.currentState?.validator();
-    String? val;
-    if (b!) {
-      val = modelsGlobalKey.currentState?.selectedValue;
+    String? val = modelsGlobalKey.currentState?.selectedValue;
+    String? rf = transcriptionGlobalKey.currentState?.selectedValue;
+
+    Chat chat = Chat();
+    chat.type = MenuItems.assistant.text;
+    chat.name = _nameController.text.isEmpty
+        ? MenuItems.assistant.text
+        : _nameController.text;
+    chat.des = _desController.text.isEmpty ? '语音转录助手' : _desController.text;
+    chat.model = val;
+    chat.apiKey = _keyController.text;
+    chat.temperature = _temperatureController.text;
+    chat.responseFormat = rf;
+    chat.createTime = DateTime.now().millisecondsSinceEpoch;
+    chat.messageSize = '0';
+
+    if (widget.arguments != null && widget.arguments!['id'] != null) {
+      // update set id
+      chat.id = widget.arguments!['id'];
+      await ChatProvider().update(chat);
+    } else {
+      await ChatProvider().insert(chat);
     }
-
-    Chat chat = Chat(
-      null,
-      MenuItems.whisper.text,
-      _nameController.text.isEmpty
-          ? MenuItems.whisper.text
-          : _nameController.text,
-      _desController.text,
-      val,
-      _keyController.text,
-      _temperatureController.text.isEmpty ? '1.0' : _temperatureController.text,
-      _seedController.text,
-      _maxTokensController.text.isEmpty ? '500' : _maxTokensController.text,
-      _nController.text.isEmpty ? '1' : _nController.text,
-      _sizeController.text.isEmpty ? '1' : _sizeController.text,
-      DateTime.now().millisecondsSinceEpoch,
-      '0',
-    );
-
-    await ChatProvider().insert(chat);
     List<Chat> chats = await ChatProvider().findList();
     if (context.mounted) {
       Provider.of<ChatModel>(context, listen: false).setChats = chats;
@@ -75,10 +72,6 @@ class _CreateWhisperState extends State<CreateWhisper> {
     _desController.dispose();
     _keyController.dispose();
     _temperatureController.dispose();
-    _seedController.dispose();
-    _maxTokensController.dispose();
-    _nController.dispose();
-    _sizeController.dispose();
   }
 
   @override
@@ -88,7 +81,7 @@ class _CreateWhisperState extends State<CreateWhisper> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Create Chat Completion'),
+        title: const Text('Create Transcription'),
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
@@ -153,7 +146,7 @@ class _CreateWhisperState extends State<CreateWhisper> {
                         maxLength: 20,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '描述（des）,例如：翻译助手',
+                        hintText: '描述（des）,例如：语音转录助手',
                         controller: _desController,
                       ),
                       buildLine(),
@@ -181,7 +174,7 @@ class _CreateWhisperState extends State<CreateWhisper> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('配置项'),
+                      const Text('随机性（temperature）'),
                       const SizedBox(height: 10),
                       OpenCnTextField(
                         height: 46,
@@ -192,40 +185,6 @@ class _CreateWhisperState extends State<CreateWhisper> {
                         bgColor: Colors.grey.shade200,
                         hintText: '随机性（temperature），默认值：1.0',
                         controller: _temperatureController,
-                      ),
-                      buildLine(),
-                      OpenCnTextField(
-                        height: 46,
-                        radius: 10,
-                        size: 12,
-                        maxLength: 200,
-                        padding: const EdgeInsets.only(left: 10, right: 10),
-                        bgColor: Colors.grey.shade200,
-                        hintText: '确定性采样（seed）',
-                        controller: _seedController,
-                      ),
-                      buildLine(),
-                      OpenCnTextField(
-                        height: 46,
-                        radius: 10,
-                        size: 12,
-                        maxLength: 200,
-                        padding: const EdgeInsets.only(left: 10, right: 10),
-                        bgColor: Colors.grey.shade200,
-                        hintText: 'token数量（maxTokens），默认值：500',
-                        controller: _maxTokensController,
-                      ),
-                      buildLine(),
-                      OpenCnTextField(
-                        height: 46,
-                        radius: 10,
-                        size: 12,
-                        fontSize: 14,
-                        maxLength: 200,
-                        padding: const EdgeInsets.only(left: 10, right: 10),
-                        bgColor: Colors.grey.shade200,
-                        hintText: '返回结果数量（n），默认值：1',
-                        controller: _nController,
                       ),
                     ],
                   ),
@@ -241,18 +200,10 @@ class _CreateWhisperState extends State<CreateWhisper> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('消息集合'),
+                      const Text('response_format（response_format）'),
                       const SizedBox(height: 10),
-                      OpenCnTextField(
-                        height: 46,
-                        radius: 10,
-                        size: 12,
-                        maxLength: 200,
-                        padding: const EdgeInsets.only(left: 10, right: 10),
-                        bgColor: Colors.grey.shade200,
-                        hintText: '历史消息（message size），默认值：1',
-                        controller: _sizeController,
-                      ),
+                      SelectTranscriptionResponseFormat(
+                          key: transcriptionGlobalKey)
                     ],
                   ),
                 ),

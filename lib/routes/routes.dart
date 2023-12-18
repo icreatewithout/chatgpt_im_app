@@ -1,19 +1,17 @@
-import 'package:chatgpt_im/routes/message/audio_message_page.dart';
+import 'package:chatgpt_im/routes/message/speech_message_page.dart';
 import 'package:chatgpt_im/routes/message/chat_message_page.dart';
-import 'package:chatgpt_im/routes/message/edits_message_page.dart';
 import 'package:chatgpt_im/routes/message/fine_message_page.dart';
 import 'package:chatgpt_im/routes/message/images_message_page.dart';
-import 'package:chatgpt_im/routes/message/whisper_message_page.dart';
+import 'package:chatgpt_im/routes/message/transcription_message_page.dart';
 import 'package:chatgpt_im/routes/my_files.dart';
 import 'package:flutter/material.dart';
 
 import 'about_us.dart';
 import 'create/create_assistant.dart';
-import 'create/create_audio.dart';
-import 'create/create_edits.dart';
+import 'create/create_speech.dart';
 import 'create/create_fine.dart';
 import 'create/create_images.dart';
-import 'create/create_whisper.dart';
+import 'create/create_transcription.dart';
 import 'index_page.dart';
 import 'language_setting_page.dart';
 import 'login_page.dart';
@@ -26,20 +24,19 @@ final routes = <String, WidgetBuilder>{
       const LanguageSettingPage(),
   CreateAssistant.path: (BuildContext context, {arguments}) =>
       CreateAssistant(arguments: arguments),
-  CreateAudio.path: (BuildContext context, {arguments}) => const CreateAudio(),
-  CreateEdits.path: (BuildContext context, {arguments}) => const CreateEdits(),
-  CreateFine.path: (BuildContext context, {arguments}) => const CreateFine(),
+  CreateAudio.path: (BuildContext context, {arguments}) =>
+      CreateAudio(arguments: arguments),
+  CreateFine.path: (BuildContext context, {arguments}) =>
+      CreateFine(arguments: arguments),
   CreateImages.path: (BuildContext context, {arguments}) =>
-      const CreateImages(),
+      CreateImages(arguments: arguments),
   CreateWhisper.path: (BuildContext context, {arguments}) =>
-      const CreateWhisper(),
+      CreateWhisper(arguments: arguments),
   MyFiles.path: (BuildContext context, {arguments}) => const MyFiles(),
   AudioMessage.path: (BuildContext context, {arguments}) =>
       AudioMessage(arguments: arguments),
   ChatMessage.path: (BuildContext context, {arguments}) =>
       ChatMessage(arguments: arguments),
-  EditsMessage.path: (BuildContext context, {arguments}) =>
-      EditsMessage(arguments: arguments),
   FineMessage.path: (BuildContext context, {arguments}) =>
       FineMessage(arguments: arguments),
   ImagesMessage.path: (BuildContext context, {arguments}) =>

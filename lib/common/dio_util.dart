@@ -101,13 +101,12 @@ class DioUtil {
     FormData fd = FormData.fromMap(data);
 
     Response res = await dio.post(api, data: fd);
-
     if (res.statusCode == 401) {
       return Result.err(401, "需要登陆");
     }
 
     if (res.statusCode == 200 && res.data['code'] == 200) {
-      return Result.fromJson(res.data, (json) => res.data);
+      return Result.fromJson(res.data, (json) => res.data['data']);
     }
     return Result.err();
   }

@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:path_provider/path_provider.dart';
 
 class CommonUtils {
   static Future<bool?> showToast(
@@ -96,4 +99,31 @@ class CommonUtils {
     );
   }
 
+  static Future<Directory> getTempDir() async {
+    return await getTemporaryDirectory();
+  }
+
+  static Future<Directory> getAppDocumentsDir() async {
+    return await getApplicationDocumentsDirectory();
+  }
+
+  static Future<Directory> getAppCacheDir() async {
+    return await getApplicationCacheDirectory();
+  }
+
+  static Future<Directory> getAppSupportDir() async {
+    return await getApplicationSupportDirectory();
+  }
+
+  static Future<Directory> getLibraryDir() async {
+    return await getLibraryDirectory();
+  }
+
+  static Future<Directory?> getExternalStorageDir() async {
+    return await getExternalStorageDirectory();
+  }
+
+  static Future<Directory?> getDownloadsDir() async {
+    return await getDownloadsDirectory();
+  }
 }

@@ -70,7 +70,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
     chat.name = _nameController.text.isEmpty
         ? MenuItems.assistant.text
         : _nameController.text;
-    chat.des = _desController.text.isEmpty ? '一个有用的AI助手' : _desController.text;
+    chat.des = _desController.text.isEmpty ? '一个有用的智能助手' : _desController.text;
     chat.model = val;
     chat.apiKey = _keyController.text;
     chat.temperature = _temperatureController.text.isEmpty

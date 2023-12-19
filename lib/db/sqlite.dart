@@ -76,7 +76,9 @@ class SqliteDb {
               chat_id INTEGER,
               type TEXT,
               message TEXT,
-              file TEXT,
+              file_name TEXT,
+              file_type TEXT,
+              file_path TEXT,
               status TEXT,
               create_time INTEGER
             );

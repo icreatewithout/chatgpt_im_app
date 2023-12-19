@@ -8,13 +8,31 @@ const columns = [
   'chat_id',
   'type',
   'message',
-  'file',
+  'file_name',
+  'file_type',
+  'file_path',
   'status',
   'create_time'
 ];
 
 class MessageProvider {
   final Database? db = SqliteDb().db;
+
+  Future<List<Message>> findLastBySize(int chatId, String size) async {
+    List<Map<String, dynamic>> maps = await db!.query(
+      SqliteDb.message,
+      columns: columns,
+      where: 'chat_id = ?',
+      whereArgs: [chatId],
+      orderBy: 'create_time desc',
+      limit: int.tryParse(size),
+      offset: 0,
+    );
+    if (maps.isNotEmpty) {
+      return maps.map((e) => Message.fromJson(e)).toList();
+    }
+    return [];
+  }
 
   Future<List<Message>> findPage(int chatId, int limit, int offset) async {
     List<Map<String, dynamic>> maps = await db!.query(

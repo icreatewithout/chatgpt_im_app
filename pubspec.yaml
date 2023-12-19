@@ -54,6 +54,8 @@ dependencies:
   image_picker: ^1.0.5
   photo_view: ^0.14.0
   adaptive_dialog: ^2.0.0
+  zstd_ffi: ^0.1.0
+  permission_handler: ^11.1.0
 
 dev_dependencies:
   flutter_test:

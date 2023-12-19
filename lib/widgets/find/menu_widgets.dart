@@ -122,10 +122,10 @@ class MenuItems {
       case 'Images':
         iconData = Icons.image;
         break;
-      case 'Audio':
+      case 'Speech':
         iconData = Icons.text_fields;
         break;
-      case 'Whisper':
+      case 'Transcription':
         iconData = Icons.audio_file;
         break;
       // case 'FineTunes':
@@ -144,9 +144,9 @@ class MenuItems {
         return assistant;
       case 'Images':
         return images;
-      case 'Audio':
+      case 'Speech':
         return audio;
-      case 'Whisper':
+      case 'Transcription':
         return whisper;
       // case 'FineTunes':
       //   return fine;

@@ -4,26 +4,34 @@ part 'message.g.dart';
 
 @JsonSerializable(genericArgumentFactories: true)
 class Message {
-  late int? id;
+  int? id;
 
   @JsonKey(name: 'chat_id')
-  late int? chatId;
+  int? chatId;
 
   /// 1from 2to
-  late String? type;
+  String? type;
 
-  late String? message;
+  String? message;
 
   /// 1成功 2 失败 3...
-  late String? status;
+  String? status;
 
-  ///gpt4 image
-  late String? file;
+  ///gpt4 image name
+  @JsonKey(name: 'file_name')
+  String? fileName;
+
+  ///类型，1本地，2网络url
+  @JsonKey(name: 'file_type')
+  String? fileType;
+
+  @JsonKey(name: 'file_path')
+  String? filePath;
 
   @JsonKey(name: 'create_time')
-  late int? createTime;
+  int? createTime;
 
-  Message(this.id, this.chatId, this.type, this.message, this.file, this.status,
+  Message(this.id, this.chatId, this.type, this.message, this.fileName, this.status,
       this.createTime);
 
   factory Message.fromJson(Map<String, dynamic> json) =>

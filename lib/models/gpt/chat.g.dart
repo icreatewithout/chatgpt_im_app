@@ -19,6 +19,9 @@ Chat _$ChatFromJson(Map<String, dynamic> json) => Chat()
   ..n = json['n'] as String?
   ..size = json['size'] as String?
   ..style = json['style'] as String?
+  ..speed = json['speed'] as String?
+  ..voice = json['voice'] as String?
+  ..responseFormat = json['response_format'] as String?
   ..createTime = json['create_time'] as int?
   ..messageSize = json['message_size'] as String?;
 
@@ -35,6 +38,9 @@ Map<String, dynamic> _$ChatToJson(Chat instance) => <String, dynamic>{
       'n': instance.n,
       'size': instance.size,
       'style': instance.style,
+      'speed': instance.speed,
+      'voice': instance.voice,
+      'response_format': instance.responseFormat,
       'create_time': instance.createTime,
       'message_size': instance.messageSize,
     };

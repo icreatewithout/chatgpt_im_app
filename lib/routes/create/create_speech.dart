@@ -43,7 +43,7 @@ class _CreateAudioState extends State<CreateAudio> {
     Chat chat = Chat();
     chat.type = MenuItems.audio.text;
     chat.name = _nameController.text.isEmpty
-        ? MenuItems.assistant.text
+        ? MenuItems.audio.text
         : _nameController.text;
     chat.des = _desController.text.isEmpty ? '语音助手' : _desController.text;
     chat.model = val;

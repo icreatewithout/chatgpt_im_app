@@ -1,11 +1,15 @@
+import 'dart:io';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:chatgpt_im/common/assets.dart';
+import 'package:chatgpt_im/common/common_utils.dart';
 import 'package:chatgpt_im/db/chat_table.dart';
 import 'package:chatgpt_im/db/message_table.dart';
 import 'package:chatgpt_im/models/gpt/chat.dart';
 import 'package:chatgpt_im/models/gpt/message.dart';
 import 'package:chatgpt_im/routes/create/create_assistant.dart';
 import 'package:dart_openai/dart_openai.dart';
+import 'package:dio/dio.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -14,7 +18,10 @@ import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
+import '../../common/api.dart';
+import '../../common/dio_util.dart';
 import '../../generated/l10n.dart';
+import '../../models/result.dart';
 import '../../states/ChatModel.dart';
 import '../../states/LocaleModel.dart';
 
@@ -33,6 +40,7 @@ class ChatMessage extends StatefulWidget {
 }
 
 class _ChatMessageState extends State<ChatMessage> {
+  final String filePath = '/chat/';
   final _listenable = IndicatorStateListenable();
   bool _shrinkWrap = false;
   double? _viewportDimension;
@@ -44,6 +52,7 @@ class _ChatMessageState extends State<ChatMessage> {
   late String? imageName = '';
   late String? imageUrl = '';
   final List<dynamic> messages = List.of([], growable: true);
+  final List<dynamic> sysMessages = List.of([], growable: true);
 
   int _offset = 1;
   int limit = 20;
@@ -65,7 +74,9 @@ class _ChatMessageState extends State<ChatMessage> {
       setState(() {
         _chat = chat;
       });
+      OpenAI.apiKey = _chat.apiKey ?? '';
       await findPage(chat.id!, limit, _offset);
+      await findLast(chat.id!, chat.size!);
     }
   }
 
@@ -76,6 +87,16 @@ class _ChatMessageState extends State<ChatMessage> {
       setState(() {
         messages.addAll(list);
         _offset = _offset + 1;
+      });
+    }
+  }
+
+  Future<void> findLast(int chatId, String size) async {
+    List<Message> list = await MessageProvider().findLastBySize(chatId, size);
+    if (list.isNotEmpty) {
+      sysMessages.clear();
+      setState(() {
+        sysMessages.addAll(list);
       });
     }
   }
@@ -99,14 +120,21 @@ class _ChatMessageState extends State<ChatMessage> {
     XFile? file =
         await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (file != null) {
-      setState(() {
-        imageName = file.name;
-        imageUrl = file.path;
-      });
+      Result result = await DioUtil().upload(Api.upload, file.path, file.name);
+      if (result.code == 200) {
+        setState(() {
+          imageName = file.name;
+          imageUrl = result.data['file_url'];
+        });
+      } else {
+        CommonUtils.showToast(result.message);
+      }
     }
   }
 
   void delete() {
+    File file = File(imageUrl!);
+    file.delete();
     setState(() {
       imageName = '';
       imageUrl = '';
@@ -120,7 +148,25 @@ class _ChatMessageState extends State<ChatMessage> {
     super.dispose();
   }
 
-  void send(val) async {
+  buildMsg(Message msg) {
+    if (msg.type == '1') {
+      return OpenAIChatCompletionChoiceMessageModel(
+        content: [
+          OpenAIChatCompletionChoiceMessageContentItemModel.text(msg.message!),
+        ],
+        role: OpenAIChatMessageRole.assistant,
+      );
+    } else {
+      return OpenAIChatCompletionChoiceMessageModel(
+        content: [
+          OpenAIChatCompletionChoiceMessageContentItemModel.text(msg.message!),
+        ],
+        role: OpenAIChatMessageRole.user,
+      );
+    }
+  }
+
+  void send() async {
     if (_textController.text.isEmpty) {
       return;
     }
@@ -133,12 +179,10 @@ class _ChatMessageState extends State<ChatMessage> {
       );
 
       List<OpenAIChatCompletionChoiceMessageContentItemModel>? list = [];
-
       list.add(
         OpenAIChatCompletionChoiceMessageContentItemModel.text(
             _textController.text),
       );
-
       if (imageUrl != '') {
         list.add(
           OpenAIChatCompletionChoiceMessageContentItemModel.text(imageUrl!),
@@ -151,10 +195,11 @@ class _ChatMessageState extends State<ChatMessage> {
         ],
         role: OpenAIChatMessageRole.user,
       );
-
       //保存并显示发送的信息，发起openai请求，生成一条请求信息并显示请求中，接受返回的数据结果，保存返回结果并更新页面显示结果
       Message message = Message(null, _chat.id, '1', _textController.text,
-          imageUrl, '200', DateTime.now().millisecondsSinceEpoch);
+          imageName, '200', DateTime.now().millisecondsSinceEpoch);
+      message.fileType = '2'; //url类型
+      message.filePath = imageUrl; //网络url
 
       ///save sqlite
       Message? res = await MessageProvider().insert(message);
@@ -164,12 +209,37 @@ class _ChatMessageState extends State<ChatMessage> {
         imageName = '';
         messages.insert(0, res);
         jump();
-        receive('ImeCallback=ImeOnBackInvokedCallback@139008201', '200');
       });
+
+      ///获取历史记录
+      List<Message> historyMessage =
+          await MessageProvider().findLastBySize(_chat.id!, _chat.size!);
+
+      ///组装请求消息
+      final List<OpenAIChatCompletionChoiceMessageModel> requestMessages = [
+        systemMessage,
+        ...historyMessage.map((msg) => buildMsg(msg)),
+        userMessage,
+      ];
+
+      // the actual request.
+      OpenAIChatCompletionModel chatCompletion =
+          await OpenAI.instance.chat.create(
+        model: _chat.model!,
+        responseFormat: {"type": "json_object"},
+        seed: int.tryParse(_chat.seed!),
+        messages: requestMessages,
+        temperature: double.tryParse(_chat.temperature!),
+        maxTokens: int.tryParse(_chat.maxToken!),
+      );
+      receive(chatCompletion.toMap().toString(), '200');
     } on RequestFailedException catch (e) {
       debugPrint(e.message);
       debugPrint('${e.statusCode}');
       receive(e.message, '${e.statusCode}');
+    }catch(e){
+      debugPrint(e.toString());
+      receive(e.toString(), '500');
     }
   }
 
@@ -380,7 +450,7 @@ class _ChatMessageState extends State<ChatMessage> {
           Image.asset(
             Assets.ic_launcher_48,
           ),
-          Flexible(
+          Expanded(
             child: Container(
               alignment: Alignment.centerLeft,
               child: Container(
@@ -418,7 +488,7 @@ class _ChatMessageState extends State<ChatMessage> {
         color: Colors.grey.shade100,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             buildFileButton(),
             const SizedBox(width: 6),
@@ -436,30 +506,43 @@ class _ChatMessageState extends State<ChatMessage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextField(
-                      cursorColor: Colors.grey,
-                      autofocus: false,
-                      focusNode: _focusNode,
-                      maxLength: 2000,
-                      minLines: 1,
-                      maxLines: 6,
-                      controller: _textController,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        counterText: '',
-                        hintText: '请输入内容',
-                        enabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        isDense: true,
-                        hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                      style: const TextStyle(fontSize: 14),
-                      textInputAction: TextInputAction.send,
-                      keyboardType: TextInputType.multiline,
-                      onSubmitted: (val) => send(val),
-                      onEditingComplete: () {},
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            cursorColor: Colors.grey,
+                            autofocus: false,
+                            focusNode: _focusNode,
+                            maxLength: 2000,
+                            minLines: 1,
+                            maxLines: 6,
+                            controller: _textController,
+                            decoration: const InputDecoration(
+                              border: InputBorder.none,
+                              counterText: '',
+                              hintText: '请输入内容',
+                              enabledBorder: InputBorder.none,
+                              contentPadding: EdgeInsets.zero,
+                              isDense: true,
+                              hintStyle:
+                                  TextStyle(fontSize: 14, color: Colors.grey),
+                            ),
+                            style: const TextStyle(fontSize: 14),
+                            textInputAction: TextInputAction.send,
+                            keyboardType: TextInputType.multiline,
+                            onSubmitted: (val) => send(),
+                            onEditingComplete: () {},
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () => send(),
+                          child: Icon(
+                            Icons.send,
+                            color: Colors.blue.shade300,
+                          ),
+                        ),
+                      ],
                     ),
-                    buildSelectFile(),
                   ],
                 ),
               ),
@@ -471,6 +554,37 @@ class _ChatMessageState extends State<ChatMessage> {
   }
 
   buildFileButton() {
+    if (imageUrl != '') {
+      return GestureDetector(
+        onTap: () => selectImage(),
+        child: Stack(
+          children: [
+            Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.all(0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: CommonUtils.image(imageUrl, 40, 40, 4, BoxFit.cover),
+            ),
+            Positioned(
+              right: 0,
+              top: 0,
+              child: InkWell(
+                onTap: () => delete(),
+                child: const Icon(
+                  Icons.close,
+                  color: Colors.red,
+                  size: 16,
+                ),
+              ),
+            )
+          ],
+        ),
+      );
+    }
+
     return GestureDetector(
       onTap: () => selectImage(),
       child: Container(
@@ -491,7 +605,9 @@ class _ChatMessageState extends State<ChatMessage> {
 
   buildSelectFile() {
     return Visibility(
-        visible: imageName != '',
+      visible: imageName != '',
+      child: Container(
+        padding: const EdgeInsets.only(top: 5, bottom: 2),
         child: Row(
           children: [
             Expanded(
@@ -510,7 +626,9 @@ class _ChatMessageState extends State<ChatMessage> {
               ),
             ),
           ],
-        ));
+        ),
+      ),
+    );
   }
 
   buildMenuAnchor(BuildContext context) {

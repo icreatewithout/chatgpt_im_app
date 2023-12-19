@@ -39,9 +39,9 @@ class _CreateWhisperState extends State<CreateWhisper> {
     String? rf = transcriptionGlobalKey.currentState?.selectedValue;
 
     Chat chat = Chat();
-    chat.type = MenuItems.assistant.text;
+    chat.type = MenuItems.whisper.text;
     chat.name = _nameController.text.isEmpty
-        ? MenuItems.assistant.text
+        ? MenuItems.whisper.text
         : _nameController.text;
     chat.des = _desController.text.isEmpty ? '语音转录助手' : _desController.text;
     chat.model = val;
@@ -183,7 +183,7 @@ class _CreateWhisperState extends State<CreateWhisper> {
                         maxLength: 200,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '随机性（temperature），默认值：1.0',
+                        hintText: '随机性（temperature），默认值：0',
                         controller: _temperatureController,
                       ),
                     ],

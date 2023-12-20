@@ -9,7 +9,6 @@ import 'package:chatgpt_im/models/gpt/chat.dart';
 import 'package:chatgpt_im/models/gpt/message.dart';
 import 'package:chatgpt_im/routes/create/create_assistant.dart';
 import 'package:dart_openai/dart_openai.dart';
-import 'package:dio/dio.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -77,6 +76,16 @@ class _ChatMessageState extends State<ChatMessage> {
       OpenAI.apiKey = _chat.apiKey ?? '';
       await findPage(chat.id!, limit, _offset);
       await findLast(chat.id!, chat.size!);
+    }
+  }
+
+  void updateChatInfo() async {
+    Chat? chat = await ChatProvider().get(widget.arguments['id']);
+    if (chat != null) {
+      setState(() {
+        _chat = chat;
+      });
+      OpenAI.apiKey = _chat.apiKey ?? '';
     }
   }
 
@@ -237,7 +246,7 @@ class _ChatMessageState extends State<ChatMessage> {
       debugPrint(e.message);
       debugPrint('${e.statusCode}');
       receive(e.message, '${e.statusCode}');
-    }catch(e){
+    } catch (e) {
       debugPrint(e.toString());
       receive(e.toString(), '500');
     }
@@ -285,8 +294,8 @@ class _ChatMessageState extends State<ChatMessage> {
 
   void updateChat(BuildContext context, MenuController controller) async {
     controller.close();
-    Navigator.of(context)
-        .pushNamed(CreateAssistant.path, arguments: {'id': _chat.id});
+    Navigator.of(context).pushNamed(CreateAssistant.path,
+        arguments: {'id': _chat.id}).then((_) => updateChatInfo());
   }
 
   @override

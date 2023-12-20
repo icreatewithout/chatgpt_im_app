@@ -4,7 +4,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:chatgpt_im/common/common_utils.dart';
 import 'package:chatgpt_im/routes/index_page.dart';
-import 'package:chatgpt_im/routes/login_page.dart';
 import 'package:chatgpt_im/routes/routes.dart';
 import 'package:chatgpt_im/states/LocaleModel.dart';
 import 'package:chatgpt_im/states/UserModel.dart';

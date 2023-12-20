@@ -8,6 +8,7 @@ import 'package:chatgpt_im/db/message_table.dart';
 import 'package:chatgpt_im/models/gpt/chat.dart';
 import 'package:chatgpt_im/models/gpt/message.dart';
 import 'package:chatgpt_im/routes/create/create_assistant.dart';
+import 'package:chatgpt_im/widgets/chat/chat_util.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
@@ -187,6 +188,11 @@ class _ChatMessageState extends State<ChatMessage> {
         role: OpenAIChatMessageRole.system,
       );
 
+      ///获取历史记录
+      List<Message> historyMessage =
+          await MessageProvider().findLastBySize(_chat.id!, _chat.size!);
+
+      ///组装本次发送信息
       List<OpenAIChatCompletionChoiceMessageContentItemModel>? list = [];
       list.add(
         OpenAIChatCompletionChoiceMessageContentItemModel.text(
@@ -204,25 +210,6 @@ class _ChatMessageState extends State<ChatMessage> {
         ],
         role: OpenAIChatMessageRole.user,
       );
-      //保存并显示发送的信息，发起openai请求，生成一条请求信息并显示请求中，接受返回的数据结果，保存返回结果并更新页面显示结果
-      Message message = Message(null, _chat.id, '1', _textController.text,
-          imageName, '200', DateTime.now().millisecondsSinceEpoch);
-      message.fileType = '2'; //url类型
-      message.filePath = imageUrl; //网络url
-
-      ///save sqlite
-      Message? res = await MessageProvider().insert(message);
-      setState(() {
-        _textController.clear();
-        imageUrl = '';
-        imageName = '';
-        messages.insert(0, res);
-        jump();
-      });
-
-      ///获取历史记录
-      List<Message> historyMessage =
-          await MessageProvider().findLastBySize(_chat.id!, _chat.size!);
 
       ///组装请求消息
       final List<OpenAIChatCompletionChoiceMessageModel> requestMessages = [
@@ -231,7 +218,28 @@ class _ChatMessageState extends State<ChatMessage> {
         userMessage,
       ];
 
-      // the actual request.
+      //保存并显示发送的信息，发起openai请求，生成一条请求信息并显示请求中，接受返回的数据结果，保存返回结果并更新页面显示结果
+      Message message = Message(null, _chat.id, '1', _textController.text,
+          imageName, '200', DateTime.now().millisecondsSinceEpoch);
+      if (imageUrl != '') {
+        message.fileType = '2'; //url类型
+        message.filePath = imageUrl; //网络url
+      }
+      Message? res = await MessageProvider().insert(message);
+      _textController.clear();
+      setState(() {
+        imageUrl = '';
+        imageName = '';
+        messages.insert(0, res);
+        jump();
+
+        ///创建临时消息，状态202
+        message = Message(null, _chat.id, '2', '', '', '202',
+            DateTime.now().millisecondsSinceEpoch);
+        messages.insert(0, message);
+        jump();
+      });
+
       OpenAIChatCompletionModel chatCompletion =
           await OpenAI.instance.chat.create(
         model: _chat.model!,
@@ -243,23 +251,22 @@ class _ChatMessageState extends State<ChatMessage> {
       );
       receive(chatCompletion.toMap().toString(), '200');
     } on RequestFailedException catch (e) {
-      debugPrint(e.message);
-      debugPrint('${e.statusCode}');
       receive(e.message, '${e.statusCode}');
     } catch (e) {
-      debugPrint(e.toString());
       receive(e.toString(), '500');
     }
   }
 
   void receive(String msg, String status) async {
-    Message message = Message(null, _chat.id, '2', msg, '', status,
-        DateTime.now().millisecondsSinceEpoch);
+    Message message = messages[0];
+    message.createTime = DateTime.now().millisecondsSinceEpoch;
+    message.message = msg;
+    message.status = status;
 
-    ///save sqlite
+    ///更新接受消息，停止loading图标
     Message? res = await MessageProvider().insert(message);
     setState(() {
-      messages.insert(0, res);
+      messages[0] = res;
       jump();
     });
   }
@@ -469,7 +476,7 @@ class _ChatMessageState extends State<ChatMessage> {
                   color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: mdMessage(message.message!),
+                child: mdMessage(message.status!, message.message!),
               ),
             ),
           ),
@@ -478,7 +485,10 @@ class _ChatMessageState extends State<ChatMessage> {
     );
   }
 
-  Widget mdMessage(String? message) {
+  Widget mdMessage(String status, String? message) {
+    if (status == '202') {
+      return LoadingAnimationWidget.stretchedDots(color: Colors.red, size: 30);
+    }
     return MarkdownBody(
       data: message ?? '',
       selectable: true,
@@ -518,37 +528,11 @@ class _ChatMessageState extends State<ChatMessage> {
                     Row(
                       children: [
                         Expanded(
-                          child: TextField(
-                            cursorColor: Colors.grey,
-                            autofocus: false,
-                            focusNode: _focusNode,
-                            maxLength: 2000,
-                            minLines: 1,
-                            maxLines: 6,
-                            controller: _textController,
-                            decoration: const InputDecoration(
-                              border: InputBorder.none,
-                              counterText: '',
-                              hintText: '请输入内容',
-                              enabledBorder: InputBorder.none,
-                              contentPadding: EdgeInsets.zero,
-                              isDense: true,
-                              hintStyle:
-                                  TextStyle(fontSize: 14, color: Colors.grey),
-                            ),
-                            style: const TextStyle(fontSize: 14),
-                            textInputAction: TextInputAction.send,
-                            keyboardType: TextInputType.multiline,
-                            onSubmitted: (val) => send(),
-                            onEditingComplete: () {},
-                          ),
-                        ),
+                            child: ChatUtil.textField(_textController,
+                                _focusNode, '请输入内容', (val) => send())),
                         InkWell(
                           onTap: () => send(),
-                          child: Icon(
-                            Icons.send,
-                            color: Colors.blue.shade300,
-                          ),
+                          child: Icon(Icons.send, color: Colors.blue.shade300),
                         ),
                       ],
                     ),
@@ -582,18 +566,13 @@ class _ChatMessageState extends State<ChatMessage> {
               top: 0,
               child: InkWell(
                 onTap: () => delete(),
-                child: const Icon(
-                  Icons.close,
-                  color: Colors.red,
-                  size: 16,
-                ),
+                child: const Icon(Icons.close, color: Colors.red, size: 16),
               ),
             )
           ],
         ),
       );
     }
-
     return GestureDetector(
       onTap: () => selectImage(),
       child: Container(
@@ -603,11 +582,7 @@ class _ChatMessageState extends State<ChatMessage> {
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Icon(
-          Icons.image,
-          color: Colors.grey,
-          size: 26,
-        ),
+        child: const Icon(Icons.image, color: Colors.grey, size: 26),
       ),
     );
   }
@@ -628,11 +603,7 @@ class _ChatMessageState extends State<ChatMessage> {
             ),
             GestureDetector(
               onTap: () => delete(),
-              child: const Icon(
-                Icons.clear,
-                color: Colors.red,
-                size: 14,
-              ),
+              child: const Icon(Icons.clear, color: Colors.red, size: 14),
             ),
           ],
         ),
@@ -678,9 +649,7 @@ class _ChatMessageState extends State<ChatMessage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Icon(iconData, color: Colors.grey, size: 18),
-          const SizedBox(
-            width: 2,
-          ),
+          const SizedBox(width: 2),
           Text(name,
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 14, color: Colors.grey)),

@@ -1,15 +1,14 @@
-import 'package:chatgpt_im/widgets/find/select_speech_response_format_widgets.dart';
-import 'package:chatgpt_im/widgets/find/select_speech_voice_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../common/common_utils.dart';
 import '../../db/chat_table.dart';
 import '../../generated/l10n.dart';
 import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
 import '../../states/ChatModel.dart';
+import '../../widgets/chat/chat_util.dart';
 import '../../widgets/find/menu_widgets.dart';
-import '../../widgets/find/select_models_widgets.dart';
 import '../../widgets/ui/open_cn_button.dart';
 import '../../widgets/ui/open_cn_text_field.dart';
 
@@ -30,15 +29,32 @@ class _CreateAudioState extends State<CreateAudio> {
   final TextEditingController _keyController = TextEditingController();
   final TextEditingController _speedController = TextEditingController();
 
+  String? modelVal;
+  String? rfVal;
+  String? voiceVal;
+
   @override
   void initState() {
     super.initState();
   }
 
+  void _getSelectModel(val) {
+    modelVal = val;
+  }
+
+  void _getSelectRfVal(val) {
+    rfVal = val;
+  }
+
+  void _getSelectVoiceVal(val) {
+    voiceVal = val;
+  }
+
   void pop(BuildContext context) async {
-    String? val = modelsGlobalKey.currentState?.selectedValue;
-    String? voice = speechVoiceGlobalKey.currentState?.selectedValue;
-    String? rf = speechResponseFormatGlobalKey.currentState?.selectedValue;
+    if (modelVal == null) {
+      CommonUtils.showToast('请选择model');
+      return;
+    }
 
     Chat chat = Chat();
     chat.type = MenuItems.audio.text;
@@ -46,11 +62,11 @@ class _CreateAudioState extends State<CreateAudio> {
         ? MenuItems.audio.text
         : _nameController.text;
     chat.des = _desController.text.isEmpty ? '语音助手' : _desController.text;
-    chat.model = val;
+    chat.model = modelVal;
     chat.apiKey = _keyController.text;
     chat.speed = _speedController.text.isEmpty ? '1' : _speedController.text;
-    chat.voice = voice;
-    chat.responseFormat = rf ?? '';
+    chat.voice = voiceVal;
+    chat.responseFormat = rfVal ?? '';
     chat.createTime = DateTime.now().millisecondsSinceEpoch;
     chat.messageSize = '0';
 
@@ -84,16 +100,11 @@ class _CreateAudioState extends State<CreateAudio> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Create Speech'),
+        title: const Text('Create Speech', style: TextStyle(fontSize: 16)),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
+            icon: const Icon(Icons.arrow_back_ios, size: 20),
+            onPressed: () => Navigator.pop(context)),
       ),
       body: Consumer<LocaleModel>(
         builder:
@@ -116,7 +127,8 @@ class _CreateAudioState extends State<CreateAudio> {
                     children: [
                       const Text('选择模型（model）'),
                       const SizedBox(height: 10),
-                      SelectModels(key: modelsGlobalKey)
+                      ChatUtil.selectItem(ChatUtil.models, 'Select Your Model',
+                          'Please select model.', (val) => _getSelectModel(val))
                     ],
                   ),
                 ),
@@ -205,7 +217,12 @@ class _CreateAudioState extends State<CreateAudio> {
                     children: [
                       const Text('voice（voice）'),
                       const SizedBox(height: 10),
-                      SelectSpeechVoice(key: speechVoiceGlobalKey)
+                      ChatUtil.selectItem(
+                        ChatUtil.voice,
+                        'Select Speech voice',
+                        'Please select speech voice.',
+                        (val) => _getSelectVoiceVal(val),
+                      )
                     ],
                   ),
                 ),
@@ -220,10 +237,14 @@ class _CreateAudioState extends State<CreateAudio> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('response_format（response_format）'),
+                      const Text('response_format'),
                       const SizedBox(height: 10),
-                      SelectSpeechResponseFormat(
-                          key: speechResponseFormatGlobalKey)
+                      ChatUtil.selectItem(
+                        ChatUtil.audio,
+                        'Select Response Format',
+                        'Please select response format.',
+                        (val) => _getSelectRfVal(val),
+                      ),
                     ],
                   ),
                 ),

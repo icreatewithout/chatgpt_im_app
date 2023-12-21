@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../common/common_utils.dart';
 import '../../db/chat_table.dart';
 import '../../generated/l10n.dart';
 import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
 import '../../states/ChatModel.dart';
+import '../../widgets/chat/chat_util.dart';
 import '../../widgets/find/menu_widgets.dart';
-import '../../widgets/find/select_models_widgets.dart';
-import '../../widgets/find/select_transcription_response_format_widgets.dart';
 import '../../widgets/ui/open_cn_button.dart';
 import '../../widgets/ui/open_cn_text_field.dart';
 
@@ -29,14 +29,27 @@ class _CreateWhisperState extends State<CreateWhisper> {
   final TextEditingController _keyController = TextEditingController();
   final TextEditingController _temperatureController = TextEditingController();
 
+  String? modelVal;
+  String? rfVal;
+
   @override
   void initState() {
     super.initState();
   }
 
+  void _getSelectModel(val) {
+    modelVal = val;
+  }
+
+  void _getSelectRfVal(val) {
+    rfVal = val;
+  }
+
   void pop(BuildContext context) async {
-    String? val = modelsGlobalKey.currentState?.selectedValue;
-    String? rf = transcriptionGlobalKey.currentState?.selectedValue;
+    if (modelVal == null) {
+      CommonUtils.showToast('请选择model');
+      return;
+    }
 
     Chat chat = Chat();
     chat.type = MenuItems.whisper.text;
@@ -44,10 +57,10 @@ class _CreateWhisperState extends State<CreateWhisper> {
         ? MenuItems.whisper.text
         : _nameController.text;
     chat.des = _desController.text.isEmpty ? '语音转录助手' : _desController.text;
-    chat.model = val;
+    chat.model = modelVal;
     chat.apiKey = _keyController.text;
     chat.temperature = _temperatureController.text;
-    chat.responseFormat = rf;
+    chat.responseFormat = rfVal;
     chat.createTime = DateTime.now().millisecondsSinceEpoch;
     chat.messageSize = '0';
 
@@ -81,16 +94,12 @@ class _CreateWhisperState extends State<CreateWhisper> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Create Transcription'),
+        title:
+            const Text('Create Transcription', style: TextStyle(fontSize: 16)),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
+            icon: const Icon(Icons.arrow_back_ios, size: 20),
+            onPressed: () => Navigator.pop(context)),
       ),
       body: Consumer<LocaleModel>(
         builder:
@@ -113,7 +122,8 @@ class _CreateWhisperState extends State<CreateWhisper> {
                     children: [
                       const Text('选择模型（model）'),
                       const SizedBox(height: 10),
-                      SelectModels(key: modelsGlobalKey)
+                      ChatUtil.selectItem(ChatUtil.models, 'Select Your Model',
+                          'Please select model.', (val) => _getSelectModel(val))
                     ],
                   ),
                 ),
@@ -200,10 +210,14 @@ class _CreateWhisperState extends State<CreateWhisper> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('response_format（response_format）'),
+                      const Text('response_format'),
                       const SizedBox(height: 10),
-                      SelectTranscriptionResponseFormat(
-                          key: transcriptionGlobalKey)
+                      ChatUtil.selectItem(
+                        ChatUtil.transcription,
+                        'Select Response Format',
+                        'Please select response format.',
+                        (val) => _getSelectRfVal(val),
+                      ),
                     ],
                   ),
                 ),

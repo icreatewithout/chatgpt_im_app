@@ -1,15 +1,15 @@
-import 'package:chatgpt_im/widgets/find/select_size_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../common/common_utils.dart';
 import '../../db/chat_table.dart';
 import '../../generated/l10n.dart';
 import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
 import '../../states/ChatModel.dart';
+import '../../widgets/chat/chat_util.dart';
 import '../../widgets/find/menu_widgets.dart';
-import '../../widgets/find/select_models_widgets.dart';
-import '../../widgets/find/select_style_widgets.dart';
+
 import '../../widgets/ui/open_cn_button.dart';
 import '../../widgets/ui/open_cn_text_field.dart';
 
@@ -30,15 +30,32 @@ class _CreateImagesState extends State<CreateImages> {
   final TextEditingController _keyController = TextEditingController();
   final TextEditingController _nController = TextEditingController();
 
+  String? modelVal;
+  String? sizeVal;
+  String? styleVal;
+
   @override
   void initState() {
     super.initState();
   }
 
+  void _getSelectModel(val) {
+    modelVal = val;
+  }
+
+  void _getSelectStyleVal(val) {
+    styleVal = val;
+  }
+
+  void _getSelectSizeVal(val) {
+    sizeVal = val;
+  }
+
   void pop(BuildContext context) async {
-    String? val = modelsGlobalKey.currentState?.selectedValue;
-    String? size = sizeGlobalKey.currentState?.selectedValue;
-    String? style = styleGlobalKey.currentState?.selectedValue;
+    if (modelVal == null) {
+      CommonUtils.showToast('请选择model');
+      return;
+    }
 
     Chat chat = Chat();
     chat.type = MenuItems.images.text;
@@ -46,11 +63,11 @@ class _CreateImagesState extends State<CreateImages> {
         ? MenuItems.images.text
         : _nameController.text;
     chat.des = _desController.text.isEmpty ? '图片创作助手' : _desController.text;
-    chat.model = val;
+    chat.model = modelVal;
     chat.apiKey = _keyController.text;
     chat.n = _nController.text.isEmpty ? '1' : _nController.text;
-    chat.size = size;
-    chat.style = style;
+    chat.size = sizeVal;
+    chat.style = styleVal;
     chat.createTime = DateTime.now().millisecondsSinceEpoch;
     chat.messageSize = '0';
 
@@ -84,16 +101,11 @@ class _CreateImagesState extends State<CreateImages> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text('Create Images'),
+        title: const Text('Create Images', style: TextStyle(fontSize: 16)),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
+            icon: const Icon(Icons.arrow_back_ios, size: 20),
+            onPressed: () => Navigator.pop(context)),
       ),
       body: Consumer<LocaleModel>(
         builder:
@@ -116,7 +128,8 @@ class _CreateImagesState extends State<CreateImages> {
                     children: [
                       const Text('选择模型（model）'),
                       const SizedBox(height: 10),
-                      SelectModels(key: modelsGlobalKey)
+                      ChatUtil.selectItem(ChatUtil.models, 'Select Your Model',
+                          'Please select model.', (val) => _getSelectModel(val))
                     ],
                   ),
                 ),
@@ -206,7 +219,12 @@ class _CreateImagesState extends State<CreateImages> {
                     children: [
                       const Text('size（size）'),
                       const SizedBox(height: 10),
-                      SelectSize(key: sizeGlobalKey)
+                      ChatUtil.selectItem(
+                        ChatUtil.size,
+                        'Select Image Size',
+                        'Please select image size.',
+                        (val) => _getSelectSizeVal(val),
+                      )
                     ],
                   ),
                 ),
@@ -223,7 +241,12 @@ class _CreateImagesState extends State<CreateImages> {
                     children: [
                       const Text('style（style）'),
                       const SizedBox(height: 10),
-                      SelectStyle(key: styleGlobalKey)
+                      ChatUtil.selectItem(
+                        ChatUtil.style,
+                        'Select Image Style',
+                        'Please select image style.',
+                        (val) => _getSelectStyleVal(val),
+                      )
                     ],
                   ),
                 ),

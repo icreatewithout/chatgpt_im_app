@@ -3,7 +3,6 @@ import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:chatgpt_im/db/chat_table.dart';
 import 'package:chatgpt_im/routes/create/create_transcription.dart';
 import 'package:chatgpt_im/states/ChatModel.dart';
-import 'package:chatgpt_im/widgets/find/menu_widgets.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
@@ -19,9 +18,7 @@ import '../../generated/l10n.dart';
 import '../../models/gpt/chat.dart';
 import '../../models/gpt/message.dart';
 import '../../states/LocaleModel.dart';
-import '../../widgets/find/select_models_widgets.dart';
-import '../../widgets/ui/open_cn_button.dart';
-import '../../widgets/ui/open_cn_text_field.dart';
+
 
 class WhisperMessage extends StatefulWidget {
   static const String path = "/gpt/whisper";

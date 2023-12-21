@@ -1,13 +1,15 @@
 import 'package:chatgpt_im/db/chat_table.dart';
 import 'package:chatgpt_im/states/ChatModel.dart';
+import 'package:chatgpt_im/widgets/chat/chat_util.dart';
 import 'package:chatgpt_im/widgets/find/menu_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../common/common_utils.dart';
 import '../../generated/l10n.dart';
 import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
-import '../../widgets/find/select_models_widgets.dart';
+import '../../widgets/chat/select_widgets.dart';
 import '../../widgets/ui/open_cn_button.dart';
 import '../../widgets/ui/open_cn_text_field.dart';
 
@@ -32,6 +34,11 @@ class _CreateAssistantState extends State<CreateAssistant> {
   final TextEditingController _nController = TextEditingController();
   final TextEditingController _sizeController = TextEditingController();
 
+  String? modelVal;
+  String? rfVal;
+
+  late Chat? _chat = Chat();
+
   @override
   void initState() {
     if (widget.arguments != null) {
@@ -44,6 +51,8 @@ class _CreateAssistantState extends State<CreateAssistant> {
     Chat? chat = await ChatProvider().get(widget.arguments?['id']);
     if (chat != null) {
       setState(() {
+        _chat = chat;
+        modelVal = chat.model;
         _nameController.text = chat.name!;
         _desController.text = chat.des!;
         _keyController.text = chat.apiKey!;
@@ -52,16 +61,22 @@ class _CreateAssistantState extends State<CreateAssistant> {
         _maxTokensController.text = chat.maxToken!;
         _nController.text = chat.n!;
         _sizeController.text = chat.size!;
-        modelsGlobalKey.currentState?.setVal(chat.model!);
       });
     }
   }
 
+  void _getSelectModel(val) {
+    modelVal = val;
+  }
+
+  void _getSelectRfVal(val) {
+    rfVal = val;
+  }
+
   void pop(BuildContext context) async {
-    bool? b = await modelsGlobalKey.currentState?.validator();
-    String? val;
-    if (b!) {
-      val = modelsGlobalKey.currentState?.selectedValue;
+    if (modelVal == null) {
+      CommonUtils.showToast('请选择model');
+      return;
     }
 
     Chat chat = Chat();
@@ -71,7 +86,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
         ? MenuItems.assistant.text
         : _nameController.text;
     chat.des = _desController.text.isEmpty ? '一个有用的智能助手' : _desController.text;
-    chat.model = val;
+    chat.model = modelVal;
     chat.apiKey = _keyController.text;
     chat.temperature = _temperatureController.text.isEmpty
         ? '1.0'
@@ -83,6 +98,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
     chat.size = _sizeController.text.isEmpty ? '1' : _sizeController.text;
     chat.createTime = DateTime.now().millisecondsSinceEpoch;
     chat.messageSize = '0';
+    chat.responseFormat = rfVal ?? 'text';
 
     if (widget.arguments != null && widget.arguments!['id'] != null) {
       // update set id
@@ -119,20 +135,12 @@ class _CreateAssistantState extends State<CreateAssistant> {
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
         centerTitle: true,
-        title: const Text(
-          'Create Chat Completion',
-          style: TextStyle(fontSize: 16),
-        ),
+        title: const Text('Create Chat Completion',
+            style: TextStyle(fontSize: 16)),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            size: 20,
-          ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
+            icon: const Icon(Icons.arrow_back_ios, size: 20),
+            onPressed: () => Navigator.pop(context)),
       ),
       body: Consumer<LocaleModel>(
         builder:
@@ -155,7 +163,13 @@ class _CreateAssistantState extends State<CreateAssistant> {
                     children: [
                       const Text('选择模型（model）'),
                       const SizedBox(height: 10),
-                      SelectModels(key: modelsGlobalKey)
+                      SelectWidgets(
+                        hint: 'Select Your Model',
+                        valid: 'Please select model.',
+                        dropdownItems: ChatUtil.models,
+                        value: _chat?.model,
+                        onChanged: (val) => _getSelectModel(val),
+                      ),
                     ],
                   ),
                 ),
@@ -170,44 +184,40 @@ class _CreateAssistantState extends State<CreateAssistant> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('名称（Name）'),
-                      const SizedBox(height: 8),
-                      OpenCnTextField(
-                        height: 46,
-                        radius: 10,
-                        maxLength: 20,
-                        padding: const EdgeInsets.only(left: 10, right: 10),
-                        bgColor: Colors.grey.shade200,
-                        hintText: '输入一个名称',
-                        controller: _nameController,
-                      ),
                       Container(
-                        padding: const EdgeInsets.only(top: 8, bottom: 8),
-                        child: const Text('指示（Instructions）'),
-                      ),
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: const Text('名称（Name）')),
                       OpenCnTextField(
-                        height: 46,
-                        radius: 10,
-                        maxLength: 20,
-                        padding: const EdgeInsets.only(left: 10, right: 10),
-                        bgColor: Colors.grey.shade200,
-                        hintText: '翻译助手',
-                        controller: _desController,
-                      ),
+                          height: 46,
+                          radius: 10,
+                          maxLength: 20,
+                          padding: const EdgeInsets.only(left: 10, right: 10),
+                          bgColor: Colors.grey.shade200,
+                          hintText: '输入一个名称',
+                          controller: _nameController),
                       Container(
-                        padding: const EdgeInsets.only(top: 8, bottom: 8),
-                        child: const Text('API Key'),
-                      ),
+                          padding: const EdgeInsets.only(top: 8, bottom: 8),
+                          child: const Text('指示（Instructions）')),
                       OpenCnTextField(
-                        height: 46,
-                        radius: 10,
-                        maxLength: 200,
-                        size: 12,
-                        padding: const EdgeInsets.only(left: 10, right: 10),
-                        bgColor: Colors.grey.shade200,
-                        hintText: 'API KEY',
-                        controller: _keyController,
-                      ),
+                          height: 46,
+                          radius: 10,
+                          maxLength: 20,
+                          padding: const EdgeInsets.only(left: 10, right: 10),
+                          bgColor: Colors.grey.shade200,
+                          hintText: '翻译助手',
+                          controller: _desController),
+                      Container(
+                          padding: const EdgeInsets.only(top: 8, bottom: 8),
+                          child: const Text('API Key')),
+                      OpenCnTextField(
+                          height: 46,
+                          radius: 10,
+                          maxLength: 200,
+                          size: 12,
+                          padding: const EdgeInsets.only(left: 10, right: 10),
+                          bgColor: Colors.grey.shade200,
+                          hintText: 'API KEY',
+                          controller: _keyController),
                     ],
                   ),
                 ),
@@ -277,6 +287,19 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         hintText: '默认值：1',
                         controller: _nController,
                       ),
+                      Container(
+                        padding: const EdgeInsets.only(top: 8, bottom: 8),
+                        child: const Text('历史消息数量'),
+                      ),
+                      OpenCnTextField(
+                          height: 46,
+                          radius: 10,
+                          size: 12,
+                          maxLength: 200,
+                          padding: const EdgeInsets.only(left: 10, right: 10),
+                          bgColor: Colors.grey.shade200,
+                          hintText: '历史消息（message size），默认值：1',
+                          controller: _sizeController),
                     ],
                   ),
                 ),
@@ -291,17 +314,14 @@ class _CreateAssistantState extends State<CreateAssistant> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('消息集合'),
-                      const SizedBox(height: 8),
-                      OpenCnTextField(
-                        height: 46,
-                        radius: 10,
-                        size: 12,
-                        maxLength: 200,
-                        padding: const EdgeInsets.only(left: 10, right: 10),
-                        bgColor: Colors.grey.shade200,
-                        hintText: '历史消息（message size），默认值：1',
-                        controller: _sizeController,
+                      const Text('response_format'),
+                      const SizedBox(height: 10),
+                      SelectWidgets(
+                        hint: 'Select Response Format',
+                        valid: 'Please select response format.',
+                        dropdownItems: ChatUtil.format,
+                        value: _chat?.responseFormat,
+                        onChanged: (val) => _getSelectRfVal(val),
                       ),
                     ],
                   ),

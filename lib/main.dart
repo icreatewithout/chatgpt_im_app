@@ -1,4 +1,4 @@
-import 'package:chatgpt_im/states/ChatModel.dart';
+  import 'package:chatgpt_im/states/ChatModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
             (BuildContext context, LocaleModel localeModel, Widget? child) {
           return MaterialApp(
             theme: ThemeData(
+                platform: TargetPlatform.iOS,
                 brightness: Brightness.light,
                 primarySwatch: CommonUtils.white()),
             debugShowCheckedModeBanner: false,

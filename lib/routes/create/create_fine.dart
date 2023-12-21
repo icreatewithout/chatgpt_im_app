@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../common/common_utils.dart';
 import '../../db/chat_table.dart';
 import '../../generated/l10n.dart';
 import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
 import '../../states/ChatModel.dart';
+import '../../widgets/chat/chat_util.dart';
 import '../../widgets/find/menu_widgets.dart';
-import '../../widgets/find/select_models_widgets.dart';
 import '../../widgets/ui/open_cn_button.dart';
 import '../../widgets/ui/open_cn_text_field.dart';
 
@@ -30,16 +31,20 @@ class _CreateFineState extends State<CreateFine> {
   final TextEditingController _nController = TextEditingController();
   final TextEditingController _sizeController = TextEditingController();
 
+  String? modelVal;
   @override
   void initState() {
     super.initState();
   }
 
+  void _getSelectModel(val) {
+    modelVal = val;
+  }
+
   void pop(BuildContext context) async {
-    bool? b = await modelsGlobalKey.currentState?.validator();
-    String? val;
-    if (b!) {
-      val = modelsGlobalKey.currentState?.selectedValue;
+    if (modelVal == null) {
+      CommonUtils.showToast('请选择model');
+      return;
     }
 
     Chat chat = Chat();
@@ -48,7 +53,7 @@ class _CreateFineState extends State<CreateFine> {
         ? MenuItems.assistant.text
         : _nameController.text;
     chat.des = _desController.text.isEmpty ? '一个有用的AI助手' : _desController.text;
-    chat.model = val;
+    chat.model = modelVal;
     chat.apiKey = _keyController.text;
     chat.temperature = _temperatureController.text.isEmpty
         ? '1.0'
@@ -127,7 +132,12 @@ class _CreateFineState extends State<CreateFine> {
                     children: [
                       const Text('选择模型（model）'),
                       const SizedBox(height: 10),
-                      SelectModels(key: modelsGlobalKey)
+                      ChatUtil.selectItem(
+                        ChatUtil.models,
+                        'Select Your Model',
+                        'Please select model.',
+                            (val) => _getSelectModel(val),
+                      )
                     ],
                   ),
                 ),

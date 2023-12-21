@@ -40,14 +40,14 @@ class _MenuWidgetsState extends State<MenuWidgets> {
         ),
         items: [
           ...MenuItems.firstItems.map(
-            (item) => DropdownMenuItem<MenuItem>(
+            (item) => DropdownItem<MenuItem>(
               value: item,
               child: MenuItems.buildItem(item),
             ),
           ),
-          const DropdownMenuItem<Divider>(enabled: false, child: Divider()),
+          const DropdownItem<Divider>(enabled: false, child: Divider()),
           ...MenuItems.secondItems.map(
-            (item) => DropdownMenuItem<MenuItem>(
+            (item) => DropdownItem<MenuItem>(
               value: item,
               child: MenuItems.buildItem(item),
             ),
@@ -55,23 +55,16 @@ class _MenuWidgetsState extends State<MenuWidgets> {
         ],
         onChanged: (val) => MenuItems.onChanged(context, val as MenuItem),
         dropdownStyleData: DropdownStyleData(
-          direction: DropdownDirection.left,
           width: 180,
-          padding: const EdgeInsets.symmetric(vertical: 2),
+          padding: const EdgeInsets.symmetric(vertical: 6),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(4),
-            color: Colors.grey,
+            color: Colors.redAccent,
           ),
-          elevation: 8,
-          offset: const Offset(0, 8),
+          offset: const Offset(-160, -10),
         ),
-        menuItemStyleData: MenuItemStyleData(
-          customHeights: [
-            ...List<double>.filled(MenuItems.firstItems.length, 48),
-            8,
-            ...List<double>.filled(MenuItems.secondItems.length, 48),
-          ],
-          padding: const EdgeInsets.only(left: 16, right: 16),
+        menuItemStyleData: const MenuItemStyleData(
+          padding: EdgeInsets.only(left: 16, right: 16),
         ),
       ),
     );
@@ -107,7 +100,10 @@ class MenuItems {
   static const audio =
       MenuItem(text: 'Speech', path: AudioMessage.path, icon: Icons.audio_file);
   static const whisper = MenuItem(
-      text: 'Transcription', path: WhisperMessage.path, icon: Icons.text_fields);
+      text: 'Transcription',
+      path: WhisperMessage.path,
+      icon: Icons.text_fields);
+
   // static const fine =
   //     MenuItem(text: 'FineTunes', path: FineMessage.path, icon: Icons.settings);
   static const files =

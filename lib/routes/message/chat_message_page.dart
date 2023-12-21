@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
@@ -47,8 +48,8 @@ class _ChatMessageState extends State<ChatMessage> {
   final ImagePicker picker = ImagePicker();
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-
-  late final Chat _chat;
+  bool isSending = false;
+  late Chat _chat;
   late String? imageName = '';
   late String? imageUrl = '';
   final List<dynamic> messages = List.of([], growable: true);
@@ -68,13 +69,19 @@ class _ChatMessageState extends State<ChatMessage> {
     });
   }
 
+  @override
+  void dispose() {
+    _textController.dispose();
+    _listenable.removeListener(_onHeaderChange);
+    super.dispose();
+  }
+
   void init() async {
     Chat? chat = await ChatProvider().get(widget.arguments['id']);
     if (chat != null) {
       setState(() {
         _chat = chat;
       });
-      OpenAI.apiKey = _chat.apiKey ?? '';
       await findPage(chat.id!, limit, _offset);
       await findLast(chat.id!, chat.size!);
     }
@@ -83,10 +90,8 @@ class _ChatMessageState extends State<ChatMessage> {
   void updateChatInfo() async {
     Chat? chat = await ChatProvider().get(widget.arguments['id']);
     if (chat != null) {
-      setState(() {
-        _chat = chat;
-      });
-      OpenAI.apiKey = _chat.apiKey ?? '';
+      _chat = chat;
+      OpenAI.apiKey = chat.apiKey ?? '';
     }
   }
 
@@ -151,46 +156,21 @@ class _ChatMessageState extends State<ChatMessage> {
     });
   }
 
-  @override
-  void dispose() {
-    _textController.dispose();
-    _listenable.removeListener(_onHeaderChange);
-    super.dispose();
-  }
-
-  buildMsg(Message msg) {
-    if (msg.type == '1') {
-      return OpenAIChatCompletionChoiceMessageModel(
-        content: [
-          OpenAIChatCompletionChoiceMessageContentItemModel.text(msg.message!),
-        ],
-        role: OpenAIChatMessageRole.assistant,
-      );
-    } else {
-      return OpenAIChatCompletionChoiceMessageModel(
-        content: [
-          OpenAIChatCompletionChoiceMessageContentItemModel.text(msg.message!),
-        ],
-        role: OpenAIChatMessageRole.user,
-      );
-    }
-  }
-
   void send() async {
-    if (_textController.text.isEmpty) {
+    if (_textController.text.isEmpty || isSending) {
       return;
     }
+    setState(() {
+      isSending = true;
+    });
     try {
+      OpenAI.apiKey = _chat.apiKey ?? '';
       final systemMessage = OpenAIChatCompletionChoiceMessageModel(
         content: [
           OpenAIChatCompletionChoiceMessageContentItemModel.text(_chat.des!),
         ],
         role: OpenAIChatMessageRole.system,
       );
-
-      ///获取历史记录
-      List<Message> historyMessage =
-          await MessageProvider().findLastBySize(_chat.id!, _chat.size!);
 
       ///组装本次发送信息
       List<OpenAIChatCompletionChoiceMessageContentItemModel>? list = [];
@@ -212,11 +192,43 @@ class _ChatMessageState extends State<ChatMessage> {
       );
 
       ///组装请求消息
-      final List<OpenAIChatCompletionChoiceMessageModel> requestMessages = [
-        systemMessage,
-        ...historyMessage.map((msg) => buildMsg(msg)),
-        userMessage,
-      ];
+      final List<OpenAIChatCompletionChoiceMessageModel> requestMessages = [];
+      requestMessages.add(systemMessage);
+
+      ///获取历史记录
+      List<Message> historyMessage =
+          await MessageProvider().findLastBySize(_chat.id!, _chat.size!);
+      for (Message msg in historyMessage) {
+        if (msg.type == '1' && msg.status == '200') {
+          OpenAIChatCompletionModel completionModel =
+              OpenAIChatCompletionModel.fromMap(json.decode(msg.message!));
+          if (completionModel.haveChoices) {
+            OpenAIChatCompletionChoiceMessageModel choiceMessageModel =
+                completionModel.choices.first.message;
+            requestMessages.add(
+              OpenAIChatCompletionChoiceMessageModel(
+                content: [
+                  OpenAIChatCompletionChoiceMessageContentItemModel.text(
+                      choiceMessageModel.content!.first.text!),
+                ],
+                role: OpenAIChatMessageRole.assistant,
+              ),
+            );
+          }
+        } else if (msg.type == '2' && msg.status == '200') {
+          requestMessages.add(
+            OpenAIChatCompletionChoiceMessageModel(
+              content: [
+                OpenAIChatCompletionChoiceMessageContentItemModel.text(
+                    msg.message!),
+              ],
+              role: OpenAIChatMessageRole.user,
+            ),
+          );
+        }
+      }
+
+      requestMessages.add(userMessage);
 
       //保存并显示发送的信息，发起openai请求，生成一条请求信息并显示请求中，接受返回的数据结果，保存返回结果并更新页面显示结果
       Message message = Message(null, _chat.id, '1', _textController.text,
@@ -243,30 +255,40 @@ class _ChatMessageState extends State<ChatMessage> {
       OpenAIChatCompletionModel chatCompletion =
           await OpenAI.instance.chat.create(
         model: _chat.model!,
-        responseFormat: {"type": "json_object"},
+        responseFormat: {"type": "text"},
         seed: int.tryParse(_chat.seed!),
         messages: requestMessages,
         temperature: double.tryParse(_chat.temperature!),
         maxTokens: int.tryParse(_chat.maxToken!),
       );
-      receive(chatCompletion.toMap().toString(), '200');
+      receive(json.encode(chatCompletion.toMap()), '200');
     } on RequestFailedException catch (e) {
+      debugPrint('----------e.message ${e.message}');
       receive(e.message, '${e.statusCode}');
     } catch (e) {
+      debugPrint('----------e ${e.toString()}');
       receive(e.toString(), '500');
     }
   }
 
   void receive(String msg, String status) async {
-    Message message = messages[0];
-    message.createTime = DateTime.now().millisecondsSinceEpoch;
-    message.message = msg;
-    message.status = status;
+    Message message;
+    if (status == '200') {
+      message = messages[0];
+      message.createTime = DateTime.now().millisecondsSinceEpoch;
+      message.message = msg;
+      message.status = status;
+    } else {
+      // 出现错误时生成错误信息存储
+      message = Message(null, _chat.id, '2', msg, '', status,
+          DateTime.now().millisecondsSinceEpoch);
+    }
 
     ///更新接受消息，停止loading图标
     Message? res = await MessageProvider().insert(message);
     setState(() {
       messages[0] = res;
+      isSending = false;
       jump();
     });
   }
@@ -429,26 +451,17 @@ class _ChatMessageState extends State<ChatMessage> {
         mainAxisAlignment: MainAxisAlignment.end,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Flexible(
+          Expanded(
             child: Container(
               alignment: Alignment.centerRight,
-              child: Container(
-                margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(message.message!),
-              ),
+              child: buildUserMessages(message),
             ),
           ),
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.grey.shade300,
-              borderRadius: BorderRadius.circular(8),
-            ),
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(8)),
             child: const Icon(Icons.person),
           ),
         ],
@@ -456,7 +469,46 @@ class _ChatMessageState extends State<ChatMessage> {
     );
   }
 
+  buildUserMessages(Message message) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(right: 8),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Text(message.message!),
+        ),
+        Visibility(
+          visible: message.filePath != null && message.filePath != '',
+          child: Container(
+            margin: const EdgeInsets.only(top: 10, right: 8),
+            child:
+                CommonUtils.image(message.filePath, 100, 100, 4, BoxFit.cover),
+          ),
+        )
+      ],
+    );
+  }
+
   Widget chatMessage(Message message) {
+
+    if(message.status=='200'){
+      OpenAIChatCompletionModel completionModel =
+      OpenAIChatCompletionModel.fromMap(json.decode(message.message!));
+      completionModel.choices.forEach((msg) {
+        debugPrint('${msg.message.content?[0].text}');
+      });
+    }else{
+      debugPrint('${message.message}');
+    }
+
+
+
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -464,7 +516,8 @@ class _ChatMessageState extends State<ChatMessage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Image.asset(
-            Assets.ic_launcher_48,
+            Assets.ic_launcher_72,
+            width: 46,
           ),
           Expanded(
             child: Container(
@@ -483,6 +536,10 @@ class _ChatMessageState extends State<ChatMessage> {
         ],
       ),
     );
+  }
+
+  buildChatMessages(Message message) {
+    debugPrint('${message.toJson()}');
   }
 
   Widget mdMessage(String status, String? message) {
@@ -529,7 +586,7 @@ class _ChatMessageState extends State<ChatMessage> {
                       children: [
                         Expanded(
                             child: ChatUtil.textField(_textController,
-                                _focusNode, '请输入内容', (val) => send())),
+                                _focusNode, '请输入内容', () => send())),
                         InkWell(
                           onTap: () => send(),
                           child: Icon(Icons.send, color: Colors.blue.shade300),

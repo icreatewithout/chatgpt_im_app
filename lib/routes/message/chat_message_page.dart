@@ -255,11 +255,12 @@ class _ChatMessageState extends State<ChatMessage> {
       OpenAIChatCompletionModel chatCompletion =
           await OpenAI.instance.chat.create(
         model: _chat.model!,
-        responseFormat: {"type": "text"},
+        responseFormat: {"type": _chat.responseFormat!},
         seed: int.tryParse(_chat.seed!),
         messages: requestMessages,
         temperature: double.tryParse(_chat.temperature!),
         maxTokens: int.tryParse(_chat.maxToken!),
+        n: int.tryParse(_chat.n ?? '1'),
       );
       receive(json.encode(chatCompletion.toMap()), '200');
     } on RequestFailedException catch (e) {
@@ -339,23 +340,14 @@ class _ChatMessageState extends State<ChatMessage> {
           systemNavigationBarColor: Colors.grey.shade100,
         ),
         centerTitle: true,
-        title: Text(
-          widget.arguments['title'],
-          style: const TextStyle(fontSize: 16),
-        ),
+        title: Text(widget.arguments['title'],
+            style: const TextStyle(fontSize: 16)),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            size: 20,
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          icon: const Icon(Icons.arrow_back_ios, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: [
-          buildMenuAnchor(context),
-        ],
+        actions: [buildMenuAnchor(context)],
       ),
       body: SizedBox(
         height: double.infinity,
@@ -496,41 +488,17 @@ class _ChatMessageState extends State<ChatMessage> {
   }
 
   Widget chatMessage(Message message) {
-
-    if(message.status=='200'){
-      OpenAIChatCompletionModel completionModel =
-      OpenAIChatCompletionModel.fromMap(json.decode(message.message!));
-      completionModel.choices.forEach((msg) {
-        debugPrint('${msg.message.content?[0].text}');
-      });
-    }else{
-      debugPrint('${message.message}');
-    }
-
-
-
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(
-            Assets.ic_launcher_72,
-            width: 46,
-          ),
+          Image.asset(Assets.ic_launcher_72, width: 46),
           Expanded(
             child: Container(
               alignment: Alignment.centerLeft,
-              child: Container(
-                margin: const EdgeInsets.only(left: 8),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: mdMessage(message.status!, message.message!),
-              ),
+              child: buildChatMessages(message),
             ),
           ),
         ],
@@ -539,7 +507,41 @@ class _ChatMessageState extends State<ChatMessage> {
   }
 
   buildChatMessages(Message message) {
-    debugPrint('${message.toJson()}');
+    if (message.status != '200') {
+      return Container(
+        margin: const EdgeInsets.only(left: 8),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade200,
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: mdMessage(message.status!, message.message!),
+      );
+    }
+
+    OpenAIChatCompletionModel completionModel =
+        OpenAIChatCompletionModel.fromMap(json.decode(message.message!));
+    debugPrint('${completionModel.usage.totalTokens}');
+    debugPrint('${completionModel.usage.promptTokens}');
+    debugPrint('${completionModel.usage.completionTokens}');
+    return Column(
+      children: [
+        ...completionModel.choices.map(
+          (msg) => Container(
+            margin: const EdgeInsets.only(left: 8, bottom: 8),
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(6)),
+            child: mdMessage(
+                '200',
+                msg.message.content == null
+                    ? 'empty text.'
+                    : msg.message.content?.first.text),
+          ),
+        ),
+      ],
+    );
   }
 
   Widget mdMessage(String status, String? message) {
@@ -671,6 +673,7 @@ class _ChatMessageState extends State<ChatMessage> {
   buildMenuAnchor(BuildContext context) {
     late MenuController menuController;
     return MenuAnchor(
+      alignmentOffset: const Offset(-60, 0),
       builder:
           (BuildContext context, MenuController controller, Widget? child) {
         menuController = controller;

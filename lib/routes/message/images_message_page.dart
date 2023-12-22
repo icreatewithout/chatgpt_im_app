@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:chatgpt_im/db/chat_table.dart';
 import 'package:chatgpt_im/routes/create/create_images.dart';
+import 'package:chatgpt_im/widgets/chat/chat_util.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
@@ -36,7 +39,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
   final ImagePicker picker = ImagePicker();
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-
+  bool isSending = false;
   late final Chat _chat;
   late String? imageName = '';
   late String? imageUrl = '';
@@ -63,6 +66,14 @@ class _ImagesMessageState extends State<ImagesMessage> {
         _chat = chat;
       });
       await findPage(chat.id!, limit, _offset);
+    }
+  }
+
+  void updateChatInfo() async {
+    Chat? chat = await ChatProvider().get(widget.arguments['id']);
+    if (chat != null) {
+      _chat = chat;
+      OpenAI.apiKey = chat.apiKey ?? '';
     }
   }
 
@@ -111,37 +122,14 @@ class _ImagesMessageState extends State<ImagesMessage> {
   }
 
   void send(val) async {
-    if (_textController.text.isEmpty) {
+    if (_textController.text.isEmpty || isSending) {
       return;
     }
+    setState(() {
+      isSending = true;
+    });
     try {
-      final systemMessage = OpenAIChatCompletionChoiceMessageModel(
-        content: [
-          OpenAIChatCompletionChoiceMessageContentItemModel.text(_chat.des!),
-        ],
-        role: OpenAIChatMessageRole.system,
-      );
-
-      List<OpenAIChatCompletionChoiceMessageContentItemModel>? list = [];
-
-      list.add(
-        OpenAIChatCompletionChoiceMessageContentItemModel.text(
-            _textController.text),
-      );
-
-      if (imageUrl != '') {
-        list.add(
-          OpenAIChatCompletionChoiceMessageContentItemModel.text(imageUrl!),
-        );
-      }
-
-      final userMessage = OpenAIChatCompletionChoiceMessageModel(
-        content: [
-          ...list,
-        ],
-        role: OpenAIChatMessageRole.user,
-      );
-
+      OpenAI.apiKey = _chat.apiKey ?? '';
       //保存并显示发送的信息，发起openai请求，生成一条请求信息并显示请求中，接受返回的数据结果，保存返回结果并更新页面显示结果
       Message message = Message(null, _chat.id, '1', _textController.text,
           imageUrl, '200', DateTime.now().millisecondsSinceEpoch);
@@ -154,23 +142,48 @@ class _ImagesMessageState extends State<ImagesMessage> {
         imageName = '';
         messages.insert(0, res);
         jump();
-        receive('ImeCallback=ImeOnBackInvokedCallback@139008201', '200');
+
+        ///创建临时消息，状态202
+        message = Message(null, _chat.id, '2', '', '', '202',
+            DateTime.now().millisecondsSinceEpoch);
+        messages.insert(0, message);
       });
+
+      OpenAIImageModel image = await OpenAI.instance.image.create(
+        model: _chat.model,
+        prompt: _textController.text,
+        n: int.tryParse(_chat.n ?? '1'),
+        style: ChatUtil.getStyle(_chat.style ?? 'vivid'),
+        size: ChatUtil.getSize(_chat.size ?? '1024x1024'),
+        responseFormat: ChatUtil.getImageFormat(_chat.responseFormat ?? 'url'),
+      );
+      receive(json.encode(image.toString()), '200');
     } on RequestFailedException catch (e) {
-      debugPrint(e.message);
-      debugPrint('${e.statusCode}');
       receive(e.message, '${e.statusCode}');
+    } catch (e) {
+      debugPrint('----------e ${e.toString()}');
+      receive(e.toString(), '500');
     }
   }
 
   void receive(String msg, String status) async {
-    Message message = Message(null, _chat.id, '2', msg, '', status,
-        DateTime.now().millisecondsSinceEpoch);
+    Message message;
+    if (status == '200') {
+      message = messages[0];
+      message.createTime = DateTime.now().millisecondsSinceEpoch;
+      message.message = msg;
+      message.status = status;
+    } else {
+      // 出现错误时生成错误信息存储
+      message = Message(null, _chat.id, '2', msg, '', status,
+          DateTime.now().millisecondsSinceEpoch);
+    }
 
     ///save sqlite
     Message? res = await MessageProvider().insert(message);
     setState(() {
-      messages.insert(0, res);
+      messages[0] = res;
+      isSending = false;
       jump();
     });
   }
@@ -205,8 +218,8 @@ class _ImagesMessageState extends State<ImagesMessage> {
 
   void updateChat(BuildContext context, MenuController controller) async {
     controller.close();
-    Navigator.of(context)
-        .pushNamed(CreateImages.path, arguments: {'id': _chat.id});
+    Navigator.of(context).pushNamed(CreateImages.path,
+        arguments: {'id': _chat.id}).then((_) => updateChatInfo());
   }
 
   @override
@@ -375,10 +388,8 @@ class _ImagesMessageState extends State<ImagesMessage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(
-            Assets.ic_launcher_48,
-          ),
-          Flexible(
+          Image.asset(Assets.ic_launcher_72, width: 46),
+          Expanded(
             child: Container(
               alignment: Alignment.centerLeft,
               child: Container(
@@ -388,7 +399,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
                   color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: mdMessage(message.message!),
+                child: mdMessage(message.status!, message.message!),
               ),
             ),
           ),
@@ -397,7 +408,10 @@ class _ImagesMessageState extends State<ImagesMessage> {
     );
   }
 
-  Widget mdMessage(String? message) {
+  Widget mdMessage(String status, String? message) {
+    if (status == '202') {
+      return LoadingAnimationWidget.stretchedDots(color: Colors.red, size: 30);
+    }
     return MarkdownBody(
       data: message ?? '',
       selectable: true,

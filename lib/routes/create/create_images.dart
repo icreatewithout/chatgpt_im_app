@@ -8,6 +8,7 @@ import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
 import '../../states/ChatModel.dart';
 import '../../widgets/chat/chat_util.dart';
+import '../../widgets/chat/select_widgets.dart';
 import '../../widgets/find/menu_widgets.dart';
 
 import '../../widgets/ui/open_cn_button.dart';
@@ -32,11 +33,33 @@ class _CreateImagesState extends State<CreateImages> {
 
   String? modelVal;
   String? sizeVal;
+  String? rfVal;
   String? styleVal;
+
+  late Chat? _chat = Chat();
 
   @override
   void initState() {
+    if (widget.arguments != null) {
+      init();
+    }
     super.initState();
+  }
+
+  void init() async {
+    Chat? chat = await ChatProvider().get(widget.arguments?['id']);
+    if (chat != null) {
+      setState(() {
+        _chat = chat;
+        modelVal = chat.model;
+        sizeVal = chat.size;
+        styleVal = chat.style;
+        _nameController.text = chat.name!;
+        _desController.text = chat.des!;
+        _keyController.text = chat.apiKey!;
+        _nController.text = chat.n!;
+      });
+    }
   }
 
   void _getSelectModel(val) {
@@ -49,6 +72,10 @@ class _CreateImagesState extends State<CreateImages> {
 
   void _getSelectSizeVal(val) {
     sizeVal = val;
+  }
+
+  void _getSelectRfVal(val) {
+    rfVal = val;
   }
 
   void pop(BuildContext context) async {
@@ -70,6 +97,7 @@ class _CreateImagesState extends State<CreateImages> {
     chat.style = styleVal;
     chat.createTime = DateTime.now().millisecondsSinceEpoch;
     chat.messageSize = '0';
+    chat.responseFormat = rfVal;
 
     if (widget.arguments != null && widget.arguments!['id'] != null) {
       // update set id
@@ -128,8 +156,13 @@ class _CreateImagesState extends State<CreateImages> {
                     children: [
                       const Text('选择模型（model）'),
                       const SizedBox(height: 10),
-                      ChatUtil.selectItem(ChatUtil.models, 'Select Your Model',
-                          'Please select model.', (val) => _getSelectModel(val))
+                      SelectWidgets(
+                        hint: 'Select Your Model',
+                        valid: 'Please select model.',
+                        dropdownItems: ChatUtil.models,
+                        value: _chat?.model,
+                        onChanged: (val) => _getSelectModel(val),
+                      ),
                     ],
                   ),
                 ),
@@ -219,12 +252,13 @@ class _CreateImagesState extends State<CreateImages> {
                     children: [
                       const Text('size（size）'),
                       const SizedBox(height: 10),
-                      ChatUtil.selectItem(
-                        ChatUtil.size,
-                        'Select Image Size',
-                        'Please select image size.',
-                        (val) => _getSelectSizeVal(val),
-                      )
+                      SelectWidgets(
+                        hint: 'Select Image Size',
+                        valid: 'Please select image size.',
+                        dropdownItems: ChatUtil.size,
+                        value: _chat?.size,
+                        onChanged: (val) => _getSelectSizeVal(val),
+                      ),
                     ],
                   ),
                 ),
@@ -241,12 +275,36 @@ class _CreateImagesState extends State<CreateImages> {
                     children: [
                       const Text('style（style）'),
                       const SizedBox(height: 10),
-                      ChatUtil.selectItem(
-                        ChatUtil.style,
-                        'Select Image Style',
-                        'Please select image style.',
-                        (val) => _getSelectStyleVal(val),
-                      )
+                      SelectWidgets(
+                        hint: 'Select Image Style',
+                        valid: 'Please select image style.',
+                        dropdownItems: ChatUtil.style,
+                        value: _chat?.style,
+                        onChanged: (val) => _getSelectStyleVal(val),
+                      ),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: double.infinity,
+                  margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
+                  padding: const EdgeInsets.only(
+                      left: 20, right: 20, top: 15, bottom: 15),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text('response_format'),
+                      const SizedBox(height: 10),
+                      SelectWidgets(
+                        hint: 'Select Image Response Format',
+                        valid: 'Please select image response format.',
+                        dropdownItems: ChatUtil.imageFormat,
+                        value: _chat?.responseFormat,
+                        onChanged: (val) => _getSelectRfVal(val),
+                      ),
                     ],
                   ),
                 ),

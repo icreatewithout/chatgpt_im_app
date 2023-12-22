@@ -264,10 +264,8 @@ class _ChatMessageState extends State<ChatMessage> {
       );
       receive(json.encode(chatCompletion.toMap()), '200');
     } on RequestFailedException catch (e) {
-      debugPrint('----------e.message ${e.message}');
       receive(e.message, '${e.statusCode}');
     } catch (e) {
-      debugPrint('----------e ${e.toString()}');
       receive(e.toString(), '500');
     }
   }

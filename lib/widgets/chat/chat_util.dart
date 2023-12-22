@@ -1,3 +1,4 @@
+import 'package:dart_openai/dart_openai.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 
@@ -108,9 +109,24 @@ class ChatUtil {
     '256x256',
     '512x512',
     '1024x1024',
-    '1792x1024(dall-e-3)',
-    '1024x1792(dall-e-3)',
+    '1792x1024',
+    '1024x1792',
   ];
+
+  static getSize(String size) {
+    switch (size) {
+      case '256x256':
+        return OpenAIImageSize.size256;
+      case '512x512':
+        return OpenAIImageSize.size512;
+      case '1024x1024':
+        return OpenAIImageSize.size1024;
+      case '1792x1024':
+        return OpenAIImageSize.size1792Horizontal;
+      case '1024x1792':
+        return OpenAIImageSize.size1792Vertical;
+    }
+  }
 
   static final List<String> audio = [
     'mp3',
@@ -123,6 +139,15 @@ class ChatUtil {
     'vivid',
     'natural',
   ];
+
+  static getStyle(String style) {
+    switch (style) {
+      case 'vivid':
+        return OpenAIImageStyle.vivid;
+      case 'natural':
+        return OpenAIImageStyle.natural;
+    }
+  }
 
   static final List<String> voice = [
     'alloy',
@@ -145,4 +170,18 @@ class ChatUtil {
     'text',
     'json_object',
   ];
+
+  static final List<String> imageFormat = [
+    'url',
+    'b64_json',
+  ];
+
+  static getImageFormat(String imageFormat) {
+    switch (imageFormat) {
+      case 'url':
+        return OpenAIImageResponseFormat.url;
+      case 'b64_json':
+        return OpenAIImageResponseFormat.b64Json;
+    }
+  }
 }

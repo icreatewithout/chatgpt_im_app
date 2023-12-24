@@ -1,3 +1,7 @@
+import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:chatgpt_im/common/common_utils.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
@@ -183,5 +187,22 @@ class ChatUtil {
       case 'b64_json':
         return OpenAIImageResponseFormat.b64Json;
     }
+  }
+
+  static Future<String> saveFile(
+      String path, String fileName, Uint8List bytes) async {
+    Directory directory = await CommonUtils.getAppDocumentsDir();
+    path = '${directory.path}$path/';
+    Directory newDir = Directory(path);
+    if (!newDir.existsSync()) {
+      newDir.createSync(recursive: true);
+    }
+    File file = File(path + fileName);
+    if (!file.existsSync()) {
+      file.createSync(recursive: true);
+    }
+    file.writeAsBytes(bytes);
+
+    return file.path;
   }
 }

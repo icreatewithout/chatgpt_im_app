@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart';
 import 'package:dio/dio.dart';
@@ -47,7 +48,6 @@ class DioUtil {
       dio.options.headers['Authorization'] = 'Bearer $token';
 
   Future<Result> get(String api, [Map<String, dynamic>? data]) async {
-
     Response res = await dio.get(api, queryParameters: handleData(data ?? {}));
 
     if (res.statusCode == 401) {
@@ -109,6 +109,12 @@ class DioUtil {
       return Result.fromJson(res.data, (json) => res.data['data']);
     }
     return Result.err();
+  }
+
+  Future<Uint8List?> getBytesByUrl(String url) async {
+    Response<Uint8List> response =
+        await dio.get(url, options: Options(responseType: ResponseType.bytes));
+    return response.data;
   }
 
   static Map<String, dynamic> handleData(Map<String, dynamic>? data) {

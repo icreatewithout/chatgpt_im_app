@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -52,7 +54,7 @@ class CommonUtils {
   static const int _whitePrimaryValue = 0xFFFFFFFF;
 
   static image(
-      String? url, double height, double width, double radius, BoxFit fit) {
+      String? url, double? height, double? width, double radius, BoxFit fit) {
     if (url == null) {
       return Container(
         height: height,
@@ -85,9 +87,8 @@ class CommonUtils {
         height: height,
         width: width,
         decoration: BoxDecoration(
-          color: Colors.grey.shade200,
-          borderRadius: BorderRadius.circular(radius),
-        ),
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(radius)),
         child: const Center(
           child: Icon(
             Icons.warning,
@@ -125,5 +126,16 @@ class CommonUtils {
 
   static Future<Directory?> getDownloadsDir() async {
     return await getDownloadsDirectory();
+  }
+
+  static getHW(String url) {
+    Image image = Image.network(url);
+    return {'h': image.height, 'w': image.width};
+  }
+
+  static b64HW(String b64Json) {
+    Uint8List bytes = base64.decode(b64Json);
+    Image image = Image.memory(bytes);
+    return {'h': image.height, 'w': image.width};
   }
 }

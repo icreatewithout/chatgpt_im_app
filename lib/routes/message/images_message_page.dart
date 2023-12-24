@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
+import 'package:chatgpt_im/common/calculate_image.dart';
+import 'package:chatgpt_im/common/common_utils.dart';
+import 'package:chatgpt_im/common/dio_util.dart';
 import 'package:chatgpt_im/db/chat_table.dart';
 import 'package:chatgpt_im/routes/create/create_images.dart';
 import 'package:chatgpt_im/widgets/chat/chat_util.dart';
@@ -48,6 +51,8 @@ class _ImagesMessageState extends State<ImagesMessage> {
   int _offset = 1;
   int limit = 20;
 
+  String _path = '';
+
   @override
   void initState() {
     super.initState();
@@ -64,6 +69,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
     if (chat != null) {
       setState(() {
         _chat = chat;
+        _path = '/image/${chat.id}/';
       });
       await findPage(chat.id!, limit, _offset);
     }
@@ -134,6 +140,8 @@ class _ImagesMessageState extends State<ImagesMessage> {
       Message message = Message(null, _chat.id, '1', _textController.text,
           imageUrl, '200', DateTime.now().millisecondsSinceEpoch);
 
+      String prompt = _textController.text;
+
       ///save sqlite
       Message? res = await MessageProvider().insert(message);
       setState(() {
@@ -151,13 +159,41 @@ class _ImagesMessageState extends State<ImagesMessage> {
 
       OpenAIImageModel image = await OpenAI.instance.image.create(
         model: _chat.model,
-        prompt: _textController.text,
+        prompt: prompt,
         n: int.tryParse(_chat.n ?? '1'),
         style: ChatUtil.getStyle(_chat.style ?? 'vivid'),
         size: ChatUtil.getSize(_chat.size ?? '1024x1024'),
         responseFormat: ChatUtil.getImageFormat(_chat.responseFormat ?? 'url'),
       );
-      receive(json.encode(image.toString()), '200');
+
+      List<Map<String, dynamic>> images = List.of([], growable: true);
+
+      /// 保存图片到本地在加载，从gpt获取的url带有超时
+      for (OpenAIImageData data in image.data) {
+        String path = '';
+        if (data.haveUrl) {
+          Uint8List? bytes = await DioUtil().getBytesByUrl(data.url!);
+          if (bytes != null) {
+            path = await ChatUtil.saveFile(
+                _path, '${DateTime.now().millisecondsSinceEpoch}.png', bytes);
+          }
+        } else {
+          Uint8List bytes = base64.decode(data.b64Json!);
+          path = await ChatUtil.saveFile(
+              _path, '${DateTime.now().millisecondsSinceEpoch}.png', bytes);
+        }
+
+        images.add(
+          {
+            'path': path,
+            'url': data.url,
+            'b64Json': data.b64Json,
+            'haveUrl': data.haveUrl,
+            'revisedPrompt': data.revisedPrompt
+          },
+        );
+      }
+      receive(json.encode(images), '200');
     } on RequestFailedException catch (e) {
       receive(e.message, '${e.statusCode}');
     } catch (e) {
@@ -392,15 +428,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
           Expanded(
             child: Container(
               alignment: Alignment.centerLeft,
-              child: Container(
-                margin: const EdgeInsets.only(left: 8),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: mdMessage(message.status!, message.message!),
-              ),
+              child: buildChatMessages(message),
             ),
           ),
         ],
@@ -408,12 +436,49 @@ class _ImagesMessageState extends State<ImagesMessage> {
     );
   }
 
+  buildChatMessages(Message message) {
+    if (message.status != '200') {
+      return Container(
+        margin: const EdgeInsets.only(left: 8),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(6)),
+        child: mdMessage(message.status!, message.message!),
+      );
+    }
+
+    List<dynamic> images = json.decode(message.message!);
+
+    return Column(
+      children: [
+        ...images.map(
+          (image) => Container(
+            margin: const EdgeInsets.only(left: 8, bottom: 8),
+            child: buildImage(image),
+          ),
+        )
+      ],
+    );
+  }
+
+  buildImage(Map<String, dynamic> data) {
+    if (data['haveUrl']) {
+      Map<String, dynamic> map = CommonUtils.getHW(data['url']);
+      return CalculateImage.network(data['url'],
+          networkBuilder: (context, snapshot, url) {
+        return CommonUtils.image(data['url'], snapshot.data?.height.toDouble(),
+            snapshot.data?.width.toDouble(), 4, BoxFit.cover);
+      });
+    }
+  }
+
   Widget mdMessage(String status, String? message) {
     if (status == '202') {
       return LoadingAnimationWidget.stretchedDots(color: Colors.red, size: 30);
     }
     return MarkdownBody(
-      data: message ?? '',
+      data: message ?? 'Empty message.',
       selectable: true,
       onTapText: () {},
       styleSheetTheme: MarkdownStyleSheetBaseTheme.material,

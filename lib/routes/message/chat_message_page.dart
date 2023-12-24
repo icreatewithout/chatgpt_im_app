@@ -534,7 +534,7 @@ class _ChatMessageState extends State<ChatMessage> {
             child: mdMessage(
                 '200',
                 msg.message.content == null
-                    ? 'empty text.'
+                    ? 'Empty message.'
                     : msg.message.content?.first.text),
           ),
         ),

@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="OpenGpt"
+        android:requestLegacyExternalStorage="true"
+        android:label="OpenGPT"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

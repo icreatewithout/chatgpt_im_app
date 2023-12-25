@@ -6,6 +6,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class CommonUtils {
   static Future<bool?> showToast(
@@ -128,14 +129,24 @@ class CommonUtils {
     return await getDownloadsDirectory();
   }
 
-  static getHW(String url) {
-    Image image = Image.network(url);
-    return {'h': image.height, 'w': image.width};
+  /// 授予权限返回true， 否则返回false
+  static Future<bool> requestScopePermission(Permission scope) async {
+    // 获取当前的权限
+    PermissionStatus status = await scope.status;
+    if (status.isGranted) {
+      // 已经授权
+      return true;
+    } else {
+      // 未授权则发起一次申请
+      status = await scope.request();
+      if (status.isGranted) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 
-  static b64HW(String b64Json) {
-    Uint8List bytes = base64.decode(b64Json);
-    Image image = Image.memory(bytes);
-    return {'h': image.height, 'w': image.width};
-  }
+
+
 }

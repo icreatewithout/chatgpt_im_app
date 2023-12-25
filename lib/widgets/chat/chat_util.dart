@@ -5,6 +5,9 @@ import 'package:chatgpt_im/common/common_utils.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_view/photo_view.dart';
 
 class ChatUtil {
   static Widget textField(TextEditingController controller, FocusNode focusNode,
@@ -65,6 +68,62 @@ class ChatUtil {
       menuItemStyleData: const MenuItemStyleData(
           padding: EdgeInsets.symmetric(horizontal: 16)),
     );
+  }
+
+  static openBottomSheet(BuildContext context, File file) =>
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        useRootNavigator: true,
+        backgroundColor: Colors.transparent,
+        builder: (BuildContext context) {
+          return SafeArea(
+            child: Stack(
+              children: [
+                PhotoViewGestureDetectorScope(
+                  axis: Axis.vertical,
+                  child: PhotoView(
+                    backgroundDecoration:
+                        BoxDecoration(color: Colors.black.withAlpha(240)),
+                    imageProvider: FileImage(file),
+                  ),
+                ),
+                Positioned(
+                  right: 10,
+                  top: kToolbarHeight,
+                  child: IconButton(
+                    icon:
+                        const Icon(Icons.close, color: Colors.white, size: 28),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: kBottomNavigationBarHeight,
+                  child: Center(
+                    child: IconButton(
+                      icon: const Icon(Icons.download,
+                          color: Colors.white, size: 28),
+                      onPressed: () => downloadFile(file),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+
+  static void downloadFile(File file) async {
+    bool storageStatus =
+        await CommonUtils.requestScopePermission(Permission.storage);
+    if (storageStatus) {
+      final result = await ImageGallerySaver.saveImage(file.readAsBytesSync(), quality: 100);
+      debugPrint(result);
+    } else {
+      CommonUtils.showToast('相册未授权');
+    }
   }
 
   static final List<String> models = [

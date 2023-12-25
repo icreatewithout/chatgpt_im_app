@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:chatgpt_im/common/calculate_image.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/assets.dart';
@@ -43,7 +45,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool isSending = false;
-  late final Chat _chat;
+  late Chat _chat;
   late String? imageName = '';
   late String? imageUrl = '';
   final List<dynamic> messages = List.of([], growable: true);
@@ -78,6 +80,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
   void updateChatInfo() async {
     Chat? chat = await ChatProvider().get(widget.arguments['id']);
     if (chat != null) {
+      debugPrint('${chat.toJson()}');
       _chat = chat;
       OpenAI.apiKey = chat.apiKey ?? '';
     }
@@ -257,6 +260,8 @@ class _ImagesMessageState extends State<ImagesMessage> {
     Navigator.of(context).pushNamed(CreateImages.path,
         arguments: {'id': _chat.id}).then((_) => updateChatInfo());
   }
+
+
 
   @override
   void dispose() {
@@ -449,7 +454,6 @@ class _ImagesMessageState extends State<ImagesMessage> {
     }
 
     List<dynamic> images = json.decode(message.message!);
-
     return Column(
       children: [
         ...images.map(
@@ -463,14 +467,19 @@ class _ImagesMessageState extends State<ImagesMessage> {
   }
 
   buildImage(Map<String, dynamic> data) {
-    if (data['haveUrl']) {
-      Map<String, dynamic> map = CommonUtils.getHW(data['url']);
-      return CalculateImage.network(data['url'],
-          networkBuilder: (context, snapshot, url) {
-        return CommonUtils.image(data['url'], snapshot.data?.height.toDouble(),
-            snapshot.data?.width.toDouble(), 4, BoxFit.cover);
-      });
-    }
+    File file = File(data['path']);
+    return CalculateImage.file(file, fileBuilder: (context, snapshot, file) {
+      double w = snapshot.data!.width.toDouble() / 5.0;
+      double h = snapshot.data!.height.toDouble() / 5.0;
+      return GestureDetector(
+        onTap: () => ChatUtil.openBottomSheet(context, file),
+        child: SizedBox(
+          height: h,
+          width: w,
+          child: PhotoView(imageProvider: FileImage(file)),
+        ),
+      );
+    });
   }
 
   Widget mdMessage(String status, String? message) {

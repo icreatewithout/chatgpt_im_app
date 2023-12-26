@@ -8,12 +8,14 @@ import 'package:chatgpt_im/common/dio_util.dart';
 import 'package:chatgpt_im/db/chat_table.dart';
 import 'package:chatgpt_im/routes/create/create_images.dart';
 import 'package:chatgpt_im/widgets/chat/chat_util.dart';
+import 'package:chatgpt_im/widgets/chat/edit_image.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:image_picker/image_picker.dart';
+
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
@@ -41,13 +43,13 @@ class _ImagesMessageState extends State<ImagesMessage> {
   final _listenable = IndicatorStateListenable();
   bool _shrinkWrap = false;
   double? _viewportDimension;
-  final ImagePicker picker = ImagePicker();
+
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   bool isSending = false;
   late Chat _chat;
-  late String? imageName = '';
-  late String? imageUrl = '';
+  late File? _image = null;
+  late File? _mask = null;
   final List<dynamic> messages = List.of([], growable: true);
 
   int _offset = 1;
@@ -112,22 +114,39 @@ class _ImagesMessageState extends State<ImagesMessage> {
     }
   }
 
-  void selectImage() async {
-    XFile? file =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-    if (file != null) {
-      setState(() {
-        imageName = file.name;
-        imageUrl = file.path;
-      });
-    }
-  }
-
-  void delete() {
-    setState(() {
-      imageName = '';
-      imageUrl = '';
-    });
+  void openSelectImageBottom(BuildContext context) async {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      useRootNavigator: true,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return EditImage(
+          image: (XFile? file) {
+            setState(() {
+              _image = File(file!.path);
+            });
+          },
+          mask: (XFile? file) {
+            setState(() {
+              _mask = File(file!.path);
+            });
+          },
+          imageFile: _image,
+          maskFile: _mask,
+          delImage: () {
+            setState(() {
+              _image = null;
+            });
+          },
+          delMask: () {
+            setState(() {
+              _mask = null;
+            });
+          },
+        );
+      },
+    );
   }
 
   void send(val) async {
@@ -140,8 +159,8 @@ class _ImagesMessageState extends State<ImagesMessage> {
     try {
       OpenAI.apiKey = _chat.apiKey ?? '';
       //保存并显示发送的信息，发起openai请求，生成一条请求信息并显示请求中，接受返回的数据结果，保存返回结果并更新页面显示结果
-      Message message = Message(null, _chat.id, '1', _textController.text,
-          imageUrl, '200', DateTime.now().millisecondsSinceEpoch);
+      Message message = Message(null, _chat.id, '1', _textController.text, '',
+          '200', DateTime.now().millisecondsSinceEpoch);
 
       String prompt = _textController.text;
 
@@ -149,8 +168,8 @@ class _ImagesMessageState extends State<ImagesMessage> {
       Message? res = await MessageProvider().insert(message);
       setState(() {
         _textController.clear();
-        imageUrl = '';
-        imageName = '';
+        _image = null;
+        _mask = null;
         messages.insert(0, res);
         jump();
 
@@ -160,14 +179,39 @@ class _ImagesMessageState extends State<ImagesMessage> {
         messages.insert(0, message);
       });
 
-      OpenAIImageModel image = await OpenAI.instance.image.create(
-        model: _chat.model,
-        prompt: prompt,
-        n: int.tryParse(_chat.n ?? '1'),
-        style: ChatUtil.getStyle(_chat.style ?? 'vivid'),
-        size: ChatUtil.getSize(_chat.size ?? '1024x1024'),
-        responseFormat: ChatUtil.getImageFormat(_chat.responseFormat ?? 'url'),
-      );
+      late OpenAIImageModel image;
+
+      if ((_image == null && _mask == null) ||
+          (_image == null && _mask != null)) {
+        image = await OpenAI.instance.image.create(
+          model: _chat.model,
+          prompt: prompt,
+          n: int.tryParse(_chat.n ?? '1'),
+          style: ChatUtil.getStyle(_chat.style ?? 'vivid'),
+          size: ChatUtil.getSize(_chat.size ?? '1024x1024'),
+          responseFormat:
+              ChatUtil.getImageFormat(_chat.responseFormat ?? 'url'),
+        );
+      } else if (_image != null && _mask == null) {
+        image = await OpenAI.instance.image.variation(
+          model: _chat.model,
+          image: _image!,
+          n: int.tryParse(_chat.n ?? '1'),
+          size: ChatUtil.getSize(_chat.size ?? '1024x1024'),
+          responseFormat:
+              ChatUtil.getImageFormat(_chat.responseFormat ?? 'url'),
+        );
+      } else if (_image != null && _mask != null) {
+        image = await OpenAI.instance.image.edit(
+          prompt: prompt,
+          image: _image!,
+          mask: _mask,
+          n: int.tryParse(_chat.n ?? '1'),
+          size: ChatUtil.getSize(_chat.size ?? '1024x1024'),
+          responseFormat:
+              ChatUtil.getImageFormat(_chat.responseFormat ?? 'url'),
+        );
+      }
 
       List<Map<String, dynamic>> images = List.of([], growable: true);
 
@@ -200,7 +244,6 @@ class _ImagesMessageState extends State<ImagesMessage> {
     } on RequestFailedException catch (e) {
       receive(e.message, '${e.statusCode}');
     } catch (e) {
-      debugPrint('----------e ${e.toString()}');
       receive(e.toString(), '500');
     }
   }
@@ -260,8 +303,6 @@ class _ImagesMessageState extends State<ImagesMessage> {
     Navigator.of(context).pushNamed(CreateImages.path,
         arguments: {'id': _chat.id}).then((_) => updateChatInfo());
   }
-
-
 
   @override
   void dispose() {
@@ -372,7 +413,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
                   );
                 },
               ),
-              buildTextField(),
+              buildTextField(context),
             ],
           ),
         ),
@@ -494,7 +535,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
     );
   }
 
-  buildTextField() {
+  buildTextField(BuildContext context) {
     return Positioned(
       left: 0,
       right: 0,
@@ -506,7 +547,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            buildFileButton(),
+            buildFileButton(context),
             const SizedBox(width: 6),
             Expanded(
               child: Container(
@@ -519,34 +560,28 @@ class _ImagesMessageState extends State<ImagesMessage> {
                   borderRadius: BorderRadius.circular(8),
                   color: Colors.white,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      cursorColor: Colors.grey,
-                      autofocus: false,
-                      focusNode: _focusNode,
-                      maxLength: 2000,
-                      minLines: 1,
-                      maxLines: 6,
-                      controller: _textController,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        counterText: '',
-                        hintText: '请输入内容',
-                        enabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        isDense: true,
-                        hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                      style: const TextStyle(fontSize: 14),
-                      textInputAction: TextInputAction.send,
-                      keyboardType: TextInputType.multiline,
-                      onSubmitted: (val) => send(val),
-                      onEditingComplete: () {},
-                    ),
-                    buildSelectFile(),
-                  ],
+                child: TextField(
+                  cursorColor: Colors.grey,
+                  autofocus: false,
+                  focusNode: _focusNode,
+                  maxLength: 2000,
+                  minLines: 1,
+                  maxLines: 6,
+                  controller: _textController,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    counterText: '',
+                    hintText: '请输入内容',
+                    enabledBorder: InputBorder.none,
+                    contentPadding: EdgeInsets.zero,
+                    isDense: true,
+                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                  style: const TextStyle(fontSize: 14),
+                  textInputAction: TextInputAction.send,
+                  keyboardType: TextInputType.multiline,
+                  onSubmitted: (val) => send(val),
+                  onEditingComplete: () {},
                 ),
               ),
             ),
@@ -556,9 +591,9 @@ class _ImagesMessageState extends State<ImagesMessage> {
     );
   }
 
-  buildFileButton() {
+  buildFileButton(BuildContext context) {
     return GestureDetector(
-      onTap: () => selectImage(),
+      onTap: () => openSelectImageBottom(context),
       child: Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.all(8),
@@ -571,31 +606,6 @@ class _ImagesMessageState extends State<ImagesMessage> {
           color: Colors.grey,
           size: 26,
         ),
-      ),
-    );
-  }
-
-  buildSelectFile() {
-    return Visibility(
-      visible: imageName != '',
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              imageName!,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
-            ),
-          ),
-          GestureDetector(
-            onTap: () => delete(),
-            child: const Icon(
-              Icons.clear,
-              color: Colors.red,
-              size: 14,
-            ),
-          ),
-        ],
       ),
     );
   }

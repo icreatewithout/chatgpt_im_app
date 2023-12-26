@@ -2,10 +2,12 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:chatgpt_im/common/common_utils.dart';
+import 'package:chatgpt_im/widgets/ui/open_cn_button.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -119,12 +121,14 @@ class ChatUtil {
     bool storageStatus =
         await CommonUtils.requestScopePermission(Permission.storage);
     if (storageStatus) {
-      final result = await ImageGallerySaver.saveImage(file.readAsBytesSync(), quality: 100);
+      final result = await ImageGallerySaver.saveImage(file.readAsBytesSync(),
+          quality: 100);
       debugPrint(result);
     } else {
       CommonUtils.showToast('相册未授权');
     }
   }
+
 
   static final List<String> models = [
     'gpt-3.5-turbo-16k',

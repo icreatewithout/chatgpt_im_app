@@ -69,16 +69,15 @@ class _AudioMessageState extends State<AudioMessage>
   void dispose() {
     _textController.dispose();
     _listenable.removeListener(_onHeaderChange);
+    _player.stop();
     _player.dispose();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.paused) {
-      // Release the player's resources when not in use. We use "stop" so that
-      // if the app resumes later, it will still remember what position to
-      // resume from.
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
       _player.stop();
     }
   }
@@ -131,7 +130,7 @@ class _AudioMessageState extends State<AudioMessage>
   }
 
   void send() async {
-    if (_textController.text.isEmpty || isSending) {
+    if (_textController.text.isEmpty && isSending) {
       return;
     }
     setState(() {
@@ -176,7 +175,7 @@ class _AudioMessageState extends State<AudioMessage>
         outputFileName: DateTime.now().millisecondsSinceEpoch.toString(),
       );
 
-      int sec = await getDuration(speechFile.path);
+      int sec = await ChatUtil.getDuration(speechFile.path, _player);
 
       var result = {
         'path': speechFile.path,
@@ -248,14 +247,6 @@ class _AudioMessageState extends State<AudioMessage>
         arguments: {'id': _chat.id}).then((_) => updateChatInfo());
   }
 
-  Future<int> getDuration(String path) async {
-    Duration? duration = await _player.setFilePath(path);
-    if (duration != null) {
-      return duration.inSeconds;
-    }
-    return 0;
-  }
-
   void playVoice(String path, int index) async {
     if (isPlay) {
       _player.stop();
@@ -278,7 +269,7 @@ class _AudioMessageState extends State<AudioMessage>
     });
   }
 
-  void saveFile(String path){
+  void saveFile(String path) {
     File file = File(path);
     ChatUtil.downloadAudio(file);
   }
@@ -475,23 +466,20 @@ class _AudioMessageState extends State<AudioMessage>
       child: Stack(
         children: [
           Container(
-            alignment: Alignment.centerLeft,
-            child: Container(
-              margin: const EdgeInsets.only(left: 8, right: 44),
-              padding: const EdgeInsets.all(13),
-              decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(6)),
-              child: Row(
-                children: [
-                  isPlay && index == isIndex
-                      ? LoadingAnimationWidget.staggeredDotsWave(
-                          color: Colors.red, size: 20)
-                      : Image.asset(Assets.voice, height: 20, width: 20),
-                  const SizedBox(width: 8),
-                  Text(map['hms'] ?? '', style: const TextStyle(fontSize: 12)),
-                ],
-              ),
+            margin: const EdgeInsets.only(left: 8),
+            padding: const EdgeInsets.all(13),
+            decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(6)),
+            child: Row(
+              children: [
+                isPlay && index == isIndex
+                    ? LoadingAnimationWidget.staggeredDotsWave(
+                        color: Colors.red, size: 20)
+                    : Image.asset(Assets.voice, height: 20, width: 20),
+                const SizedBox(width: 8),
+                Text(map['hms'] ?? '', style: const TextStyle(fontSize: 12)),
+              ],
             ),
           ),
           Positioned(
@@ -534,9 +522,7 @@ class _AudioMessageState extends State<AudioMessage>
         padding: const EdgeInsets.all(10),
         color: Colors.grey.shade100,
         child: Container(
-          constraints: const BoxConstraints(
-            minHeight: 42,
-          ),
+          constraints: const BoxConstraints(minHeight: 42),
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(

@@ -151,7 +151,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
     );
   }
 
-  void send(val) async {
+  void send() async {
     if (_textController.text.isEmpty || isSending) {
       return;
     }
@@ -343,13 +343,13 @@ class _ImagesMessageState extends State<ImagesMessage> {
           buildMenuAnchor(),
         ],
       ),
-      body: InkWell(
-        highlightColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        onTap: () => unFocus(context),
-        child: SizedBox(
-          height: double.infinity,
-          width: double.infinity,
+      body: SizedBox(
+        height: double.infinity,
+        width: double.infinity,
+        child: InkWell(
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          onTap: () => unFocus(context),
           child: Stack(
             children: [
               Consumer<LocaleModel>(
@@ -555,37 +555,22 @@ class _ImagesMessageState extends State<ImagesMessage> {
             const SizedBox(width: 6),
             Expanded(
               child: Container(
-                constraints: const BoxConstraints(
-                  minHeight: 42,
-                ),
+                constraints: const BoxConstraints(minHeight: 42),
                 alignment: Alignment.centerLeft,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   color: Colors.white,
                 ),
-                child: TextField(
-                  cursorColor: Colors.grey,
-                  autofocus: false,
-                  focusNode: _focusNode,
-                  maxLength: 2000,
-                  minLines: 1,
-                  maxLines: 6,
-                  controller: _textController,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    counterText: '',
-                    hintText: '请输入内容',
-                    enabledBorder: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                    isDense: true,
-                    hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                  style: const TextStyle(fontSize: 14),
-                  textInputAction: TextInputAction.send,
-                  keyboardType: TextInputType.multiline,
-                  onSubmitted: (val) => send(val),
-                  onEditingComplete: () {},
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: ChatUtil.textField(_textController, _focusNode,
+                            '请输入内容', () => send())),
+                    InkWell(
+                        onTap: () => send(),
+                        child: Icon(Icons.send, color: Colors.blue.shade300)),
+                  ],
                 ),
               ),
             ),

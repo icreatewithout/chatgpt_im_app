@@ -8,6 +8,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -131,7 +132,7 @@ class ChatUtil {
 
   static void downloadAudio(File file) async {
     bool storageStatus =
-    await CommonUtils.requestScopePermission(Permission.storage);
+        await CommonUtils.requestScopePermission(Permission.storage);
     if (storageStatus) {
       final result = await ImageGallerySaver.saveImage(file.readAsBytesSync(),
           quality: 100);
@@ -140,7 +141,6 @@ class ChatUtil {
       CommonUtils.showToast('存储未授权');
     }
   }
-
 
   static final List<String> models = [
     'gpt-3.5-turbo-16k',
@@ -258,6 +258,21 @@ class ChatUtil {
     'vtt',
   ];
 
+  static getTT(String tt) {
+    switch (tt) {
+      case 'json':
+        return OpenAIAudioResponseFormat.json;
+      case 'text':
+        return OpenAIAudioResponseFormat.text;
+      case 'srt':
+        return OpenAIAudioResponseFormat.srt;
+      case 'verbose_json':
+        return OpenAIAudioResponseFormat.verbose_json;
+      case 'vtt':
+        return OpenAIAudioResponseFormat.vtt;
+    }
+  }
+
   static final List<String> format = [
     'text',
     'json_object',
@@ -292,5 +307,13 @@ class ChatUtil {
     file.writeAsBytes(bytes);
 
     return file.path;
+  }
+
+  static Future<int> getDuration(String path, AudioPlayer player) async {
+    Duration? duration = await player.setFilePath(path);
+    if (duration != null) {
+      return duration.inSeconds;
+    }
+    return 0;
   }
 }

@@ -8,6 +8,7 @@ import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
 import '../../states/ChatModel.dart';
 import '../../widgets/chat/chat_util.dart';
+import '../../widgets/chat/select_widgets.dart';
 import '../../widgets/find/menu_widgets.dart';
 import '../../widgets/ui/open_cn_button.dart';
 import '../../widgets/ui/open_cn_text_field.dart';
@@ -27,14 +28,31 @@ class _CreateWhisperState extends State<CreateWhisper> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _desController = TextEditingController();
   final TextEditingController _keyController = TextEditingController();
-  final TextEditingController _temperatureController = TextEditingController();
 
   String? modelVal;
   String? rfVal;
+  late Chat? _chat = Chat();
 
   @override
   void initState() {
+    if (widget.arguments != null) {
+      init();
+    }
     super.initState();
+  }
+
+  void init() async {
+    Chat? chat = await ChatProvider().get(widget.arguments?['id']);
+    if (chat != null) {
+      setState(() {
+        _chat = chat;
+        modelVal = chat.model;
+        rfVal = chat.responseFormat;
+        _nameController.text = chat.name!;
+        _desController.text = chat.des!;
+        _keyController.text = chat.apiKey!;
+      });
+    }
   }
 
   void _getSelectModel(val) {
@@ -59,7 +77,6 @@ class _CreateWhisperState extends State<CreateWhisper> {
     chat.des = _desController.text.isEmpty ? '语音转录助手' : _desController.text;
     chat.model = modelVal;
     chat.apiKey = _keyController.text;
-    chat.temperature = _temperatureController.text;
     chat.responseFormat = rfVal;
     chat.createTime = DateTime.now().millisecondsSinceEpoch;
     chat.messageSize = '0';
@@ -84,7 +101,6 @@ class _CreateWhisperState extends State<CreateWhisper> {
     _nameController.dispose();
     _desController.dispose();
     _keyController.dispose();
-    _temperatureController.dispose();
   }
 
   @override
@@ -122,8 +138,13 @@ class _CreateWhisperState extends State<CreateWhisper> {
                     children: [
                       const Text('选择模型（model）'),
                       const SizedBox(height: 10),
-                      ChatUtil.selectItem(ChatUtil.models, 'Select Your Model',
-                          'Please select model.', (val) => _getSelectModel(val))
+                      SelectWidgets(
+                        hint: 'Select Your Model',
+                        valid: 'Please select model.',
+                        dropdownItems: ChatUtil.models,
+                        value: _chat?.model,
+                        onChanged: (val) => _getSelectModel(val),
+                      ),
                     ],
                   ),
                 ),
@@ -184,39 +205,14 @@ class _CreateWhisperState extends State<CreateWhisper> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('随机性（temperature）'),
-                      const SizedBox(height: 10),
-                      OpenCnTextField(
-                        height: 46,
-                        radius: 10,
-                        size: 12,
-                        maxLength: 200,
-                        padding: const EdgeInsets.only(left: 10, right: 10),
-                        bgColor: Colors.grey.shade200,
-                        hintText: '随机性（temperature），默认值：0',
-                        controller: _temperatureController,
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  width: double.infinity,
-                  margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
-                  padding: const EdgeInsets.only(
-                      left: 20, right: 20, top: 15, bottom: 15),
-                  decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20)),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
                       const Text('response_format'),
                       const SizedBox(height: 10),
-                      ChatUtil.selectItem(
-                        ChatUtil.transcription,
-                        'Select Response Format',
-                        'Please select response format.',
-                        (val) => _getSelectRfVal(val),
+                      SelectWidgets(
+                        hint: 'Select Response Format',
+                        valid: 'Please select response format.',
+                        dropdownItems: ChatUtil.transcription,
+                        value: _chat?.responseFormat ?? 'text',
+                        onChanged: (val) => _getSelectRfVal(val),
                       ),
                     ],
                   ),

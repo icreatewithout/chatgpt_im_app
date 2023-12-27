@@ -8,6 +8,7 @@ import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
 import '../../states/ChatModel.dart';
 import '../../widgets/chat/chat_util.dart';
+import '../../widgets/chat/select_widgets.dart';
 import '../../widgets/find/menu_widgets.dart';
 import '../../widgets/ui/open_cn_button.dart';
 import '../../widgets/ui/open_cn_text_field.dart';
@@ -32,10 +33,29 @@ class _CreateAudioState extends State<CreateAudio> {
   String? modelVal;
   String? rfVal;
   String? voiceVal;
+  late Chat? _chat = Chat();
 
   @override
   void initState() {
+    if (widget.arguments != null) {
+      init();
+    }
     super.initState();
+  }
+
+  void init() async {
+    Chat? chat = await ChatProvider().get(widget.arguments?['id']);
+    if (chat != null) {
+      setState(() {
+        _chat = chat;
+        modelVal = chat.model;
+        rfVal = chat.responseFormat;
+        voiceVal = chat.voice;
+        _nameController.text = chat.name!;
+        _desController.text = chat.des!;
+        _keyController.text = chat.apiKey!;
+      });
+    }
   }
 
   void _getSelectModel(val) {
@@ -127,8 +147,13 @@ class _CreateAudioState extends State<CreateAudio> {
                     children: [
                       const Text('选择模型（model）'),
                       const SizedBox(height: 10),
-                      ChatUtil.selectItem(ChatUtil.models, 'Select Your Model',
-                          'Please select model.', (val) => _getSelectModel(val))
+                      SelectWidgets(
+                        hint: 'Select Your Model',
+                        valid: 'Please select model.',
+                        dropdownItems: ChatUtil.models,
+                        value: _chat?.model,
+                        onChanged: (val) => _getSelectModel(val),
+                      ),
                     ],
                   ),
                 ),
@@ -189,7 +214,7 @@ class _CreateAudioState extends State<CreateAudio> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('speed（speed）'),
+                      const Text('speed'),
                       const SizedBox(height: 10),
                       OpenCnTextField(
                         height: 46,
@@ -215,14 +240,15 @@ class _CreateAudioState extends State<CreateAudio> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('voice（voice）'),
+                      const Text('voice'),
                       const SizedBox(height: 10),
-                      ChatUtil.selectItem(
-                        ChatUtil.voice,
-                        'Select Speech voice',
-                        'Please select speech voice.',
-                        (val) => _getSelectVoiceVal(val),
-                      )
+                      SelectWidgets(
+                        hint: 'Select Speech Voice',
+                        valid: 'Please select speech voice.',
+                        dropdownItems: ChatUtil.voice,
+                        value: _chat?.voice,
+                        onChanged: (val) => _getSelectVoiceVal(val),
+                      ),
                     ],
                   ),
                 ),
@@ -239,11 +265,12 @@ class _CreateAudioState extends State<CreateAudio> {
                     children: [
                       const Text('response_format'),
                       const SizedBox(height: 10),
-                      ChatUtil.selectItem(
-                        ChatUtil.audio,
-                        'Select Response Format',
-                        'Please select response format.',
-                        (val) => _getSelectRfVal(val),
+                      SelectWidgets(
+                        hint: 'Select Response Format',
+                        valid: 'Please select response format.',
+                        dropdownItems: ChatUtil.audio,
+                        value: _chat?.responseFormat ?? 'mp3',
+                        onChanged: (val) => _getSelectRfVal(val),
                       ),
                     ],
                   ),

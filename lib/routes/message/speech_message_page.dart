@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 
 import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:chatgpt_im/db/chat_table.dart';
@@ -9,15 +11,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/assets.dart';
+import '../../common/common_utils.dart';
 import '../../db/message_table.dart';
 import '../../generated/l10n.dart';
 import '../../models/gpt/chat.dart';
 import '../../models/gpt/message.dart';
 import '../../states/LocaleModel.dart';
+import '../../widgets/chat/chat_util.dart';
 
 class AudioMessage extends StatefulWidget {
   static const String path = "/gpt/audio";
@@ -30,21 +35,24 @@ class AudioMessage extends StatefulWidget {
   State<AudioMessage> createState() => _AudioMessageState();
 }
 
-class _AudioMessageState extends State<AudioMessage> {
-
+class _AudioMessageState extends State<AudioMessage>
+    with WidgetsBindingObserver {
   final _listenable = IndicatorStateListenable();
   bool _shrinkWrap = false;
   double? _viewportDimension;
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  final ImagePicker picker = ImagePicker();
+  bool isSending = false;
   late final Chat _chat;
-  late String? imageName = '';
-  late String? imageUrl = '';
   final List<dynamic> messages = List.of([], growable: true);
+  late AudioPlayer _player = AudioPlayer();
 
   int _offset = 1;
   int limit = 20;
+
+  String _path = '';
+  bool isPlay = false;
+  int isIndex = -1;
 
   @override
   void initState() {
@@ -57,19 +65,48 @@ class _AudioMessageState extends State<AudioMessage> {
     });
   }
 
+  @override
+  void dispose() {
+    _textController.dispose();
+    _listenable.removeListener(_onHeaderChange);
+    _player.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused) {
+      // Release the player's resources when not in use. We use "stop" so that
+      // if the app resumes later, it will still remember what position to
+      // resume from.
+      _player.stop();
+    }
+  }
+
   void init() async {
     Chat? chat = await ChatProvider().get(widget.arguments['id']);
     if (chat != null) {
       setState(() {
         _chat = chat;
+        _path = '/speech/${chat.id}';
       });
       await findPage(chat.id!, limit, _offset);
     }
   }
 
+  void updateChatInfo() async {
+    Chat? chat = await ChatProvider().get(widget.arguments['id']);
+    if (chat != null) {
+      setState(() {
+        _chat = chat;
+      });
+      OpenAI.apiKey = chat.apiKey ?? '';
+    }
+  }
+
   Future<void> findPage(int chatId, int limit, int offset) async {
     List<Message> list =
-    await MessageProvider().findPage(chatId, limit, offset);
+        await MessageProvider().findPage(chatId, limit, offset);
     if (list.isNotEmpty) {
       setState(() {
         messages.addAll(list);
@@ -93,92 +130,93 @@ class _AudioMessageState extends State<AudioMessage> {
     }
   }
 
-  void selectImage() async {
-    XFile? file =
-    await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
-    if (file != null) {
-      setState(() {
-        imageName = file.name;
-        imageUrl = file.path;
-      });
-    }
-  }
-
-  void delete() {
-    setState(() {
-      imageName = '';
-      imageUrl = '';
-    });
-  }
-
-  void send(val) async {
-    if (_textController.text.isEmpty) {
+  void send() async {
+    if (_textController.text.isEmpty || isSending) {
       return;
     }
+    setState(() {
+      isSending = true;
+    });
     try {
-      final systemMessage = OpenAIChatCompletionChoiceMessageModel(
-        content: [
-          OpenAIChatCompletionChoiceMessageContentItemModel.text(_chat.des!),
-        ],
-        role: OpenAIChatMessageRole.system,
-      );
-
-      List<OpenAIChatCompletionChoiceMessageContentItemModel>? list = [];
-
-      list.add(
-        OpenAIChatCompletionChoiceMessageContentItemModel.text(
-            _textController.text),
-      );
-
-      if (imageUrl != '') {
-        list.add(
-          OpenAIChatCompletionChoiceMessageContentItemModel.text(imageUrl!),
-        );
-      }
-
-      final userMessage = OpenAIChatCompletionChoiceMessageModel(
-        content: [
-          ...list,
-        ],
-        role: OpenAIChatMessageRole.user,
-      );
+      OpenAI.apiKey = _chat.apiKey ?? '';
 
       //保存并显示发送的信息，发起openai请求，生成一条请求信息并显示请求中，接受返回的数据结果，保存返回结果并更新页面显示结果
-      Message message = Message(null, _chat.id, '1', _textController.text,
-          imageUrl, '200', DateTime.now().millisecondsSinceEpoch);
+      Message message = Message(null, _chat.id, '1', _textController.text, '',
+          '200', DateTime.now().millisecondsSinceEpoch);
+
+      String input = _textController.text;
 
       ///save sqlite
       Message? res = await MessageProvider().insert(message);
       setState(() {
         _textController.clear();
-        imageUrl = '';
-        imageName = '';
         messages.insert(0, res);
         jump();
-        receive('ImeCallback=ImeOnBackInvokedCallback@139008201', '200');
+
+        ///创建临时消息，状态202
+        message = Message(null, _chat.id, '2', '', '', '202',
+            DateTime.now().millisecondsSinceEpoch);
+        messages.insert(0, message);
       });
+
+      Directory directory = await CommonUtils.getAppDocumentsDir();
+      _path = '${directory.path}$_path';
+      Directory dir = Directory(_path);
+      if (!dir.existsSync()) {
+        dir.createSync(recursive: true);
+      }
+
+      // The speech request.
+      File speechFile = await OpenAI.instance.audio.createSpeech(
+        model: _chat.model ?? 'tts-1',
+        input: input,
+        voice: _chat.voice ?? 'nova',
+        responseFormat: ChatUtil.getAudio(_chat.responseFormat ?? 'mp3'),
+        outputDirectory: await Directory(_path).create(),
+        outputFileName: DateTime.now().millisecondsSinceEpoch.toString(),
+      );
+
+      int sec = await getDuration(speechFile.path);
+
+      var result = {
+        'path': speechFile.path,
+        'sec': sec,
+        'hms': CommonUtils.hms(sec),
+      };
+
+      receive(json.encode(result), '200');
     } on RequestFailedException catch (e) {
-      debugPrint(e.message);
-      debugPrint('${e.statusCode}');
       receive(e.message, '${e.statusCode}');
+    } catch (e) {
+      receive(e.toString(), '500');
     }
   }
 
   void receive(String msg, String status) async {
-    Message message = Message(null, _chat.id, '2', msg, '', status,
-        DateTime.now().millisecondsSinceEpoch);
+    Message message;
+    if (status == '200') {
+      message = messages[0];
+      message.createTime = DateTime.now().millisecondsSinceEpoch;
+      message.message = msg;
+      message.status = status;
+    } else {
+      // 出现错误时生成错误信息存储
+      message = Message(null, _chat.id, '2', msg, '', status,
+          DateTime.now().millisecondsSinceEpoch);
+    }
 
     ///save sqlite
     Message? res = await MessageProvider().insert(message);
     setState(() {
-      messages.insert(0, res);
+      messages[0] = res;
+      isSending = false;
       jump();
     });
   }
 
   void jump() {
     Future.delayed(const Duration(milliseconds: 100),
-            () => PrimaryScrollController.of(context).jumpTo(0));
+        () => PrimaryScrollController.of(context).jumpTo(0));
   }
 
   void unFocus(BuildContext context) {
@@ -206,15 +244,43 @@ class _AudioMessageState extends State<AudioMessage> {
 
   void updateChat(BuildContext context, MenuController controller) async {
     controller.close();
-    Navigator.of(context)
-        .pushNamed(CreateAudio.path, arguments: {'id': _chat.id});
+    Navigator.of(context).pushNamed(CreateAudio.path,
+        arguments: {'id': _chat.id}).then((_) => updateChatInfo());
   }
 
-  @override
-  void dispose() {
-    _textController.dispose();
-    _listenable.removeListener(_onHeaderChange);
-    super.dispose();
+  Future<int> getDuration(String path) async {
+    Duration? duration = await _player.setFilePath(path);
+    if (duration != null) {
+      return duration.inSeconds;
+    }
+    return 0;
+  }
+
+  void playVoice(String path, int index) async {
+    if (isPlay) {
+      _player.stop();
+      setState(() {
+        isPlay = false;
+        isIndex = -1;
+      });
+      return;
+    }
+    setState(() {
+      isPlay = true;
+      isIndex = index;
+    });
+    _player = AudioPlayer();
+    await _player.setFilePath(path);
+    await _player.play();
+    setState(() {
+      isPlay = false;
+      isIndex = -1;
+    });
+  }
+
+  void saveFile(String path){
+    File file = File(path);
+    ChatUtil.downloadAudio(file);
   }
 
   @override
@@ -247,11 +313,13 @@ class _AudioMessageState extends State<AudioMessage> {
           buildMenuAnchor(),
         ],
       ),
-      body: GestureDetector(
-        onTap: () => unFocus(context),
-        child: SizedBox(
-          height: double.infinity,
-          width: double.infinity,
+      body: SizedBox(
+        height: double.infinity,
+        width: double.infinity,
+        child: InkWell(
+          highlightColor: Colors.transparent,
+          splashColor: Colors.transparent,
+          onTap: () => unFocus(context),
           child: Stack(
             children: [
               Consumer<LocaleModel>(
@@ -299,7 +367,7 @@ class _AudioMessageState extends State<AudioMessage> {
                     ),
                     child: Container(
                       padding:
-                      const EdgeInsets.only(bottom: 70, left: 8, right: 8),
+                          const EdgeInsets.only(bottom: 70, left: 8, right: 8),
                       child: CustomScrollView(
                         reverse: true,
                         shrinkWrap: _shrinkWrap,
@@ -307,8 +375,8 @@ class _AudioMessageState extends State<AudioMessage> {
                         slivers: [
                           SliverList(
                             delegate: SliverChildBuilderDelegate(
-                                  (context, index) {
-                                return buildChatMessage(messages[index]);
+                              (context, index) {
+                                return buildChatMessage(messages[index], index);
                               },
                               childCount: messages.length,
                             ),
@@ -327,11 +395,11 @@ class _AudioMessageState extends State<AudioMessage> {
     );
   }
 
-  buildChatMessage(Message message) {
+  buildChatMessage(Message message, int index) {
     if (message.type == '1') {
       return userMessage(message);
     } else {
-      return chatMessage(message);
+      return chatMessage(message, index);
     }
   }
 
@@ -369,28 +437,18 @@ class _AudioMessageState extends State<AudioMessage> {
     );
   }
 
-  Widget chatMessage(Message message) {
+  Widget chatMessage(Message message, int index) {
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(
-            Assets.ic_launcher_48,
-          ),
-          Flexible(
+          Image.asset(Assets.ic_launcher_72, width: 46),
+          Expanded(
             child: Container(
               alignment: Alignment.centerLeft,
-              child: Container(
-                margin: const EdgeInsets.only(left: 8),
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: mdMessage(message.message!),
-              ),
+              child: buildChatMessages(message, index),
             ),
           ),
         ],
@@ -398,9 +456,69 @@ class _AudioMessageState extends State<AudioMessage> {
     );
   }
 
-  Widget mdMessage(String? message) {
+  buildChatMessages(Message message, int index) {
+    if (message.status != '200') {
+      return Container(
+        margin: const EdgeInsets.only(left: 8),
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(6)),
+        child: mdMessage(message.status!, message.message!),
+      );
+    }
+
+    ///创建语音播放组建
+    Map<String, dynamic> map = json.decode(message.message!);
+    return GestureDetector(
+      onTap: () => playVoice(map['path'], index),
+      child: Stack(
+        children: [
+          Container(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              margin: const EdgeInsets.only(left: 8, right: 44),
+              padding: const EdgeInsets.all(13),
+              decoration: BoxDecoration(
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(6)),
+              child: Row(
+                children: [
+                  isPlay && index == isIndex
+                      ? LoadingAnimationWidget.staggeredDotsWave(
+                          color: Colors.red, size: 20)
+                      : Image.asset(Assets.voice, height: 20, width: 20),
+                  const SizedBox(width: 8),
+                  Text(map['hms'] ?? '', style: const TextStyle(fontSize: 12)),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            top: 0,
+            right: 0,
+            bottom: 0,
+            child: Center(
+              child: IconButton(
+                onPressed: () => saveFile(map['path']),
+                icon: Icon(
+                  Icons.download,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget mdMessage(String status, String? message) {
+    if (status == '202') {
+      return LoadingAnimationWidget.stretchedDots(color: Colors.red, size: 30);
+    }
     return MarkdownBody(
-      data: message ?? '',
+      data: message ?? 'Empty message.',
       selectable: true,
       onTapText: () {},
       styleSheetTheme: MarkdownStyleSheetBaseTheme.material,
@@ -415,100 +533,27 @@ class _AudioMessageState extends State<AudioMessage> {
       child: Container(
         padding: const EdgeInsets.all(10),
         color: Colors.grey.shade100,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            buildFileButton(),
-            const SizedBox(width: 6),
-            Expanded(
-              child: Container(
-                constraints: const BoxConstraints(
-                  minHeight: 42,
-                ),
-                alignment: Alignment.centerLeft,
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  color: Colors.white,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextField(
-                      cursorColor: Colors.grey,
-                      autofocus: false,
-                      focusNode: _focusNode,
-                      maxLength: 2000,
-                      minLines: 1,
-                      maxLines: 6,
-                      controller: _textController,
-                      decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        counterText: '',
-                        hintText: '请输入内容',
-                        enabledBorder: InputBorder.none,
-                        contentPadding: EdgeInsets.zero,
-                        isDense: true,
-                        hintStyle: TextStyle(fontSize: 14, color: Colors.grey),
-                      ),
-                      style: const TextStyle(fontSize: 14),
-                      textInputAction: TextInputAction.send,
-                      keyboardType: TextInputType.multiline,
-                      onSubmitted: (val) => send(val),
-                      onEditingComplete: () {},
-                    ),
-                    buildSelectFile(),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  buildFileButton() {
-    return GestureDetector(
-      onTap: () => selectImage(),
-      child: Container(
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Icon(
-          Icons.image,
-          color: Colors.grey,
-          size: 26,
-        ),
-      ),
-    );
-  }
-
-  buildSelectFile() {
-    return Visibility(
-      visible: imageName != '',
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              imageName!,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(color: Colors.grey, fontSize: 12),
-            ),
+        child: Container(
+          constraints: const BoxConstraints(
+            minHeight: 42,
           ),
-          GestureDetector(
-            onTap: () => delete(),
-            child: const Icon(
-              Icons.clear,
-              color: Colors.red,
-              size: 14,
-            ),
+          alignment: Alignment.centerLeft,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.white,
           ),
-        ],
+          child: Row(
+            children: [
+              Expanded(
+                  child: ChatUtil.textField(
+                      _textController, _focusNode, '请输入内容', () => send())),
+              InkWell(
+                  onTap: () => send(),
+                  child: Icon(Icons.send, color: Colors.blue.shade300)),
+            ],
+          ),
+        ),
       ),
     );
   }

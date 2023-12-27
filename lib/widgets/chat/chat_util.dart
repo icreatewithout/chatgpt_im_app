@@ -107,7 +107,7 @@ class ChatUtil {
                     child: IconButton(
                       icon: const Icon(Icons.download,
                           color: Colors.white, size: 28),
-                      onPressed: () => downloadFile(file),
+                      onPressed: () => downloadImage(file),
                     ),
                   ),
                 ),
@@ -117,15 +117,27 @@ class ChatUtil {
         },
       );
 
-  static void downloadFile(File file) async {
-    bool storageStatus =
-        await CommonUtils.requestScopePermission(Permission.storage);
-    if (storageStatus) {
+  static void downloadImage(File file) async {
+    bool photosStatus =
+        await CommonUtils.requestScopePermission(Permission.photosAddOnly);
+    if (photosStatus) {
       final result = await ImageGallerySaver.saveImage(file.readAsBytesSync(),
           quality: 100);
       debugPrint(result);
     } else {
       CommonUtils.showToast('相册未授权');
+    }
+  }
+
+  static void downloadAudio(File file) async {
+    bool storageStatus =
+    await CommonUtils.requestScopePermission(Permission.storage);
+    if (storageStatus) {
+      final result = await ImageGallerySaver.saveImage(file.readAsBytesSync(),
+          quality: 100);
+      debugPrint(result);
+    } else {
+      CommonUtils.showToast('存储未授权');
     }
   }
 
@@ -201,6 +213,19 @@ class ChatUtil {
     'aac',
     'flac',
   ];
+
+  static getAudio(String rf) {
+    switch (rf) {
+      case 'mp3':
+        return OpenAIAudioSpeechResponseFormat.mp3;
+      case 'opus':
+        return OpenAIAudioSpeechResponseFormat.opus;
+      case 'aac':
+        return OpenAIAudioSpeechResponseFormat.aac;
+      case 'flac':
+        return OpenAIAudioSpeechResponseFormat.flac;
+    }
+  }
 
   static final List<String> style = [
     'vivid',

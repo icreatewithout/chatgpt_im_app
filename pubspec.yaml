@@ -57,6 +57,7 @@ dependencies:
   zstd_ffi: ^0.1.0
   permission_handler: ^11.1.0
   image_gallery_saver: '^2.0.3'
+  just_audio: ^0.9.36
 
 dev_dependencies:
   flutter_test:

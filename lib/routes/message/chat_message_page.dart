@@ -90,7 +90,9 @@ class _ChatMessageState extends State<ChatMessage> {
   void updateChatInfo() async {
     Chat? chat = await ChatProvider().get(widget.arguments['id']);
     if (chat != null) {
-      _chat = chat;
+      setState(() {
+        _chat = chat;
+      });
       OpenAI.apiKey = chat.apiKey ?? '';
     }
   }
@@ -354,7 +356,9 @@ class _ChatMessageState extends State<ChatMessage> {
             Consumer<LocaleModel>(
               builder: (BuildContext context, LocaleModel localeModel,
                   Widget? child) {
-                return GestureDetector(
+                return InkWell(
+                  highlightColor: Colors.transparent,
+                  splashColor: Colors.transparent,
                   onTap: () => unFocus(context),
                   child: EasyRefresh(
                     clipBehavior: Clip.none,
@@ -519,9 +523,6 @@ class _ChatMessageState extends State<ChatMessage> {
 
     OpenAIChatCompletionModel completionModel =
         OpenAIChatCompletionModel.fromMap(json.decode(message.message!));
-    debugPrint('${completionModel.usage.totalTokens}');
-    debugPrint('${completionModel.usage.promptTokens}');
-    debugPrint('${completionModel.usage.completionTokens}');
     return Column(
       children: [
         ...completionModel.choices.map(

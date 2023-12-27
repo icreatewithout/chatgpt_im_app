@@ -83,7 +83,9 @@ class _ImagesMessageState extends State<ImagesMessage> {
     Chat? chat = await ChatProvider().get(widget.arguments['id']);
     if (chat != null) {
       debugPrint('${chat.toJson()}');
-      _chat = chat;
+      setState(() {
+        _chat = chat;
+      });
       OpenAI.apiKey = chat.apiKey ?? '';
     }
   }
@@ -341,7 +343,9 @@ class _ImagesMessageState extends State<ImagesMessage> {
           buildMenuAnchor(),
         ],
       ),
-      body: GestureDetector(
+      body: InkWell(
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
         onTap: () => unFocus(context),
         child: SizedBox(
           height: double.infinity,

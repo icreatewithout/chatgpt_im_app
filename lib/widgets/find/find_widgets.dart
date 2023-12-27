@@ -53,11 +53,14 @@ class _FindWidgetsState extends State<FindWidgets> {
       body: Consumer2<ChatModel, LocaleModel>(
         builder: (BuildContext context, ChatModel chatModel,
             LocaleModel localeModel, Widget? child) {
-          return ListView(
-            shrinkWrap: true,
-            children: [
-              ...chatModel.chats.map((e) => buildItem(e, localeModel)),
-            ],
+          return SizedBox(
+            height: double.infinity,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                ...chatModel.chats.map((e) => buildItem(e, localeModel)),
+              ],
+            ),
           );
         },
       ),

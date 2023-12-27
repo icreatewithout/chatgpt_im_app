@@ -155,4 +155,19 @@ class CommonUtils {
         await picker.pickImage(source: ImageSource.gallery, imageQuality: 100);
     callBack(file);
   }
+
+  static String zeroFill(int i) {
+    return i > 10 ? '$i' : '0$i';
+  }
+
+  static String hms(int sec) {
+    String hms = '00:00:00';
+    if (sec > 0) {
+      int h = sec ~/ 3600;
+      int m = (sec % 3600) ~/ 60;
+      int s = sec % 60;
+      hms = '${zeroFill(h)}:${zeroFill(m)}:${zeroFill(s)}';
+    }
+    return hms;
+  }
 }

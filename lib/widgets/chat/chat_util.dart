@@ -2,12 +2,10 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:chatgpt_im/common/common_utils.dart';
-import 'package:chatgpt_im/widgets/ui/open_cn_button.dart';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
@@ -108,7 +106,7 @@ class ChatUtil {
                     child: IconButton(
                       icon: const Icon(Icons.download,
                           color: Colors.white, size: 28),
-                      onPressed: () => downloadImage(file),
+                      onPressed: () => downloadImage(file, context),
                     ),
                   ),
                 ),
@@ -118,25 +116,41 @@ class ChatUtil {
         },
       );
 
-  static void downloadImage(File file) async {
+  static Future<void> downloadImage(File file, BuildContext context) async {
     bool photosStatus =
-        await CommonUtils.requestScopePermission(Permission.photosAddOnly);
+        await CommonUtils.requestScopePermission(Permission.photos);
     if (photosStatus) {
       final result = await ImageGallerySaver.saveImage(file.readAsBytesSync(),
           quality: 100);
-      debugPrint(result);
+      if (result['isSuccess']) {
+        CommonUtils.showToast('已保存');
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+      }
     } else {
       CommonUtils.showToast('相册未授权');
     }
   }
 
-  static void downloadAudio(File file) async {
+  static void downloadAudio(File file, BuildContext context) async {
     bool storageStatus =
-        await CommonUtils.requestScopePermission(Permission.storage);
+        await CommonUtils.requestScopePermission(Permission.photos);
     if (storageStatus) {
-      final result = await ImageGallerySaver.saveImage(file.readAsBytesSync(),
-          quality: 100);
-      debugPrint(result);
+      Uint8List? uint8list = file.readAsBytesSync();
+      String fileName = file.path.substring(file.path.lastIndexOf('/'));
+
+      Directory dir = Directory('/storage/emulated/0/Download/open_gpt/');
+      if (!dir.existsSync()) {
+        dir.createSync(recursive: true);
+      }
+      File tmpFile = File(dir.path + fileName);
+
+      if (!tmpFile.existsSync()) {
+        tmpFile.createSync(recursive: true);
+      }
+      tmpFile.writeAsBytesSync(uint8list);
+      CommonUtils.showToast('已保存到下载列表');
     } else {
       CommonUtils.showToast('存储未授权');
     }
@@ -295,7 +309,7 @@ class ChatUtil {
   static Future<String> saveFile(
       String path, String fileName, Uint8List bytes) async {
     Directory directory = await CommonUtils.getAppDocumentsDir();
-    path = '${directory.path}$path/';
+    path = '${directory.path}$path';
     Directory newDir = Directory(path);
     if (!newDir.existsSync()) {
       newDir.createSync(recursive: true);

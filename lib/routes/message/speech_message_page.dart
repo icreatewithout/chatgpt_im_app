@@ -269,9 +269,9 @@ class _AudioMessageState extends State<AudioMessage>
     });
   }
 
-  void saveFile(String path) {
+  void saveFile(String path,BuildContext context) {
     File file = File(path);
-    ChatUtil.downloadAudio(file);
+    ChatUtil.downloadAudio(file,context);
   }
 
   @override
@@ -488,7 +488,7 @@ class _AudioMessageState extends State<AudioMessage>
             bottom: 0,
             child: Center(
               child: IconButton(
-                onPressed: () => saveFile(map['path']),
+                onPressed: () => saveFile(map['path'],context),
                 icon: Icon(
                   Icons.download,
                   color: Colors.grey.shade500,

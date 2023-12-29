@@ -7,6 +7,7 @@ import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:flutter/material.dart';
 import 'package:chatgpt_im/common/api.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/result.dart';
@@ -34,6 +35,8 @@ class DioUtil {
   );
 
   static void init() {
+
+    debugPrint('token is ${Global.profile.token}');
     if (Global.isRelease) {
       dio.options.baseUrl = Api.releaseUrl;
     }
@@ -47,7 +50,7 @@ class DioUtil {
   static setToken(String token) =>
       dio.options.headers['Authorization'] = 'Bearer $token';
 
-  Future<Result> get(String api, [Map<String, dynamic>? data]) async {
+  Future<Result> get(String api, {Map<String, dynamic>? data}) async {
     Response res = await dio.get(api, queryParameters: handleData(data ?? {}));
 
     if (res.statusCode == 401) {
@@ -59,7 +62,7 @@ class DioUtil {
     return Result.err();
   }
 
-  Future<Result> post(String api, [Map<String, dynamic>? data]) async {
+  Future<Result> post(String api, {Map<String, dynamic>? data}) async {
     Response res =
         await dio.post(api, data: json.encode(handleData(data ?? {})));
     if (res.statusCode == 401) {
@@ -98,6 +101,30 @@ class DioUtil {
   Future<Result> upload(String api, String localPath, String name) async {
     Map<String, dynamic> data = handleData({});
     data['file'] = await MultipartFile.fromFile(localPath, filename: name);
+    FormData fd = FormData.fromMap(data);
+
+    Response res = await dio.post(api, data: fd);
+    if (res.statusCode == 401) {
+      return Result.err(401, "需要登陆");
+    }
+
+    if (res.statusCode == 200 && res.data['code'] == 200) {
+      return Result.fromJson(res.data, (json) => res.data['data']);
+    }
+    return Result.err();
+  }
+
+  Future<Result> uploads(String api, List<XFile> files) async {
+    Map<String, dynamic> data = handleData({});
+
+    List<MultipartFile> mfs = List.of([], growable: true);
+
+    MultipartFile mf;
+    for (XFile xf in files) {
+       mf = await MultipartFile.fromFile(xf.path, filename: xf.name);
+       mfs.add(mf);
+    }
+    data['file'] = mfs;
     FormData fd = FormData.fromMap(data);
 
     Response res = await dio.post(api, data: fd);

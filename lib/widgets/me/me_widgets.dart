@@ -42,24 +42,7 @@ class _MeWidgetsState extends State<MeWidgets> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: Text(gm.me),
-        leading:IconButton(
-          icon: Image.asset(
-            Assets.ic_launcher,
-            width: 30,
-            height: 30,
-            fit: BoxFit.cover,
-          ), onPressed: () {  },
-        ),
-        actions: [
-          Container(
-            padding: const EdgeInsets.only(right: 20),
-            child: GestureDetector(
-              onTap: () => {},
-              child: const Icon(Icons.message),
-            ),
-          ),
-        ],
+        title: Text(gm.me, style: const TextStyle(fontSize: 16)),
       ),
       body: Consumer<UserModel>(
         builder: (BuildContext context, UserModel userModel, Widget? child) {

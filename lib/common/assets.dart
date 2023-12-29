@@ -8,4 +8,7 @@ class Assets {
   static const String ic_launcher_96 = 'assets/ic_launcher_96.png';
   static const String ic_launcher_144 = 'assets/ic_launcher_144.png';
   static const String voice = 'assets/voice.png';
+  static const String google = 'assets/google.png';
+  static const String twitter = 'assets/twitter.png';
+  static const String facebook = 'assets/facebook.png';
 }

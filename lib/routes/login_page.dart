@@ -1,3 +1,4 @@
+import 'package:chatgpt_im/common/common_utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -96,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                         height: 20,
                       ),
                       const Text(
-                        "OpenCn简单学中文",
+                        "OpenGPT",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
@@ -112,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       OpenCnButton(
-                        title: '邮箱登陆',
+                        title: '邮箱登录',
                         left: 50,
                         right: 50,
                         bottom: 10,
@@ -131,11 +132,8 @@ class _LoginPageState extends State<LoginPage> {
                         radius: 20,
                         color: Colors.white,
                         fw: FontWeight.bold,
-                        callBack: () => {},
-                        prefix: const Icon(
-                          Icons.login,
-                          color: Colors.white,
-                        ),
+                        callBack: () => CommonUtils.showToast('未加入'),
+                        prefix: Image.asset(Assets.google,width: 20,),
                       ),
                       OpenCnButton(
                         title: 'X登录',
@@ -145,7 +143,8 @@ class _LoginPageState extends State<LoginPage> {
                         radius: 20,
                         color: Colors.white,
                         fw: FontWeight.bold,
-                        callBack: () => {},
+                        callBack: () => CommonUtils.showToast('未加入'),
+                        prefix: Image.asset(Assets.twitter,width: 20,),
                       ),
                       OpenCnButton(
                         title: 'Facebook登录',
@@ -155,7 +154,8 @@ class _LoginPageState extends State<LoginPage> {
                         radius: 20,
                         color: Colors.white,
                         fw: FontWeight.bold,
-                        callBack: () => {},
+                        callBack: () => CommonUtils.showToast('未加入'),
+                        prefix: Image.asset(Assets.facebook,width: 20,),
                       ),
                     ],
                   ),
@@ -178,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
                 child: RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
-                    text: '加入OpenCn，表示您已同意OpenCn的',
+                    text: '加入OpenGPT，表示您已同意OpenGPT的',
                     style: const TextStyle(fontSize: 14, color: Colors.black),
                     children: <TextSpan>[
                       TextSpan(

@@ -29,8 +29,9 @@ class EmailLoginPage extends StatefulWidget {
 class _EmailLoginPageState extends State<EmailLoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
-  late Timer? _timer = null;
-  late String _sendTxt = '发送验证码';
+  Timer? _timer = null;
+  String _sendTxt = '发送验证码';
+  bool _isSending = false;
   bool _loading = false;
 
   @override
@@ -59,6 +60,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
         _timer!.cancel();
         setState(() {
           _sendTxt = '发送验证码';
+          _isSending = false;
         });
       } else {
         setState(() {
@@ -69,6 +71,10 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
   }
 
   void _sendCode() async {
+    if (_isSending) {
+      return;
+    }
+
     if (_emailController.text.isEmpty) {
       CommonUtils.showToast('请输入邮箱');
       return;
@@ -81,6 +87,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
 
     setState(() {
       _loading = true;
+      _isSending = true;
     });
 
     try {
@@ -97,6 +104,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
     } finally {
       setState(() {
         _loading = false;
+        _isSending = false;
       });
     }
   }
@@ -126,15 +134,10 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
           .post('${Api.login}${_emailController.text}/${_codeController.text}');
       if (result.code == 200) {
         String token = result.data?['token'];
-        UserVo userVo = UserVo.fromJson(result.data?['user']);
-        Global.profile.token = token;
-        Global.profile.user = userVo;
-        Global.profile.status = true;
-        Global.saveProfile();
         DioUtil.setToken(token);
         CommonUtils.showToast('登录成功');
         if (context.mounted) {
-          Provider.of<UserModel>(context, listen: false).user = userVo;
+          Provider.of<UserModel>(context, listen: false).setUser = result;
           Navigator.of(context).pop();
           widget.callBack();
         }
@@ -142,7 +145,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
         CommonUtils.showToast(result.message);
       }
     } catch (_) {
-      CommonUtils.showToast('操作失败');
+      CommonUtils.showToast('登录失败');
     } finally {
       setState(() {
         _loading = false;

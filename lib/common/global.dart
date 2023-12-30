@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:chatgpt_im/common/time_ago_util.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:chatgpt_im/common/dio_util.dart';
@@ -24,7 +25,7 @@ class Global {
     //从SharedPreferences中取出全局变量
     _preferences = await SharedPreferences.getInstance();
     String? storeProfile = _preferences.getString("profile");
-    debugPrint(storeProfile);
+
     if (storeProfile != null) {
       try {
         Map<String, dynamic> map = jsonDecode(storeProfile);
@@ -38,6 +39,7 @@ class Global {
 
     DioUtil.init();
     await sqliteDb.init();
+    TimeAgoUtil.init();
 
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(

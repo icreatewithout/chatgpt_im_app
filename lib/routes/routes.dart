@@ -12,6 +12,7 @@ import 'create/create_speech.dart';
 import 'create/create_fine.dart';
 import 'create/create_images.dart';
 import 'create/create_transcription.dart';
+import 'forum_deatil.dart';
 import 'index_page.dart';
 import 'language_setting_page.dart';
 import 'login_page.dart';
@@ -43,6 +44,8 @@ final routes = <String, WidgetBuilder>{
       ImagesMessage(arguments: arguments),
   WhisperMessage.path: (BuildContext context, {arguments}) =>
       WhisperMessage(arguments: arguments),
+  ForumDetail.path: (BuildContext context, {arguments}) =>
+      ForumDetail(arguments: arguments),
 };
 
 RouteFactory routeFactory = (RouteSettings settings) {

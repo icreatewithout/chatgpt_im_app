@@ -1,4 +1,5 @@
 import 'package:chatgpt_im/common/common_utils.dart';
+import 'package:chatgpt_im/routes/login_page.dart';
 import 'package:chatgpt_im/widgets/qa/select_image_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -94,8 +95,13 @@ class _ForumSheetState extends State<ForumSheet> {
             _saveForum(context, urls: result.data['urls']);
           }
         } else {
-          CommonUtils.showToast(result.message,
-              tg: ToastGravity.TOP, toast: Toast.LENGTH_LONG);
+          if (result.code == 401 && mounted) {
+            Navigator.of(context).pushNamed(LoginPage.path);
+          } else {
+            CommonUtils.showToast(result.message,
+                tg: ToastGravity.TOP, toast: Toast.LENGTH_LONG);
+          }
+          closeLoading();
         }
       } else {
         _saveForum(context);

@@ -1,6 +1,8 @@
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chatgpt_im/common/global.dart';
+import 'package:chatgpt_im/common/time_ago_util.dart';
 import 'package:chatgpt_im/models/user_vo.dart';
+import 'package:chatgpt_im/routes/forum_deatil.dart';
 import 'package:chatgpt_im/routes/login_page.dart';
 import 'package:chatgpt_im/states/UserModel.dart';
 import 'package:easy_refresh/easy_refresh.dart';
@@ -19,6 +21,7 @@ import '../../models/gpt_forum.dart';
 import '../../models/result.dart';
 import '../../states/LocaleModel.dart';
 import 'create_forum_sheet.dart';
+import 'grid_image.dart';
 
 class QaWidgets extends StatefulWidget {
   const QaWidgets({super.key});
@@ -112,7 +115,9 @@ class _QaWidgetsState extends State<QaWidgets> {
   }
 
   void _insertInfo(GptForum forum) {
-    list.insert(0, forum);
+    setState(() {
+      list.insert(0, forum);
+    });
   }
 
   @override
@@ -121,6 +126,7 @@ class _QaWidgetsState extends State<QaWidgets> {
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
+        backgroundColor: Colors.white,
         title: Text(S.of(context).qa, style: const TextStyle(fontSize: 16)),
         leading: IconButton(
           icon: Image.asset(Assets.ic_launcher,
@@ -137,26 +143,28 @@ class _QaWidgetsState extends State<QaWidgets> {
       body: Consumer2<LocaleModel, UserModel>(
         builder: (BuildContext context, LocaleModel localeModel,
             UserModel userModel, Widget? child) {
-          return EasyRefresh(
-            controller: _controller,
-            refreshOnStart: true,
-            header: buildLoadHeaderWidget(),
-            footer: buildLoadFooterWidget(),
-            refreshOnStartHeader: buildLoadWidget(),
-            onRefresh: () => onRefresh(),
-            onLoad: () => findPage(),
-            child: CustomScrollView(
-              slivers: [
-                buildSlider(),
-                SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      return buildItem(list[index], index);
-                    },
-                    childCount: list.length,
+          return Container(
+            height: double.infinity,
+            color: Colors.grey.shade100,
+            child: EasyRefresh(
+              controller: _controller,
+              refreshOnStart: true,
+              refreshOnStartHeader: buildLoadWidget(),
+              onRefresh: () => onRefresh(),
+              onLoad: () => findPage(),
+              child: CustomScrollView(
+                slivers: [
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        return buildItem(
+                            list[index], index, localeModel, context);
+                      },
+                      childCount: list.length,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
@@ -164,25 +172,95 @@ class _QaWidgetsState extends State<QaWidgets> {
     );
   }
 
-  buildItem(GptForum forum, int index) {
-    return Container(
-      padding: const EdgeInsets.only(left: 20, right: 20, top: 15, bottom: 15),
-      decoration: BoxDecoration(
-        border:
-            Border(top: BorderSide(width: 0.3, color: Colors.grey.shade400)),
+  buildItem(GptForum forum, int index, LocaleModel localeModel,
+      BuildContext context) {
+    return InkWell(
+      onTap: () => Navigator.of(context)
+          .pushNamed(ForumDetail.path, arguments: {'id': forum.id}),
+      child: Container(
+        margin: const EdgeInsets.only(left: 16, right: 16, top: 10),
+        padding:
+            const EdgeInsets.only(top: 10, bottom: 10, left: 12, right: 12),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            buildUser(forum, index, localeModel),
+            buildDes(forum, index),
+            buildImage(forum, index, context),
+            buildCL(forum, index),
+          ],
+        ),
       ),
-      child: Column(
+    );
+  }
+
+  buildUser(GptForum forum, int index, LocaleModel localeModel) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          buildUser(forum, index),
+          Expanded(
+            child: SizedBox(
+              child: Row(
+                children: [
+                  CommonUtils.avatar(forum.userVo!.avatarUrl, w: 25, h: 25),
+                  const SizedBox(width: 5),
+                  Text(forum.userVo!.nickName!, overflow: TextOverflow.ellipsis)
+                ],
+              ),
+            ),
+          ),
+          Text(
+            TimeAgoUtil(localeModel).format(int.tryParse(forum.time!)),
+            style: const TextStyle(fontSize: 10, color: Colors.grey),
+          ),
         ],
       ),
     );
   }
 
-  buildUser(GptForum forum, int index) {
-    return Text('data');
+  buildDes(GptForum forum, int index) {
+    return Container(
+      padding: const EdgeInsets.only(top: 8, bottom: 8),
+      child: Text(forum.des ?? 'empty text...',
+          maxLines: 3, overflow: TextOverflow.ellipsis),
+    );
+  }
+
+  buildImage(GptForum forum, int index, BuildContext context) {
+    if (forum.pictures == null || forum.pictures!.isEmpty) {
+      return const SizedBox();
+    }
+    return GridImage(forum.pictures!, context: context).showPicture();
+  }
+
+  buildCL(GptForum forum, int index) {
+    return Container(
+      padding: const EdgeInsets.only(top: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${forum.like}推荐',
+              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          const Text('・', style: TextStyle(fontSize: 12, color: Colors.grey)),
+          Text('${forum.comment}评论',
+              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        ],
+      ),
+    );
   }
 
   buildLoadWidget() {
@@ -207,21 +285,14 @@ class _QaWidgetsState extends State<QaWidgets> {
     );
   }
 
-  buildLoadHeaderWidget() {
-    return MaterialHeader();
-  }
-
-  buildLoadFooterWidget() {
-    return MaterialFooter();
-  }
-
   buildLoadingAnimation() {
     return LoadingAnimationWidget.discreteCircle(color: Colors.red, size: 30);
   }
 
-  buildSlider(){
+  buildSlider() {
     return Container(
-      margin: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(top: 12, bottom: 12, left: 18, right: 18),
+      width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(30),
@@ -239,7 +310,7 @@ class _QaWidgetsState extends State<QaWidgets> {
     );
   }
 
-  buildSliderItem(){
+  buildSliderItem() {
     return Container(
       padding: const EdgeInsets.all(20),
       width: double.infinity,

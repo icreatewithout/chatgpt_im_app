@@ -35,7 +35,6 @@ class DioUtil {
   );
 
   static void init() {
-
     debugPrint('token is ${Global.profile.token}');
     if (Global.isRelease) {
       dio.options.baseUrl = Api.releaseUrl;
@@ -54,7 +53,7 @@ class DioUtil {
     Response res = await dio.get(api, queryParameters: handleData(data ?? {}));
 
     if (res.statusCode == 401) {
-      return Result.err(401, "需要登陆");
+      return Result.err(401, res.statusMessage);
     }
     if (res.statusCode == 200) {
       return Result.fromJson(res.data, (json) => res.data['data']);
@@ -66,7 +65,7 @@ class DioUtil {
     Response res =
         await dio.post(api, data: json.encode(handleData(data ?? {})));
     if (res.statusCode == 401) {
-      return Result.err(401, "需要登陆");
+      return Result.err(401, res.statusMessage);
     }
     if (res.statusCode == 200) {
       return Result.fromJson(res.data, (json) => res.data['data']);
@@ -78,7 +77,7 @@ class DioUtil {
     Response res =
         await dio.post(api, data: json.encode(handleData(data ?? {})));
     if (res.statusCode == 401) {
-      return Result.err(401, "需要登陆");
+      return Result.err(401, res.statusMessage);
     }
     if (res.statusCode == 200) {
       return Result.fromJson(res.data, (json) => res.data['data']);
@@ -90,7 +89,7 @@ class DioUtil {
     Response res =
         await dio.delete(api, data: json.encode(handleData(data ?? {})));
     if (res.statusCode == 401) {
-      return Result.err(401, "需要登陆");
+      return Result.err(401, res.statusMessage);
     }
     if (res.statusCode == 200) {
       return Result.fromJson(res.data, (json) => res.data['data']);
@@ -105,7 +104,7 @@ class DioUtil {
 
     Response res = await dio.post(api, data: fd);
     if (res.statusCode == 401) {
-      return Result.err(401, "需要登陆");
+      return Result.err(401, res.statusMessage);
     }
 
     if (res.statusCode == 200 && res.data['code'] == 200) {
@@ -121,15 +120,15 @@ class DioUtil {
 
     MultipartFile mf;
     for (XFile xf in files) {
-       mf = await MultipartFile.fromFile(xf.path, filename: xf.name);
-       mfs.add(mf);
+      mf = await MultipartFile.fromFile(xf.path, filename: xf.name);
+      mfs.add(mf);
     }
     data['file'] = mfs;
     FormData fd = FormData.fromMap(data);
 
     Response res = await dio.post(api, data: fd);
     if (res.statusCode == 401) {
-      return Result.err(401, "需要登陆");
+      return Result.err(401, res.statusMessage);
     }
 
     if (res.statusCode == 200 && res.data['code'] == 200) {

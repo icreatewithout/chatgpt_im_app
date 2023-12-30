@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chatgpt_im/common/assets.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -54,6 +55,15 @@ class CommonUtils {
   }
 
   static const int _whitePrimaryValue = 0xFFFFFFFF;
+
+  static avatar(String? url, {double? w, double? h, BoxFit? fit}) {
+    if (url == null) {
+      return Image.asset(Assets.ic_launcher_48,
+          width: w ?? 20, height: h ?? 200, fit: fit ?? BoxFit.cover);
+    }
+    return Image.network(url,
+        width: w ?? 20, height: h ?? 200, fit: fit ?? BoxFit.cover);
+  }
 
   static image(
       String? url, double? height, double? width, double radius, BoxFit fit) {

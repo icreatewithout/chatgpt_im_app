@@ -1,3 +1,4 @@
+import 'package:chatgpt_im/common/time_ago_util.dart';
 import 'package:chatgpt_im/states/LocaleModel.dart';
 import 'package:chatgpt_im/widgets/find/menu_widgets.dart';
 import 'package:flutter/material.dart';
@@ -6,7 +7,6 @@ import 'package:provider/provider.dart';
 import '../../generated/l10n.dart';
 import '../../models/gpt/chat.dart';
 import '../../states/ChatModel.dart';
-import 'package:timeago/timeago.dart' as timeAgo;
 
 class FindWidgets extends StatefulWidget {
   const FindWidgets({super.key});
@@ -18,13 +18,6 @@ class FindWidgets extends StatefulWidget {
 class _FindWidgetsState extends State<FindWidgets> {
   @override
   void initState() {
-    timeAgo.setLocaleMessages('zh_CN', timeAgo.ZhCnMessages());
-    timeAgo.setLocaleMessages('fr', timeAgo.FrShortMessages());
-    timeAgo.setLocaleMessages('de', timeAgo.DeShortMessages());
-    timeAgo.setLocaleMessages('it', timeAgo.ItShortMessages());
-    timeAgo.setLocaleMessages('ja', timeAgo.JaMessages());
-    timeAgo.setLocaleMessages('ko', timeAgo.KoMessages());
-    timeAgo.setLocaleMessages('ru', timeAgo.RuShortMessages());
     super.initState();
   }
 
@@ -103,14 +96,9 @@ class _FindWidgetsState extends State<FindWidgets> {
                             fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                       Text(
-                        timeAgo.format(
-                          DateTime.fromMillisecondsSinceEpoch(
-                              chat.createTime ?? 0),
-                          locale: localeModel.locale,
-                          allowFromNow: true,
-                        ),
+                        TimeAgoUtil(localeModel).format(chat.createTime),
                         style:
-                            const TextStyle(fontSize: 12, color: Colors.grey),
+                            const TextStyle(fontSize: 10, color: Colors.grey),
                       ),
                     ],
                   ),

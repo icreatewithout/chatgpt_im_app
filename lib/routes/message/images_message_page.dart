@@ -521,7 +521,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
         child: SizedBox(
           height: h,
           width: w,
-          child: PhotoView(imageProvider: FileImage(file)),
+          child: Image.file(file, width: w, height: h, fit: BoxFit.cover),
         ),
       );
     });

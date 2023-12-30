@@ -1,3 +1,4 @@
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:chatgpt_im/common/global.dart';
 import 'package:chatgpt_im/models/user_vo.dart';
 import 'package:chatgpt_im/routes/login_page.dart';
@@ -146,6 +147,7 @@ class _QaWidgetsState extends State<QaWidgets> {
             onLoad: () => findPage(),
             child: CustomScrollView(
               slivers: [
+                buildSlider(),
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -180,7 +182,7 @@ class _QaWidgetsState extends State<QaWidgets> {
   }
 
   buildUser(GptForum forum, int index) {
-
+    return Text('data');
   }
 
   buildLoadWidget() {
@@ -215,5 +217,49 @@ class _QaWidgetsState extends State<QaWidgets> {
 
   buildLoadingAnimation() {
     return LoadingAnimationWidget.discreteCircle(color: Colors.red, size: 30);
+  }
+
+  buildSlider(){
+    return Container(
+      margin: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(30),
+      ),
+      constraints: const BoxConstraints(maxHeight: 120),
+      child: CarouselSlider(
+        options: CarouselOptions(
+          viewportFraction: 1.0,
+          autoPlay: true,
+        ),
+        items: [
+          buildSliderItem(),
+        ],
+      ),
+    );
+  }
+
+  buildSliderItem(){
+    return Container(
+      padding: const EdgeInsets.all(20),
+      width: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'banner.title',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 5),
+          Text(
+            'banner.des!',
+            style: const TextStyle(fontSize: 15, color: Colors.grey),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
   }
 }

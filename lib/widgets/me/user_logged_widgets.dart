@@ -54,7 +54,7 @@ class _UserLoggedState extends State<UserLogged> {
                   ),
                   const SizedBox(width: 20),
                   Text(
-                    userModel.user!.nickName!,
+                    userModel.user!.nickName ?? 'error name.',
                     style: const TextStyle(
                         fontWeight: FontWeight.bold, letterSpacing: 1),
                   ),

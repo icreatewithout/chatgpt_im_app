@@ -12,7 +12,7 @@ import '../../common/calculate_image.dart';
 import '../../common/common_utils.dart';
 
 class GridImage {
-  final List<String> images;
+  final List<dynamic> images;
   BuildContext? context;
 
   GridImage(this.images, {this.context});

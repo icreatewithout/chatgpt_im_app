@@ -8,7 +8,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../common/api.dart';
 import '../../common/dio_util.dart';
-import '../../models/gpt_forum.dart';
+import '../../models/forum/gpt_forum.dart';
 import '../../models/result.dart';
 
 typedef CallBack = void Function(GptForum forum);

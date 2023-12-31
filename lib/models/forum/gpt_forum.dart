@@ -16,9 +16,9 @@ class GptForum {
 
   String? type;
 
-  List<String>? pictures;
+  List<dynamic>? pictures;
 
-  List<String>? tags;
+  List<dynamic>? tags;
 
   String? time;
 

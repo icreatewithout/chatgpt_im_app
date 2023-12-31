@@ -17,7 +17,7 @@ import '../../common/api.dart';
 import '../../common/common_utils.dart';
 import '../../common/dio_util.dart';
 import '../../generated/l10n.dart';
-import '../../models/gpt_forum.dart';
+import '../../models/forum/gpt_forum.dart';
 import '../../models/result.dart';
 import '../../states/LocaleModel.dart';
 import 'create_forum_sheet.dart';
@@ -62,8 +62,6 @@ class _QaWidgetsState extends State<QaWidgets> {
       if (result.code == 200) {
         List<dynamic> res =
             result.data!['content'].map((e) => GptForum.fromJson(e)).toList();
-        debugPrint('findPage ---------- ${res.length}');
-
         setState(() {
           list.addAll(res);
           pageNum++;
@@ -157,6 +155,14 @@ class _QaWidgetsState extends State<QaWidgets> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
+                        return buildSlider();
+                      },
+                      childCount: 1,
+                    ),
+                  ),
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
                         return buildItem(
                             list[index], index, localeModel, context);
                       },
@@ -217,7 +223,8 @@ class _QaWidgetsState extends State<QaWidgets> {
                 children: [
                   CommonUtils.avatar(forum.userVo!.avatarUrl, w: 25, h: 25),
                   const SizedBox(width: 5),
-                  Text(forum.userVo!.nickName!, overflow: TextOverflow.ellipsis)
+                  Text(forum.userVo!.nickName ?? 'error name.',
+                      overflow: TextOverflow.ellipsis)
                 ],
               ),
             ),
@@ -286,7 +293,9 @@ class _QaWidgetsState extends State<QaWidgets> {
   }
 
   buildLoadingAnimation() {
-    return LoadingAnimationWidget.discreteCircle(color: Colors.red, size: 30);
+    return Center(
+      child: LoadingAnimationWidget.discreteCircle(color: Colors.red, size: 30),
+    );
   }
 
   buildSlider() {
@@ -299,18 +308,17 @@ class _QaWidgetsState extends State<QaWidgets> {
       ),
       constraints: const BoxConstraints(maxHeight: 120),
       child: CarouselSlider(
-        options: CarouselOptions(
-          viewportFraction: 1.0,
-          autoPlay: true,
-        ),
+        options: CarouselOptions(viewportFraction: 1.0, autoPlay: true),
         items: [
-          buildSliderItem(),
+          buildSliderItem('欢迎来到OpenGPT社区', '在这里是匿名的、安全的，在使用过程中您的一切信息都会被加密！'),
+          buildSliderItem('提示', '如果您在使用中，遇到问题请与我联系：agdhhjfhtdh585@gmail.com！'),
+          buildSliderItem('注销账户与信息安全', '您在使用应用时只有社区功能会记录您的信息，您可以联系我们删除!'),
         ],
       ),
     );
   }
 
-  buildSliderItem() {
+  buildSliderItem(String title, String des) {
     return Container(
       padding: const EdgeInsets.all(20),
       width: double.infinity,
@@ -319,12 +327,12 @@ class _QaWidgetsState extends State<QaWidgets> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'banner.title',
+            title,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 5),
           Text(
-            'banner.des!',
+            des,
             style: const TextStyle(fontSize: 15, color: Colors.grey),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,

@@ -11,4 +11,8 @@ class Assets {
   static const String google = 'assets/google.png';
   static const String twitter = 'assets/twitter.png';
   static const String facebook = 'assets/facebook.png';
+  static const String like = 'assets/like.png';
+  static const String liked = 'assets/liked.png';
+  static const String read = 'assets/read.png';
+  static const String comment = 'assets/comment.png';
 }

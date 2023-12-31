@@ -13,9 +13,8 @@ GptForum _$GptForumFromJson(Map<String, dynamic> json) => GptForum()
       : UserVo.fromJson(json['userVo'] as Map<String, dynamic>)
   ..des = json['des'] as String?
   ..type = json['type'] as String?
-  ..pictures =
-      (json['pictures'] as List<dynamic>?)?.map((e) => e as String).toList()
-  ..tags = (json['tags'] as List<dynamic>?)?.map((e) => e as String).toList()
+  ..pictures = json['pictures'] as List<dynamic>?
+  ..tags = json['tags'] as List<dynamic>?
   ..time = json['time'] as String?
   ..comment = json['comment'] as int?
   ..like = json['like'] as int?

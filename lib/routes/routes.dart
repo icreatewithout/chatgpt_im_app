@@ -16,6 +16,7 @@ import 'forum_deatil.dart';
 import 'index_page.dart';
 import 'language_setting_page.dart';
 import 'login_page.dart';
+import 'my_info.dart';
 
 final routes = <String, WidgetBuilder>{
   IndexPage.path: (BuildContext context, {arguments}) => const IndexPage(),
@@ -46,6 +47,7 @@ final routes = <String, WidgetBuilder>{
       WhisperMessage(arguments: arguments),
   ForumDetail.path: (BuildContext context, {arguments}) =>
       ForumDetail(arguments: arguments),
+  MyInfo.path: (BuildContext context, {arguments}) => const MyInfo(),
 };
 
 RouteFactory routeFactory = (RouteSettings settings) {

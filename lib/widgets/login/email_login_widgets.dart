@@ -96,8 +96,8 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
       Result result =
           await DioUtil().post('${Api.sendCode}${_emailController.text}');
       if (result.code == 200) {
-        CommonUtils.showToast(s.sendDone);
         _countdown(s);
+        CommonUtils.showToast(s.sendDone);
       } else {
         CommonUtils.showToast(result.message);
       }

@@ -1,3 +1,5 @@
+import 'package:chatgpt_im/common/common_utils.dart';
+import 'package:chatgpt_im/routes/my_info.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../common/assets.dart';
@@ -46,14 +48,8 @@ class _UserLoggedState extends State<UserLogged> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(100),
-                    child: Image.asset(
-                      Assets.ic_launcher,
-                      width: 50,
-                      height: 50,
-                    ),
-                  ),
+                  CommonUtils.avatar(userModel.user!.avatarUrl,
+                      w: 40, h: 40, radius: 5),
                   const SizedBox(width: 20),
                   Text(
                     userModel.user!.nickName ?? 'error name.',
@@ -76,11 +72,12 @@ class _UserLoggedState extends State<UserLogged> {
                       right: 10,
                       color: Colors.black,
                       bgColor: Colors.white,
-                      size: 14,
-                      fw: FontWeight.bold,
+                      size: 13,
+                      fw: FontWeight.w600,
                       border:
-                          Border.all(color: Colors.grey.shade400, width: 0.5),
-                      callBack: () => {},
+                          Border.all(color: Colors.grey.shade400, width: 0.3),
+                      callBack: () =>
+                          Navigator.of(context).pushNamed(MyInfo.path),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -91,10 +88,10 @@ class _UserLoggedState extends State<UserLogged> {
                       height: 36,
                       color: Colors.black,
                       bgColor: Colors.white,
-                      size: 14,
-                      fw: FontWeight.bold,
+                      size: 13,
+                      fw: FontWeight.w600,
                       border:
-                          Border.all(color: Colors.grey.shade400, width: 0.5),
+                          Border.all(color: Colors.grey.shade400, width: 0.3),
                       callBack: () => {},
                     ),
                   ),

@@ -21,6 +21,11 @@ class UserModel extends ProfileChangeNotifier {
     notifyListeners();
   }
 
+  set setUserVo(UserVo userVo) {
+    profile.user = userVo;
+    notifyListeners();
+  }
+
   set quit(Result? result) {
     profile.status = false;
     profile.token = null;

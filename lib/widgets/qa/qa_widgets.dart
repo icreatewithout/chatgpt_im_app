@@ -221,7 +221,8 @@ class _QaWidgetsState extends State<QaWidgets> {
             child: SizedBox(
               child: Row(
                 children: [
-                  CommonUtils.avatar(forum.userVo!.avatarUrl, w: 25, h: 25),
+                  CommonUtils.avatar(forum.userVo!.avatarUrl,
+                      w: 30, h: 30, radius: 5),
                   const SizedBox(width: 5),
                   Text(forum.userVo!.nickName ?? 'error name.',
                       overflow: TextOverflow.ellipsis)
@@ -304,7 +305,7 @@ class _QaWidgetsState extends State<QaWidgets> {
       width: double.infinity,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(30),
+        borderRadius: BorderRadius.circular(12),
       ),
       constraints: const BoxConstraints(maxHeight: 120),
       child: CarouselSlider(

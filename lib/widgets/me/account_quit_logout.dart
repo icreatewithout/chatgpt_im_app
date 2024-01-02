@@ -57,7 +57,32 @@ class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
     }
   }
 
-  void _logout(BuildContext context) async {}
+  void _logout(BuildContext context) async {
+    setState(() {
+      _loading = true;
+    });
+    try {
+      Result result = await DioUtil().delete(Api.delAccount);
+      if (result.code == 200) {
+        Global.profile.token = null;
+        Global.profile.status = false;
+        Global.profile.user = null;
+        Global.saveProfile();
+        if (context.mounted) {
+          Provider.of<UserModel>(context, listen: false).quit = null;
+        }
+        CommonUtils.showToast('success');
+      } else {
+        CommonUtils.showToast(result.message);
+      }
+    } catch (_) {
+      CommonUtils.showToast('error');
+    } finally {
+      setState(() {
+        _loading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -73,9 +73,9 @@ class DioUtil {
     return Result.err();
   }
 
-  Future<Result> put(String api, [Map<String, dynamic>? data]) async {
+  Future<Result> put(String api, {Map<String, dynamic>? data}) async {
     Response res =
-        await dio.post(api, data: json.encode(handleData(data ?? {})));
+        await dio.put(api, data: json.encode(handleData(data ?? {})));
     if (res.statusCode == 401) {
       return Result.err(401, res.statusMessage);
     }

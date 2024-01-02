@@ -184,7 +184,8 @@ class _ForumDetailState extends State<ForumDetail> {
           child: SizedBox(
             child: Row(
               children: [
-                CommonUtils.avatar(forum.userVo!.avatarUrl, w: 30, h: 30),
+                CommonUtils.image(
+                    forum.userVo!.avatarUrl, 30, 30, 4, BoxFit.cover),
                 const SizedBox(width: 8),
                 Text(forum.userVo!.nickName ?? 'error name.',
                     overflow: TextOverflow.ellipsis)

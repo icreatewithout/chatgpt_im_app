@@ -62,6 +62,7 @@ dependencies:
   file_picker: ^6.1.1
   record: ^5.0.4
   carousel_slider: ^4.2.1
+  image_cropper: ^5.0.1
 
 dev_dependencies:
   flutter_test:

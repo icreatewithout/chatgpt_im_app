@@ -26,6 +26,7 @@ import '../../generated/l10n.dart';
 import '../../models/result.dart';
 import '../../states/ChatModel.dart';
 import '../../states/LocaleModel.dart';
+import '../login_page.dart';
 
 class ChatMessage extends StatefulWidget {
   static const String path = "/gpt/chat";
@@ -146,16 +147,18 @@ class _ChatMessageState extends State<ChatMessage> {
       try {
         Result result =
             await DioUtil().upload(Api.upload, file.path, file.name);
-        print('------ ${result.code}');
-        print('------ ${result.data}');
         if (result.code == 200) {
           setState(() {
             imageName = file.name;
             imageUrl = result.data['file_url'];
           });
         } else {
-          CommonUtils.showToast(result.message,
-              tg: ToastGravity.TOP, toast: Toast.LENGTH_LONG);
+          if (result.code == 401 && mounted) {
+            Navigator.of(context).pushNamed(LoginPage.path);
+          } else {
+            CommonUtils.showToast(result.message,
+                tg: ToastGravity.TOP, toast: Toast.LENGTH_LONG);
+          }
         }
         setState(() {
           upload = false;

@@ -264,7 +264,7 @@ class _ForumCommentListState extends State<ForumCommentList> {
       padding: const EdgeInsets.only(top: 12, bottom: 12),
       child: Row(
         children: [
-          CommonUtils.avatar(vo.avatarUrl, w: 30, h: 30),
+          CommonUtils.avatar(vo.avatarUrl, w: 30, h: 30, radius: 5),
           const SizedBox(width: 8),
           Text(vo.nickName!, overflow: TextOverflow.ellipsis)
         ],
@@ -333,7 +333,7 @@ class _ForumCommentListState extends State<ForumCommentList> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CommonUtils.avatar(vo.user?.avatarUrl, w: 30, h: 30),
+            CommonUtils.avatar(vo.user?.avatarUrl, w: 30, h: 30, radius: 5),
             const SizedBox(width: 10),
             Expanded(
               flex: 1,

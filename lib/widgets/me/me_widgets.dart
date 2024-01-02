@@ -8,6 +8,7 @@ import 'package:chatgpt_im/widgets/me/user_not_logged_in_widgets.dart';
 import 'package:provider/provider.dart';
 
 import '../../states/UserModel.dart';
+import 'forum_comment.dart';
 
 class MeWidgets extends StatefulWidget {
   const MeWidgets({super.key});
@@ -44,49 +45,63 @@ class _MeWidgetsState extends State<MeWidgets> {
         centerTitle: true,
         title: Text(s.me, style: const TextStyle(fontSize: 16)),
       ),
-      body: Container(
-        height: double.infinity,
-        color: Colors.grey.shade100,
-        child: Consumer<UserModel>(
-          builder: (BuildContext context, UserModel userModel, Widget? child) {
-            return SingleChildScrollView(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  userModel.isLogin
-                      ? const UserLogged()
-                      : const UserNotLoggedIn(),
-                  Container(
-                    margin: const EdgeInsets.only(left: 20),
-                    child: Text(
-                      s.setting,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  const Setting(),
-                  Visibility(
-                    visible: userModel.isLogin,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(left: 20),
-                          child: Text(
-                            s.account,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
+      body: Stack(
+        children: [
+          Container(
+            height: double.infinity,
+            color: Colors.grey.shade100,
+            child: Consumer<UserModel>(
+              builder:
+                  (BuildContext context, UserModel userModel, Widget? child) {
+                return SingleChildScrollView(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      userModel.isLogin
+                          ? const UserLogged()
+                          : const UserNotLoggedIn(),
+                      Container(
+                        margin: const EdgeInsets.only(left: 20),
+                        child: Text(
+                          '我的',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
-                        const AccountQuitOrLogout(),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            );
-          },
-        ),
+                      ),
+                      const ForumComment(),
+                      Container(
+                        margin: const EdgeInsets.only(left: 20),
+                        child: Text(
+                          s.setting,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const Setting(),
+                      Visibility(
+                        visible: userModel.isLogin,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.only(left: 20),
+                              child: Text(
+                                s.account,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            AccountQuitOrLogout(showLoading: () => {}),
+                          ],
+                        ),
+                      )
+                    ],
+                  ),
+                );
+              },
+            ),
+          )
+        ],
       ),
     );
   }

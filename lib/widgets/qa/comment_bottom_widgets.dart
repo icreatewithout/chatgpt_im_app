@@ -162,7 +162,7 @@ class _ForumCommentBottomBarState extends State<ForumCommentBottomBar> {
     _setName(s);
     return SafeArea(
       child: Container(
-        height: double.infinity,
+        height: kBottomNavigationBarHeight,
         width: double.infinity,
         padding: const EdgeInsets.only(left: 18, right: 18, top: 8, bottom: 6),
         decoration: const BoxDecoration(color: Colors.white),

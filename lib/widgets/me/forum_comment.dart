@@ -10,16 +10,14 @@ import '../../common/api.dart';
 import '../../common/common_utils.dart';
 import '../../generated/l10n.dart';
 
-class AccountQuitOrLogout extends StatefulWidget {
-  const AccountQuitOrLogout({super.key, required this.showLoading});
-
-  final Function showLoading;
+class ForumComment extends StatefulWidget {
+  const ForumComment({super.key});
 
   @override
-  State<AccountQuitOrLogout> createState() => _AccountQuitOrLogoutState();
+  State<ForumComment> createState() => _ForumCommentState();
 }
 
-class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
+class _ForumCommentState extends State<ForumComment> {
   @override
   void initState() {
     super.initState();
@@ -28,46 +26,6 @@ class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
   @override
   void dispose() {
     super.dispose();
-  }
-
-  void _quit(BuildContext context) async {
-    try {
-      Result result = await DioUtil().get(Api.logout);
-      if (result.code == 200) {
-        Global.profile.token = null;
-        Global.profile.status = false;
-        Global.profile.user = null;
-        Global.saveProfile();
-        if (context.mounted) {
-          Provider.of<UserModel>(context, listen: false).quit = null;
-        }
-        CommonUtils.showToast('success');
-      } else {
-        CommonUtils.showToast(result.message);
-      }
-    } catch (_) {
-      CommonUtils.showToast('error');
-    }
-  }
-
-  void _logout(BuildContext context) async {
-    try {
-      Result result = await DioUtil().delete(Api.delAccount);
-      if (result.code == 200) {
-        Global.profile.token = null;
-        Global.profile.status = false;
-        Global.profile.user = null;
-        Global.saveProfile();
-        if (context.mounted) {
-          Provider.of<UserModel>(context, listen: false).quit = null;
-        }
-        CommonUtils.showToast('success');
-      } else {
-        CommonUtils.showToast(result.message);
-      }
-    } catch (_) {
-      CommonUtils.showToast('error');
-    }
   }
 
   @override
@@ -90,10 +48,10 @@ class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               GestureDetector(
-                onTap: () => _quit(context),
+                onTap: () => {},
                 child: SizedBox(
                   width: double.infinity,
-                  child: Text(s.logout),
+                  child: Text('我的内容'),
                 ),
               ),
               Container(
@@ -103,13 +61,10 @@ class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
                     border: Border(bottom: BorderSide(width: 0.1))),
               ),
               GestureDetector(
-                onTap: () => _logout(context),
+                onTap: () => {},
                 child: SizedBox(
                   width: double.infinity,
-                  child: Text(
-                    s.deleteAccount,
-                    style: const TextStyle(color: Colors.red),
-                  ),
+                  child: Text('我的评论'),
                 ),
               ),
             ],

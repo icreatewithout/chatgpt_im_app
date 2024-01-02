@@ -31,9 +31,17 @@ class ForumDetail extends StatefulWidget {
 class _ForumDetailState extends State<ForumDetail> {
   late GptForum forum = GptForum();
   bool isDone = false;
+  final ScrollController _scrollController = ScrollController();
+  bool showAppbar = false;
 
   @override
   void initState() {
+    _scrollController.addListener(() {
+      ///监听滚动位置设置导航栏颜色
+      setState(() {
+        showAppbar = _scrollController.offset > 70 ? true : false;
+      });
+    });
     init();
     super.initState();
   }
@@ -72,47 +80,106 @@ class _ForumDetailState extends State<ForumDetail> {
   @override
   Widget build(BuildContext context) {
     var s = S.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-      ),
-      body: Stack(
-        children: [
-          Consumer2<LocaleModel, UserModel>(
-            builder: (BuildContext context, LocaleModel localeModel,
-                UserModel userModel, Widget? child) {
-              return Container(
-                width: double.infinity,
-                height: double.infinity,
-                color: Colors.grey.shade100,
-                padding:
-                    const EdgeInsets.only(bottom: kBottomNavigationBarHeight),
-                child: buildView(localeModel, userModel, context, s),
-              );
-            },
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: SizedBox(
-              width: double.infinity,
-              height: kBottomNavigationBarHeight,
-              child: ForumCommentBottomBar(
-                key: bottomBarGlobalKey,
-                callBack: (prentId, vo) =>
-                    commentGlobalKey.currentState?.update(prentId, vo),
-                id: forum.id ?? '',
-                forum: forum,
-              ),
+    return Consumer2<LocaleModel, UserModel>(
+      builder: (BuildContext context, LocaleModel localeModel,
+          UserModel userModel, Widget? child) {
+        return Scaffold(
+          body: NestedScrollView(
+            controller: _scrollController,
+            headerSliverBuilder: (context, innerBoxIsScrolled) =>
+                _headerSliverBuilder(context, localeModel),
+            body: Stack(
+              children: [
+                Container(
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: Colors.grey.shade100,
+                  padding:
+                      const EdgeInsets.only(bottom: kBottomNavigationBarHeight),
+                  child: buildView(localeModel, userModel, context, s),
+                ),
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: ForumCommentBottomBar(
+                    key: bottomBarGlobalKey,
+                    callBack: (prentId, vo) =>
+                        commentGlobalKey.currentState?.update(prentId, vo),
+                    id: forum.id ?? '',
+                    forum: forum,
+                  ),
+                ),
+              ],
             ),
           ),
+        );
+      },
+    );
+  }
+
+  List<Widget> _headerSliverBuilder(
+      BuildContext context, LocaleModel localeModel) {
+    return [
+      _buildSliverAppBar(context, localeModel),
+    ];
+  }
+
+  ///导航部分渲染
+  _buildSliverAppBar(BuildContext context, LocaleModel localeModel) {
+    return SliverAppBar(
+      //true固定顶部，false随着屏幕滑动
+      pinned: true,
+      //滚动是否拉伸图片
+      stretch: false,
+      expandedHeight: 0,
+      //展开区域高度
+      elevation: 0,
+      toolbarHeight: kToolbarHeight,
+      //当snap配置为true时，向下滑动页面，SliverAppBar（以及其中配置的flexibleSpace内容）会立即显示出来，
+      // 反之当snap配置为false时，向下滑动时，只有当ListView的数据滑动到顶部时，SliverAppBar才会下拉显示出来。
+      snap: false,
+      leadingWidth: double.infinity,
+      leading: buildAppBarUser(forum, localeModel),
+    );
+  }
+
+  buildAppBarUser(GptForum forum, LocaleModel localeModel) {
+    return Container(
+      width: double.infinity,
+      height: kToolbarHeight,
+      alignment: Alignment.centerLeft,
+      padding: const EdgeInsets.only(left: 15, right: 15),
+      child: Row(
+        children: [
+          GestureDetector(
+            child: const Icon(Icons.arrow_back_ios),
+            onTap: () => Navigator.of(context).pop(),
+          ),
+          showAppbar
+              ? Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          CommonUtils.image(
+                              forum.userVo!.avatarUrl, 30, 30, 4, BoxFit.cover),
+                          const SizedBox(width: 8),
+                          Text(forum.userVo!.nickName ?? 'error name.',
+                              overflow: TextOverflow.ellipsis)
+                        ],
+                      ),
+                      Text(
+                        TimeAgoUtil(localeModel)
+                            .format(int.tryParse(forum.time!)),
+                        style:
+                            const TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                )
+              : const SizedBox(),
         ],
       ),
     );

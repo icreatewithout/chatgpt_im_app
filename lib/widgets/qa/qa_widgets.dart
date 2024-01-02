@@ -12,6 +12,7 @@ import 'package:chatgpt_im/common/assets.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../common/api.dart';
 import '../../common/common_utils.dart';
@@ -36,6 +37,9 @@ class _QaWidgetsState extends State<QaWidgets> {
   bool isLast = false;
   int pageNum = 1;
   final int pageSize = 10;
+  bool showLoad = false;
+  int select = 0;
+  String type= '1';
 
   @override
   void initState() {
@@ -117,6 +121,12 @@ class _QaWidgetsState extends State<QaWidgets> {
     });
   }
 
+  void _chaneSelect(int i) {
+    setState(() {
+      select = i;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var s = S.of(context);
@@ -141,39 +151,103 @@ class _QaWidgetsState extends State<QaWidgets> {
       body: Consumer2<LocaleModel, UserModel>(
         builder: (BuildContext context, LocaleModel localeModel,
             UserModel userModel, Widget? child) {
-          return Container(
-            height: double.infinity,
-            color: Colors.grey.shade100,
-            child: EasyRefresh(
-              controller: _controller,
-              refreshOnStart: true,
-              refreshOnStartHeader: buildLoadWidget(),
-              onRefresh: () => onRefresh(),
-              onLoad: () => findPage(),
-              child: CustomScrollView(
-                slivers: [
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        return buildSlider();
-                      },
-                      childCount: 1,
-                    ),
+          return Stack(
+            children: [
+              Container(
+                height: double.infinity,
+                color: Colors.grey.shade100,
+                child: EasyRefresh(
+                  controller: _controller,
+                  refreshOnStart: true,
+                  refreshOnStartHeader: buildLoadWidget(),
+                  onRefresh: () => onRefresh(),
+                  onLoad: () => findPage(),
+                  child: CustomScrollView(
+                    slivers: [
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return buildSlider();
+                          },
+                          childCount: 1,
+                        ),
+                      ),
+                      SliverPinnedHeader(child: buildTabBar()),
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return buildItem(
+                                list[index], index, localeModel, context, s);
+                          },
+                          childCount: list.length,
+                        ),
+                      ),
+                    ],
                   ),
-                  SliverList(
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) {
-                        return buildItem(
-                            list[index], index, localeModel, context, s);
-                      },
-                      childCount: list.length,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
+              showLoad
+                  ? Center(
+                      child: buildLoadingAnimation(),
+                    )
+                  : const SizedBox(),
+            ],
           );
         },
+      ),
+    );
+  }
+
+  buildTabBar() {
+    return Container(
+      color: Colors.grey.shade100,
+      margin: const EdgeInsets.only(left: 16, right: 16),
+      padding: const EdgeInsets.only(top: 10, bottom: 10, left: 12, right: 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          GestureDetector(
+            onTap: () => _chaneSelect(0),
+            child: Column(
+              children: [
+                const Text(
+                  '最新观点',
+                  style:
+                      TextStyle(fontWeight: FontWeight.w600, letterSpacing: 1),
+                ),
+                buildLine(0)
+              ],
+            ),
+          ),
+          GestureDetector(
+              onTap: () => _chaneSelect(1),
+              child: Column(
+                children: [
+                  const Text(
+                    '建议反馈',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600, letterSpacing: 1),
+                  ),
+                  buildLine(1)
+                ],
+              )),
+        ],
+      ),
+    );
+  }
+
+  buildLine(int i) {
+    return Container(
+      margin: const EdgeInsets.only(top: 2),
+      width: 20,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(2),
+        border: BorderDirectional(
+          bottom: BorderSide(
+            width: 3,
+            color: i == select ? Colors.black : Colors.transparent,
+          ),
+        ),
       ),
     );
   }

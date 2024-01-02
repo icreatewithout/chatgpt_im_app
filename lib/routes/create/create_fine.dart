@@ -42,11 +42,6 @@ class _CreateFineState extends State<CreateFine> {
   }
 
   void pop(BuildContext context) async {
-    if (modelVal == null) {
-      CommonUtils.showToast('请选择model');
-      return;
-    }
-
     Chat chat = Chat();
     chat.type = MenuItems.assistant.text;
     chat.name = _nameController.text.isEmpty
@@ -152,8 +147,9 @@ class _CreateFineState extends State<CreateFine> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('基本信息'),
-                      const SizedBox(height: 10),
+                      Container(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: const Text('名称（Name）')),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,

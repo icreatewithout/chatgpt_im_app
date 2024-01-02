@@ -23,33 +23,92 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
 
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "auto": MessageLookupByLibrary.simpleMessage("Auto"),
+        "account": MessageLookupByLibrary.simpleMessage("Account"),
+        "addImage": MessageLookupByLibrary.simpleMessage("add pictures"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
-        "change_theme": MessageLookupByLibrary.simpleMessage("Change Theme"),
-        "home": MessageLookupByLibrary.simpleMessage("Home"),
+        "code": MessageLookupByLibrary.simpleMessage("Code"),
+        "comment": MessageLookupByLibrary.simpleMessage("comment"),
+        "commentText": MessageLookupByLibrary.simpleMessage("Comment"),
+        "delChat": MessageLookupByLibrary.simpleMessage("Delete"),
+        "deleteAccount": MessageLookupByLibrary.simpleMessage("Delete Account"),
+        "editInfo": MessageLookupByLibrary.simpleMessage("Edit information"),
+        "email": MessageLookupByLibrary.simpleMessage("Email"),
+        "emailErr": MessageLookupByLibrary.simpleMessage("Email format error"),
+        "emailHint": MessageLookupByLibrary.simpleMessage(
+            "Enter your email, receive and fill in the verification code"),
+        "emailLogin": MessageLookupByLibrary.simpleMessage("Email Login"),
+        "facebookLogin": MessageLookupByLibrary.simpleMessage("Facebook Login"),
+        "find": MessageLookupByLibrary.simpleMessage("Find"),
+        "googleLogin": MessageLookupByLibrary.simpleMessage("Google Login"),
+        "gpDes": MessageLookupByLibrary.simpleMessage("Description"),
+        "gptDefaultDesVal":
+            MessageLookupByLibrary.simpleMessage("For example,smart assistant"),
+        "gptDefaultVal":
+            MessageLookupByLibrary.simpleMessage("default value: "),
+        "gptDesHintText":
+            MessageLookupByLibrary.simpleMessage("please enter a description"),
+        "gptHintText":
+            MessageLookupByLibrary.simpleMessage("please enter name"),
+        "gptInstructions": MessageLookupByLibrary.simpleMessage("Instructions"),
+        "gptMessages": MessageLookupByLibrary.simpleMessage(
+            "historical messages, default value: 1"),
+        "gptName": MessageLookupByLibrary.simpleMessage("Name"),
+        "gptTemperature": MessageLookupByLibrary.simpleMessage("Temperature"),
+        "hint": MessageLookupByLibrary.simpleMessage("prompt"),
+        "hintDelChat": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to delete this chat?"),
+        "hintText":
+            MessageLookupByLibrary.simpleMessage("Write down your thoughts..."),
+        "hintText1": MessageLookupByLibrary.simpleMessage(
+            "By joining OpenGPT, you agree to OpenGPT\'s Terms of Service and Privacy Policy."),
+        "hintText2": MessageLookupByLibrary.simpleMessage(
+            "Terms of Service and Privacy Policy"),
+        "infoQ": MessageLookupByLibrary.simpleMessage("InfoQ"),
+        "inputCode": MessageLookupByLibrary.simpleMessage(
+            "please enter verification code"),
+        "inputComment":
+            MessageLookupByLibrary.simpleMessage("please enter your opinion"),
+        "inputContent":
+            MessageLookupByLibrary.simpleMessage("please enter content"),
+        "inputEmail":
+            MessageLookupByLibrary.simpleMessage("please input your email"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
+        "like": MessageLookupByLibrary.simpleMessage("like"),
+        "likeText": MessageLookupByLibrary.simpleMessage("Like"),
+        "limitSize": MessageLookupByLibrary.simpleMessage(
+            "You can only select up to 9 pictures"),
         "login": MessageLookupByLibrary.simpleMessage("Login"),
+        "loginAnonymously":
+            MessageLookupByLibrary.simpleMessage("Log in anonymously"),
         "loginTip":
             MessageLookupByLibrary.simpleMessage("You are not Logged in"),
         "logout": MessageLookupByLibrary.simpleMessage("Logout"),
         "logoutTip": MessageLookupByLibrary.simpleMessage("OK to log out! "),
-        "noDescription": MessageLookupByLibrary.simpleMessage("No description"),
+        "me": MessageLookupByLibrary.simpleMessage("Me"),
+        "moreComment": MessageLookupByLibrary.simpleMessage("expand more"),
         "ok": MessageLookupByLibrary.simpleMessage("Ok"),
-        "password": MessageLookupByLibrary.simpleMessage("User Password"),
-        "passwordRequired":
-            MessageLookupByLibrary.simpleMessage("password is required"),
-        "theme": MessageLookupByLibrary.simpleMessage("Theme"),
-        "title": MessageLookupByLibrary.simpleMessage("GitMe"),
-        "userName": MessageLookupByLibrary.simpleMessage("User Name"),
-        "userNameRequired":
-            MessageLookupByLibrary.simpleMessage("username is required"),
-        "find":
-            MessageLookupByLibrary.simpleMessage("OpenAi"),
-        "qa":
-            MessageLookupByLibrary.simpleMessage("Q&A"),
-        "infoQ":
-            MessageLookupByLibrary.simpleMessage("InfoQ"),
-        "me":
-            MessageLookupByLibrary.simpleMessage("Me"),
+        "open": MessageLookupByLibrary.simpleMessage("expand"),
+        "openMun": MessageLookupByLibrary.simpleMessage("replies"),
+        "photoGranted": MessageLookupByLibrary.simpleMessage(
+            "Not allowed to obtain album permissions"),
+        "qa": MessageLookupByLibrary.simpleMessage("Q&A"),
+        "replay": MessageLookupByLibrary.simpleMessage("Reply"),
+        "save": MessageLookupByLibrary.simpleMessage("Save"),
+        "saveComment":
+            MessageLookupByLibrary.simpleMessage("please enter a comment..."),
+        "selectAudioFile":
+            MessageLookupByLibrary.simpleMessage("Select audio file"),
+        "selectModel": MessageLookupByLibrary.simpleMessage("Select Model"),
+        "sendCode": MessageLookupByLibrary.simpleMessage("Send Code"),
+        "sendDone": MessageLookupByLibrary.simpleMessage("Code sent"),
+        "setting": MessageLookupByLibrary.simpleMessage("Setting"),
+        "shareMe": MessageLookupByLibrary.simpleMessage("Share"),
+        "storageGranted": MessageLookupByLibrary.simpleMessage(
+            "Not allowed to obtain storage permissions"),
+        "tosapp": MessageLookupByLibrary.simpleMessage(
+            "Terms of Service and Privacy Policy"),
+        "updateSetting": MessageLookupByLibrary.simpleMessage("Setting"),
+        "verify": MessageLookupByLibrary.simpleMessage("Verify"),
+        "xLogin": MessageLookupByLibrary.simpleMessage("X Login")
       };
 }

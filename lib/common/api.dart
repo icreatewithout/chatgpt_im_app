@@ -6,6 +6,7 @@ class Api {
   static const String sendCode = "/auth/send/by/";
   static const String login = "/auth/login/by/";
   static const String logout = "/auth/logout";
+  static const String delAccount = "/auth/del/account/";
 
   static const String upload = "/zh/gpt/upload";
   static const String forum = "/zh/open-gpt/forum";

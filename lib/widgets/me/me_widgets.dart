@@ -37,12 +37,12 @@ class _MeWidgetsState extends State<MeWidgets> {
 
   @override
   Widget build(BuildContext context) {
-    var gm = S.of(context);
+    var s = S.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         centerTitle: true,
-        title: Text(gm.me, style: const TextStyle(fontSize: 16)),
+        title: Text(s.me, style: const TextStyle(fontSize: 16)),
       ),
       body: Consumer<UserModel>(
         builder: (BuildContext context, UserModel userModel, Widget? child) {
@@ -56,9 +56,9 @@ class _MeWidgetsState extends State<MeWidgets> {
                     : const UserNotLoggedIn(),
                 Container(
                   margin: const EdgeInsets.only(left: 20),
-                  child: const Text(
-                    '设置',
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  child: Text(
+                    s.setting,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
                 const Setting(),
@@ -70,9 +70,9 @@ class _MeWidgetsState extends State<MeWidgets> {
                     children: [
                       Container(
                         margin: const EdgeInsets.only(left: 20),
-                        child: const Text(
-                          '账户',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                        child: Text(
+                          s.account,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                       const AccountQuitOrLogout(),

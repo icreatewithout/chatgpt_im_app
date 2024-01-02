@@ -70,18 +70,14 @@ class _CreateAudioState extends State<CreateAudio> {
     voiceVal = val;
   }
 
-  void pop(BuildContext context) async {
-    if (modelVal == null) {
-      CommonUtils.showToast('请选择model');
-      return;
-    }
-
+  void pop(BuildContext context, S s) async {
     Chat chat = Chat();
     chat.type = MenuItems.audio.text;
     chat.name = _nameController.text.isEmpty
         ? MenuItems.audio.text
         : _nameController.text;
-    chat.des = _desController.text.isEmpty ? '语音助手' : _desController.text;
+    chat.des =
+        _desController.text.isEmpty ? s.gptDefaultDesVal : _desController.text;
     chat.model = modelVal;
     chat.apiKey = _keyController.text;
     chat.speed = _speedController.text.isEmpty ? '1' : _speedController.text;
@@ -115,7 +111,7 @@ class _CreateAudioState extends State<CreateAudio> {
 
   @override
   Widget build(BuildContext context) {
-    var gm = S.of(context);
+    var s = S.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -145,7 +141,7 @@ class _CreateAudioState extends State<CreateAudio> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('选择模型（model）'),
+                      Text(s.selectModel),
                       const SizedBox(height: 10),
                       SelectWidgets(
                         hint: 'Select Your Model',
@@ -168,25 +164,28 @@ class _CreateAudioState extends State<CreateAudio> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('基本信息'),
-                      const SizedBox(height: 10),
+                      Container(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(s.gptName)),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,
                         maxLength: 20,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '名称（name）',
+                        hintText: s.gptHintText,
                         controller: _nameController,
                       ),
-                      buildLine(),
+                      Container(
+                          padding: const EdgeInsets.only(top: 8, bottom: 8),
+                          child: Text(s.gpDes)),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,
                         maxLength: 20,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '描述（des）,例如：语音助手',
+                        hintText: s.gptDesHintText,
                         controller: _desController,
                       ),
                       buildLine(),
@@ -223,7 +222,7 @@ class _CreateAudioState extends State<CreateAudio> {
                         maxLength: 200,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '速度，介于0.25-4.0之间，默认值：1.0',
+                        hintText: '${s.gptDefaultVal}1.0（0.25～4.0）',
                         controller: _speedController,
                       ),
                     ],
@@ -281,12 +280,12 @@ class _CreateAudioState extends State<CreateAudio> {
                   padding: const EdgeInsets.only(
                       left: 20, right: 20, top: 15, bottom: 15),
                   child: OpenCnButton(
-                    title: '完成',
+                    title: s.ok,
                     radius: 20,
                     color: Colors.white,
                     bgColor: Colors.grey.shade600,
                     fw: FontWeight.bold,
-                    callBack: () => pop(context),
+                    callBack: () => pop(context, s),
                   ),
                 ),
               ],

@@ -3,6 +3,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
 import '../common/assets.dart';
+import '../generated/l10n.dart';
 import '../widgets/login/email_login_widgets.dart';
 import '../widgets/ui/open_cn_button.dart';
 import 'about_us.dart';
@@ -68,11 +69,9 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    var s = S.of(context);
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-        ),
+        appBar: AppBar(backgroundColor: Colors.white, elevation: 0),
         body: Stack(
           children: [
             Container(
@@ -113,7 +112,7 @@ class _LoginPageState extends State<LoginPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       OpenCnButton(
-                        title: '邮箱登录',
+                        title: s.emailLogin,
                         left: 50,
                         right: 50,
                         bottom: 10,
@@ -125,37 +124,46 @@ class _LoginPageState extends State<LoginPage> {
                         callBack: () => showEmailLoginSheet(context),
                       ),
                       OpenCnButton(
-                        title: 'Google登录',
+                        title: s.googleLogin,
                         left: 50,
                         right: 50,
                         bottom: 10,
                         radius: 20,
                         color: Colors.white,
                         fw: FontWeight.bold,
-                        callBack: () => CommonUtils.showToast('未加入'),
-                        prefix: Image.asset(Assets.google,width: 20,),
+                        callBack: () => CommonUtils.showToast('disable'),
+                        prefix: Image.asset(
+                          Assets.google,
+                          width: 20,
+                        ),
                       ),
                       OpenCnButton(
-                        title: 'X登录',
+                        title: s.xLogin,
                         left: 50,
                         right: 50,
                         bottom: 10,
                         radius: 20,
                         color: Colors.white,
                         fw: FontWeight.bold,
-                        callBack: () => CommonUtils.showToast('未加入'),
-                        prefix: Image.asset(Assets.twitter,width: 20,),
+                        callBack: () => CommonUtils.showToast('disable'),
+                        prefix: Image.asset(
+                          Assets.twitter,
+                          width: 20,
+                        ),
                       ),
                       OpenCnButton(
-                        title: 'Facebook登录',
+                        title: s.facebookLogin,
                         left: 50,
                         right: 50,
                         bottom: 10,
                         radius: 20,
                         color: Colors.white,
                         fw: FontWeight.bold,
-                        callBack: () => CommonUtils.showToast('未加入'),
-                        prefix: Image.asset(Assets.facebook,width: 20,),
+                        callBack: () => CommonUtils.showToast('disable'),
+                        prefix: Image.asset(
+                          Assets.facebook,
+                          width: 20,
+                        ),
                       ),
                     ],
                   ),
@@ -164,7 +172,7 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   GestureDetector(
                     onTap: () => Navigator.of(context).pop(),
-                    child: const Text('游客登录'),
+                    child: Text(s.loginAnonymously),
                   ),
                 ],
               ),
@@ -178,11 +186,11 @@ class _LoginPageState extends State<LoginPage> {
                 child: RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(
-                    text: '加入OpenGPT，表示您已同意OpenGPT的',
+                    text: s.hintText1,
                     style: const TextStyle(fontSize: 14, color: Colors.black),
                     children: <TextSpan>[
                       TextSpan(
-                        text: '服务条款和隐私政策',
+                        text: '<<${s.hintText2}>>',
                         style:
                             const TextStyle(fontSize: 14, color: Colors.blue),
                         recognizer: TapGestureRecognizer()

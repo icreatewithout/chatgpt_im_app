@@ -3,6 +3,8 @@ import 'package:chatgpt_im/common/assets.dart';
 import 'package:chatgpt_im/routes/login_page.dart';
 import 'package:chatgpt_im/widgets/ui/open_cn_button.dart';
 
+import '../../generated/l10n.dart';
+
 class UserNotLoggedIn extends StatefulWidget {
   const UserNotLoggedIn({super.key});
 
@@ -23,6 +25,7 @@ class _UserNotLoggedInState extends State<UserNotLoggedIn> {
 
   @override
   Widget build(BuildContext context) {
+    var s = S.of(context);
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.all(20),
@@ -50,15 +53,16 @@ class _UserNotLoggedInState extends State<UserNotLoggedIn> {
                 ),
               ),
               const SizedBox(width: 20),
-              const Text(
-                '您还没有登录',
-                style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1),
+              Text(
+                s.loginTip,
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, letterSpacing: 1),
               ),
             ],
           ),
           const SizedBox(height: 24),
           OpenCnButton(
-            title: '点击登录',
+            title: s.login,
             radius: 20,
             color: Colors.black,
             bgColor: Colors.white,

@@ -1,14 +1,11 @@
 import 'package:chatgpt_im/routes/create/create_assistant.dart';
 import 'package:chatgpt_im/routes/create/create_speech.dart';
-import 'package:chatgpt_im/routes/create/create_fine.dart';
 import 'package:chatgpt_im/routes/create/create_images.dart';
 import 'package:chatgpt_im/routes/create/create_transcription.dart';
 import 'package:chatgpt_im/routes/message/speech_message_page.dart';
 import 'package:chatgpt_im/routes/message/chat_message_page.dart';
-import 'package:chatgpt_im/routes/message/fine_message_page.dart';
 import 'package:chatgpt_im/routes/message/images_message_page.dart';
 import 'package:chatgpt_im/routes/message/transcription_message_page.dart';
-import 'package:chatgpt_im/routes/my_files.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 
@@ -91,7 +88,7 @@ class MenuItems {
     audio,
     // fine
   ];
-  static const List<MenuItem> secondItems = [files];
+  static const List<MenuItem> secondItems = [];
 
   static const assistant =
       MenuItem(text: 'Chat', path: ChatMessage.path, icon: Icons.assistant);
@@ -106,8 +103,8 @@ class MenuItems {
 
   // static const fine =
   //     MenuItem(text: 'FineTunes', path: FineMessage.path, icon: Icons.settings);
-  static const files =
-      MenuItem(text: 'Files', path: MyFiles.path, icon: Icons.file_present);
+  // static const files =
+  //     MenuItem(text: 'Files', path: MyFiles.path, icon: Icons.file_present);
 
   static IconData? getIcon(String? text) {
     IconData? iconData = Icons.telegram;
@@ -127,9 +124,9 @@ class MenuItems {
       // case 'FineTunes':
       //   iconData = Icons.settings;
       //   break;
-      case 'Files':
-        iconData = Icons.file_present;
-        break;
+      // case 'Files':
+      //   iconData = Icons.file_present;
+      //   break;
     }
     return iconData;
   }
@@ -146,8 +143,8 @@ class MenuItems {
         return whisper;
       // case 'FineTunes':
       //   return fine;
-      case 'Files':
-        return files;
+      // case 'Files':
+      //   return files;
     }
     return null;
   }
@@ -186,9 +183,9 @@ class MenuItems {
       // case MenuItems.fine:
       //   Navigator.of(context).pushNamed(CreateFine.path);
       //   break;
-      case MenuItems.files:
-        Navigator.of(context).pushNamed(MyFiles.path);
-        break;
+      // case MenuItems.files:
+      //   Navigator.of(context).pushNamed(MyFiles.path);
+      //   break;
     }
   }
 }

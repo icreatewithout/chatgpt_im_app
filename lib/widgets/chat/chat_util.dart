@@ -10,6 +10,8 @@ import 'package:just_audio/just_audio.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_view/photo_view.dart';
 
+import '../../generated/l10n.dart';
+
 class ChatUtil {
   static Widget textField(TextEditingController controller, FocusNode focusNode,
       String hintText, Function() send) {
@@ -71,7 +73,7 @@ class ChatUtil {
     );
   }
 
-  static openBottomSheet(BuildContext context, File file) =>
+  static openBottomSheet(BuildContext context, File file, S s) =>
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -106,7 +108,7 @@ class ChatUtil {
                     child: IconButton(
                       icon: const Icon(Icons.download,
                           color: Colors.white, size: 28),
-                      onPressed: () => downloadImage(file, context),
+                      onPressed: () => downloadImage(file, context, s),
                     ),
                   ),
                 ),
@@ -116,24 +118,25 @@ class ChatUtil {
         },
       );
 
-  static Future<void> downloadImage(File file, BuildContext context) async {
+  static Future<void> downloadImage(
+      File file, BuildContext context, S s) async {
     bool photosStatus =
         await CommonUtils.requestScopePermission(Permission.photos);
     if (photosStatus) {
       final result = await ImageGallerySaver.saveImage(file.readAsBytesSync(),
           quality: 100);
       if (result['isSuccess']) {
-        CommonUtils.showToast('已保存');
+        CommonUtils.showToast('success');
         if (context.mounted) {
           Navigator.pop(context);
         }
       }
     } else {
-      CommonUtils.showToast('相册未授权');
+      CommonUtils.showToast(s.photoGranted);
     }
   }
 
-  static void downloadAudio(File file, BuildContext context) async {
+  static void downloadAudio(File file, BuildContext context, S s) async {
     bool storageStatus =
         await CommonUtils.requestScopePermission(Permission.photos);
     if (storageStatus) {
@@ -150,9 +153,9 @@ class ChatUtil {
         tmpFile.createSync(recursive: true);
       }
       tmpFile.writeAsBytesSync(uint8list);
-      CommonUtils.showToast('已保存到下载列表');
+      CommonUtils.showToast('success');
     } else {
-      CommonUtils.showToast('存储未授权');
+      CommonUtils.showToast(s.storageGranted);
     }
   }
 

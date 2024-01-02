@@ -35,6 +35,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.18.0
+  intl_translation: 0.18.2
   provider: ^6.0.5
   path_provider: ^2.1.1
   shared_preferences: ^2.2.2

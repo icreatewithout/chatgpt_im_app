@@ -27,19 +27,15 @@ class _LanguageSettingPageState extends State<LanguageSettingPage> {
 
   @override
   Widget build(BuildContext context) {
-    var gm = S.of(context);
+    S s = S.of(context);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
-        title: Text(gm.language),
+        title: Text(s.language, style: const TextStyle(fontSize: 16)),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          icon: const Icon(Icons.arrow_back_ios, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
         ),
       ),
       body: Consumer<LocaleModel>(
@@ -80,7 +76,7 @@ class _LanguageSettingPageState extends State<LanguageSettingPage> {
                   right: 30,
                   bottom: kBottomNavigationBarHeight,
                   child: OpenCnButton(
-                    title: '完成',
+                    title: s.ok,
                     radius: 20,
                     color: Colors.white,
                     bgColor: Colors.grey.shade600,

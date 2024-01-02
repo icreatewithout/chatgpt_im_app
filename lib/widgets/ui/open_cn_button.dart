@@ -74,6 +74,7 @@ class _OpenCnButtonState extends State<OpenCnButton> {
               top: widget.top ?? 0,
               bottom: widget.bottom ?? 0,
             ),
+            padding: const EdgeInsets.only(left: 10, right: 10),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(widget.radius ?? 10),
               color: widget.bgColor ?? Colors.blue.shade400,
@@ -83,11 +84,11 @@ class _OpenCnButtonState extends State<OpenCnButton> {
             child: Text(
               '${widget.title}',
               style: TextStyle(
-                fontSize: widget.size ?? 16,
-                color: widget.color ?? Colors.grey,
-                letterSpacing: widget.ls ?? 0,
-                fontWeight: widget.fw ?? FontWeight.w500,
-              ),
+                  fontSize: widget.size ?? 16,
+                  color: widget.color ?? Colors.grey,
+                  letterSpacing: widget.ls ?? 0,
+                  fontWeight: widget.fw ?? FontWeight.w500,
+                  overflow: TextOverflow.ellipsis),
             ),
           ),
           Positioned(

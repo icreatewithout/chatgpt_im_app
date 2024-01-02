@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../common/assets.dart';
+import '../../generated/l10n.dart';
 import '../../states/UserModel.dart';
 import '../ui/open_cn_button.dart';
 
@@ -24,6 +25,7 @@ class _UserLoggedState extends State<UserLogged> {
 
   @override
   Widget build(BuildContext context) {
+    var s = S.of(context);
     return Consumer<UserModel>(
       builder: (BuildContext context, UserModel userModel, Widget? child) {
         return Container(
@@ -66,10 +68,12 @@ class _UserLoggedState extends State<UserLogged> {
                 children: [
                   Expanded(
                     child: OpenCnButton(
-                      title: '编辑个人信息',
+                      title: s.editInfo,
                       radius: 20,
                       height: 36,
                       width: 150,
+                      left: 10,
+                      right: 10,
                       color: Colors.black,
                       bgColor: Colors.white,
                       size: 14,
@@ -82,7 +86,7 @@ class _UserLoggedState extends State<UserLogged> {
                   const SizedBox(width: 10),
                   Expanded(
                     child: OpenCnButton(
-                      title: '分享主页',
+                      title: s.shareMe,
                       radius: 20,
                       height: 36,
                       color: Colors.black,

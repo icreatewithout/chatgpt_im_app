@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../common/common_utils.dart';
+import '../../generated/l10n.dart';
 import '../ui/open_cn_button.dart';
 
 class EditImage extends StatefulWidget {
@@ -76,6 +77,7 @@ class _EditImageState extends State<EditImage> {
 
   @override
   Widget build(BuildContext context) {
+    var s = S.of(context);
     return Container(
       width: double.infinity,
       height: 300,
@@ -103,14 +105,14 @@ class _EditImageState extends State<EditImage> {
               color: Colors.white,
               bgColor: Colors.grey.shade500,
               callBack: () => Navigator.pop(context),
-              title: '完成',
+              title: s.ok,
             ),
           ),
           Container(
             padding: const EdgeInsets.only(top: 12, bottom: 20),
             child: Column(
               children: [
-                const Center(child: Text('创建编辑或变体')),
+                const Center(child: Text('Create image edit or variation')),
                 Container(
                   margin: const EdgeInsets.only(left: 30, right: 30, top: 30),
                   child: Row(

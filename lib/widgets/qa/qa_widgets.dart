@@ -72,7 +72,6 @@ class _QaWidgetsState extends State<QaWidgets> {
             tg: ToastGravity.TOP, toast: Toast.LENGTH_LONG);
       }
     } catch (e) {
-      debugPrint('异常信息 ---------- ${e.toString()}');
       CommonUtils.showToast(e.toString(),
           tg: ToastGravity.TOP, toast: Toast.LENGTH_LONG);
 
@@ -120,6 +119,7 @@ class _QaWidgetsState extends State<QaWidgets> {
 
   @override
   Widget build(BuildContext context) {
+    var s = S.of(context);
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
@@ -164,7 +164,7 @@ class _QaWidgetsState extends State<QaWidgets> {
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
                         return buildItem(
-                            list[index], index, localeModel, context);
+                            list[index], index, localeModel, context, s);
                       },
                       childCount: list.length,
                     ),
@@ -179,7 +179,7 @@ class _QaWidgetsState extends State<QaWidgets> {
   }
 
   buildItem(GptForum forum, int index, LocaleModel localeModel,
-      BuildContext context) {
+      BuildContext context, S s) {
     return InkWell(
       onTap: () => Navigator.of(context)
           .pushNamed(ForumDetail.path, arguments: {'id': forum.id}),
@@ -198,8 +198,8 @@ class _QaWidgetsState extends State<QaWidgets> {
           children: [
             buildUser(forum, index, localeModel),
             buildDes(forum, index),
-            buildImage(forum, index, context),
-            buildCL(forum, index),
+            buildImage(forum, index, context, s),
+            buildCL(forum, index, s),
           ],
         ),
       ),
@@ -246,24 +246,24 @@ class _QaWidgetsState extends State<QaWidgets> {
     );
   }
 
-  buildImage(GptForum forum, int index, BuildContext context) {
+  buildImage(GptForum forum, int index, BuildContext context, S s) {
     if (forum.pictures == null || forum.pictures!.isEmpty) {
       return const SizedBox();
     }
-    return GridImage(forum.pictures!, context: context).showPicture();
+    return GridImage(forum.pictures!, s, context: context).showPicture();
   }
 
-  buildCL(GptForum forum, int index) {
+  buildCL(GptForum forum, int index, S s) {
     return Container(
       padding: const EdgeInsets.only(top: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${forum.like}推荐',
+          Text('${forum.like}${s.like}',
               style: const TextStyle(fontSize: 12, color: Colors.grey)),
           const Text('・', style: TextStyle(fontSize: 12, color: Colors.grey)),
-          Text('${forum.comment}评论',
+          Text('${forum.comment}${s.comment}',
               style: const TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),

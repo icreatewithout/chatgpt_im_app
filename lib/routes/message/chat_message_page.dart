@@ -15,6 +15,7 @@ import 'package:easy_refresh/easy_refresh.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
@@ -133,18 +134,38 @@ class _ChatMessageState extends State<ChatMessage> {
     }
   }
 
+  bool upload = false;
+
   void selectImage() async {
     XFile? file =
         await picker.pickImage(source: ImageSource.gallery, imageQuality: 70);
     if (file != null) {
-      Result result = await DioUtil().upload(Api.upload, file.path, file.name);
-      if (result.code == 200) {
+      setState(() {
+        upload = true;
+      });
+      try {
+        Result result =
+            await DioUtil().upload(Api.upload, file.path, file.name);
+        print('------ ${result.code}');
+        print('------ ${result.data}');
+        if (result.code == 200) {
+          setState(() {
+            imageName = file.name;
+            imageUrl = result.data['file_url'];
+          });
+        } else {
+          CommonUtils.showToast(result.message,
+              tg: ToastGravity.TOP, toast: Toast.LENGTH_LONG);
+        }
         setState(() {
-          imageName = file.name;
-          imageUrl = result.data['file_url'];
+          upload = false;
         });
-      } else {
-        CommonUtils.showToast(result.message);
+      } catch (e) {
+        CommonUtils.showToast(e.toString(),
+            tg: ToastGravity.TOP, toast: Toast.LENGTH_LONG);
+        setState(() {
+          upload = false;
+        });
       }
     }
   }
@@ -307,10 +328,10 @@ class _ChatMessageState extends State<ChatMessage> {
     }
   }
 
-  void deleteChat(BuildContext context, MenuController controller) async {
+  void deleteChat(BuildContext context, MenuController controller, S s) async {
     controller.close();
     OkCancelResult result = await showOkCancelAlertDialog(
-        context: context, title: '提示', message: '确实删除该会话？');
+        context: context, title: s.hint, message: s.hintDelChat);
     if (result.name == 'ok') {
       ///删除会话，清除关联数据
       await ChatProvider().delete(_chat.id!);
@@ -330,7 +351,7 @@ class _ChatMessageState extends State<ChatMessage> {
 
   @override
   Widget build(BuildContext context) {
-    var gm = S.of(context);
+    var s = S.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -347,7 +368,7 @@ class _ChatMessageState extends State<ChatMessage> {
           icon: const Icon(Icons.arrow_back_ios, size: 20),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        actions: [buildMenuAnchor(context)],
+        actions: [buildMenuAnchor(context, s)],
       ),
       body: SizedBox(
         height: double.infinity,
@@ -423,7 +444,7 @@ class _ChatMessageState extends State<ChatMessage> {
                 );
               },
             ),
-            buildTextField(),
+            buildTextField(s),
           ],
         ),
       ),
@@ -555,7 +576,7 @@ class _ChatMessageState extends State<ChatMessage> {
     );
   }
 
-  buildTextField() {
+  buildTextField(S s) {
     return Positioned(
       left: 0,
       right: 0,
@@ -587,7 +608,7 @@ class _ChatMessageState extends State<ChatMessage> {
                       children: [
                         Expanded(
                             child: ChatUtil.textField(_textController,
-                                _focusNode, '请输入内容', () => send())),
+                                _focusNode, s.inputContent, () => send())),
                         InkWell(
                           onTap: () => send(),
                           child: Icon(Icons.send, color: Colors.blue.shade300),
@@ -631,45 +652,34 @@ class _ChatMessageState extends State<ChatMessage> {
         ),
       );
     }
-    return GestureDetector(
-      onTap: () => selectImage(),
-      child: Container(
+
+    if (upload) {
+      return Container(
         alignment: Alignment.center,
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Icon(Icons.image, color: Colors.grey, size: 26),
-      ),
-    );
-  }
-
-  buildSelectFile() {
-    return Visibility(
-      visible: imageName != '',
-      child: Container(
-        padding: const EdgeInsets.only(top: 5, bottom: 2),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                imageName!,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(color: Colors.grey, fontSize: 12),
-              ),
-            ),
-            GestureDetector(
-              onTap: () => delete(),
-              child: const Icon(Icons.clear, color: Colors.red, size: 14),
-            ),
-          ],
+        child: LoadingAnimationWidget.fallingDot(color: Colors.red, size: 26),
+      );
+    } else {
+      return GestureDetector(
+        onTap: () => selectImage(),
+        child: Container(
+          alignment: Alignment.center,
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: const Icon(Icons.image, color: Colors.grey, size: 26),
         ),
-      ),
-    );
+      );
+    }
   }
 
-  buildMenuAnchor(BuildContext context) {
+  buildMenuAnchor(BuildContext context, S s) {
     late MenuController menuController;
     return MenuAnchor(
       alignmentOffset: const Offset(-60, 0),
@@ -689,13 +699,13 @@ class _ChatMessageState extends State<ChatMessage> {
       },
       menuChildren: [
         GestureDetector(
-          onTap: () => deleteChat(context, menuController),
-          child: buildMenu('删除会话', Icons.delete_forever),
+          onTap: () => deleteChat(context, menuController, s),
+          child: buildMenu(s.delChat, Icons.delete_forever),
         ),
         const PopupMenuDivider(),
         GestureDetector(
           onTap: () => updateChat(context, menuController),
-          child: buildMenu('更新配置', Icons.settings),
+          child: buildMenu(s.updateSetting, Icons.settings),
         ),
       ],
     );

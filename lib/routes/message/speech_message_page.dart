@@ -226,10 +226,10 @@ class _AudioMessageState extends State<AudioMessage>
     }
   }
 
-  void deleteChat(BuildContext context, MenuController controller) async {
+  void deleteChat(BuildContext context, MenuController controller, S s) async {
     controller.close();
     OkCancelResult result = await showOkCancelAlertDialog(
-        context: context, title: '提示', message: '确实删除该会话？');
+        context: context, title: s.hint, message: s.hintDelChat);
     if (result.name == 'ok') {
       ///删除会话，清除关联数据
       await ChatProvider().delete(_chat.id!);
@@ -269,14 +269,14 @@ class _AudioMessageState extends State<AudioMessage>
     });
   }
 
-  void saveFile(String path,BuildContext context) {
+  void saveFile(String path, BuildContext context, S s) {
     File file = File(path);
-    ChatUtil.downloadAudio(file,context);
+    ChatUtil.downloadAudio(file, context, s);
   }
 
   @override
   Widget build(BuildContext context) {
-    var gm = S.of(context);
+    var s = S.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -292,16 +292,11 @@ class _AudioMessageState extends State<AudioMessage>
         ),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            size: 20,
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          icon: const Icon(Icons.arrow_back_ios, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          buildMenuAnchor(),
+          buildMenuAnchor(s),
         ],
       ),
       body: SizedBox(
@@ -367,7 +362,8 @@ class _AudioMessageState extends State<AudioMessage>
                           SliverList(
                             delegate: SliverChildBuilderDelegate(
                               (context, index) {
-                                return buildChatMessage(messages[index], index);
+                                return buildChatMessage(
+                                    messages[index], index, s);
                               },
                               childCount: messages.length,
                             ),
@@ -378,7 +374,7 @@ class _AudioMessageState extends State<AudioMessage>
                   );
                 },
               ),
-              buildTextField(),
+              buildTextField(s),
             ],
           ),
         ),
@@ -386,11 +382,11 @@ class _AudioMessageState extends State<AudioMessage>
     );
   }
 
-  buildChatMessage(Message message, int index) {
+  buildChatMessage(Message message, int index, S s) {
     if (message.type == '1') {
       return userMessage(message);
     } else {
-      return chatMessage(message, index);
+      return chatMessage(message, index, s);
     }
   }
 
@@ -428,7 +424,7 @@ class _AudioMessageState extends State<AudioMessage>
     );
   }
 
-  Widget chatMessage(Message message, int index) {
+  Widget chatMessage(Message message, int index, S s) {
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -439,7 +435,7 @@ class _AudioMessageState extends State<AudioMessage>
           Expanded(
             child: Container(
               alignment: Alignment.centerLeft,
-              child: buildChatMessages(message, index),
+              child: buildChatMessages(message, index, s),
             ),
           ),
         ],
@@ -447,7 +443,7 @@ class _AudioMessageState extends State<AudioMessage>
     );
   }
 
-  buildChatMessages(Message message, int index) {
+  buildChatMessages(Message message, int index, S s) {
     if (message.status != '200') {
       return Container(
         margin: const EdgeInsets.only(left: 8),
@@ -488,7 +484,7 @@ class _AudioMessageState extends State<AudioMessage>
             bottom: 0,
             child: Center(
               child: IconButton(
-                onPressed: () => saveFile(map['path'],context),
+                onPressed: () => saveFile(map['path'], context, s),
                 icon: Icon(
                   Icons.download,
                   color: Colors.grey.shade500,
@@ -513,7 +509,7 @@ class _AudioMessageState extends State<AudioMessage>
     );
   }
 
-  buildTextField() {
+  buildTextField(S s) {
     return Positioned(
       left: 0,
       right: 0,
@@ -532,8 +528,8 @@ class _AudioMessageState extends State<AudioMessage>
           child: Row(
             children: [
               Expanded(
-                  child: ChatUtil.textField(
-                      _textController, _focusNode, '请输入内容', () => send())),
+                  child: ChatUtil.textField(_textController, _focusNode,
+                      s.inputContent, () => send())),
               InkWell(
                   onTap: () => send(),
                   child: Icon(Icons.send, color: Colors.blue.shade300)),
@@ -544,7 +540,7 @@ class _AudioMessageState extends State<AudioMessage>
     );
   }
 
-  buildMenuAnchor() {
+  buildMenuAnchor(S s) {
     late MenuController menuController;
     return MenuAnchor(
       builder:
@@ -563,13 +559,13 @@ class _AudioMessageState extends State<AudioMessage>
       },
       menuChildren: [
         GestureDetector(
-          onTap: () => deleteChat(context, menuController),
-          child: buildMenu('删除会话', Icons.delete_forever),
+          onTap: () => deleteChat(context, menuController, s),
+          child: buildMenu(s.delChat, Icons.delete_forever),
         ),
         const PopupMenuDivider(),
         GestureDetector(
           onTap: () => updateChat(context, menuController),
-          child: buildMenu('更新配置', Icons.settings),
+          child: buildMenu(s.updateSetting, Icons.settings),
         ),
       ],
     );

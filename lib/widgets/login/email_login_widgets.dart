@@ -13,6 +13,8 @@ import 'package:chatgpt_im/widgets/ui/open_cn_button.dart';
 import 'package:chatgpt_im/widgets/ui/open_cn_text_field.dart';
 import 'package:provider/provider.dart';
 
+import '../../generated/l10n.dart';
+
 typedef CallBack = void Function();
 
 class EmailLoginPage extends StatefulWidget {
@@ -30,7 +32,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
   Timer? _timer = null;
-  String _sendTxt = '发送验证码';
+  String _sendTxt = '';
   bool _isSending = false;
   bool _loading = false;
 
@@ -49,7 +51,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
     }
   }
 
-  void _countdown() {
+  void _countdown(S s) {
     if (_timer != null && _timer!.isActive) {
       return;
     }
@@ -59,7 +61,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
       if (i == 0) {
         _timer!.cancel();
         setState(() {
-          _sendTxt = '发送验证码';
+          _sendTxt = s.sendCode;
           _isSending = false;
         });
       } else {
@@ -70,18 +72,18 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
     });
   }
 
-  void _sendCode() async {
+  void _sendCode(S s) async {
     if (_isSending) {
       return;
     }
 
     if (_emailController.text.isEmpty) {
-      CommonUtils.showToast('请输入邮箱');
+      CommonUtils.showToast(s.inputEmail);
       return;
     }
 
     if (!CommonUtils.regexEmail(_emailController.text)) {
-      CommonUtils.showToast('邮箱格式错误');
+      CommonUtils.showToast(s.emailErr);
       return;
     }
 
@@ -94,13 +96,13 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
       Result result =
           await DioUtil().post('${Api.sendCode}${_emailController.text}');
       if (result.code == 200) {
-        CommonUtils.showToast('验证码已发送');
-        _countdown();
+        CommonUtils.showToast(s.sendDone);
+        _countdown(s);
       } else {
         CommonUtils.showToast(result.message);
       }
     } catch (_) {
-      CommonUtils.showToast('操作失败');
+      CommonUtils.showToast('error');
     } finally {
       setState(() {
         _loading = false;
@@ -109,19 +111,19 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
     }
   }
 
-  void _login(BuildContext context) async {
+  void _login(BuildContext context, S s) async {
     if (_emailController.text.isEmpty) {
-      CommonUtils.showToast('请输入邮箱');
+      CommonUtils.showToast(s.inputEmail);
       return;
     }
 
     if (!CommonUtils.regexEmail(_emailController.text)) {
-      CommonUtils.showToast('邮箱格式错误');
+      CommonUtils.showToast(s.emailErr);
       return;
     }
 
     if (_codeController.text.isEmpty) {
-      CommonUtils.showToast('请输入验证码');
+      CommonUtils.showToast(s.inputCode);
       return;
     }
 
@@ -135,7 +137,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
       if (result.code == 200) {
         String token = result.data?['token'];
         DioUtil.setToken(token);
-        CommonUtils.showToast('登录成功');
+        CommonUtils.showToast('success');
         if (context.mounted) {
           Provider.of<UserModel>(context, listen: false).setUser = result;
           Navigator.of(context).pop();
@@ -145,7 +147,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
         CommonUtils.showToast(result.message);
       }
     } catch (_) {
-      CommonUtils.showToast('登录失败');
+      CommonUtils.showToast('error');
     } finally {
       setState(() {
         _loading = false;
@@ -169,8 +171,16 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
     );
   }
 
+  void _setTxt(S s) {
+    setState(() {
+      _sendTxt = s.sendCode;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    var s = S.of(context);
+    _setTxt(s);
     return SingleChildScrollView(
       child: SizedBox(
         height: MediaQuery.of(context).size.height -
@@ -182,19 +192,17 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(
+                SizedBox(
                   height: 40,
                   child: Text(
-                    '邮箱登录',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    s.emailLogin,
+                    style: const TextStyle(
+                        fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(
+                SizedBox(
                   height: 40,
-                  child: Text('输入邮箱，接收并填入验证码'),
+                  child: Text(s.emailHint),
                 ),
                 Container(
                   alignment: Alignment.topLeft,
@@ -203,7 +211,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _label('邮箱'),
+                      _label(s.email),
                       const SizedBox(height: 8),
                       OpenCnTextField(
                         height: 50,
@@ -211,11 +219,11 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                         maxLength: 45,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '请输入邮箱',
+                        hintText: s.inputEmail,
                         controller: _emailController,
                       ),
                       const SizedBox(height: 40),
-                      _label('验证码'),
+                      _label(s.code),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -231,7 +239,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                               padding:
                                   const EdgeInsets.only(left: 10, right: 10),
                               bgColor: Colors.grey.shade200,
-                              hintText: '请输入验证码',
+                              hintText: s.inputCode,
                               controller: _codeController,
                             ),
                           ),
@@ -246,7 +254,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                               size: 14,
                               height: 45,
                               bgColor: Colors.grey.shade600,
-                              callBack: () => _sendCode(),
+                              callBack: () => _sendCode(s),
                             ),
                           ),
                         ],
@@ -262,14 +270,14 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
               right: 0,
               bottom: kBottomNavigationBarHeight,
               child: OpenCnButton(
-                title: '验证',
+                title: s.verify,
                 left: 50,
                 right: 50,
                 radius: 20,
                 color: Colors.white,
                 bgColor: Colors.grey.shade600,
                 fw: FontWeight.bold,
-                callBack: () => _login(context),
+                callBack: () => _login(context, s),
               ),
             ),
             Visibility(

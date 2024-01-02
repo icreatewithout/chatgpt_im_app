@@ -7,6 +7,7 @@ import 'package:chatgpt_im/states/UserModel.dart';
 import 'package:flutter/material.dart';
 
 import '../../common/common_utils.dart';
+import '../../generated/l10n.dart';
 import '../../models/forum/gpt_forum.dart';
 import '../../models/forum/gpt_forum_comment_vo.dart';
 import '../../models/user_vo.dart';
@@ -167,6 +168,7 @@ class _ForumCommentListState extends State<ForumCommentList> {
 
   @override
   Widget build(BuildContext context) {
+    var s = S.of(context);
     return Container(
       color: Colors.white,
       width: double.infinity,
@@ -175,14 +177,14 @@ class _ForumCommentListState extends State<ForumCommentList> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTab(),
-          _list(widget.localeModel),
+          _buildTab(s),
+          _list(widget.localeModel, s),
         ],
       ),
     );
   }
 
-  _buildTab() {
+  _buildTab(S s) {
     return Container(
       decoration: const BoxDecoration(
         border: BorderDirectional(
@@ -212,7 +214,7 @@ class _ForumCommentListState extends State<ForumCommentList> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      '评论',
+                      s.commentText,
                       style: TextStyle(
                           fontWeight: FontWeight.bold,
                           color: _select == 0 ? Colors.blue : _unSelectColor,
@@ -241,7 +243,7 @@ class _ForumCommentListState extends State<ForumCommentList> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    '赞',
+                    s.likeText,
                     style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: _select == 1 ? Colors.blue : _unSelectColor,
@@ -270,7 +272,7 @@ class _ForumCommentListState extends State<ForumCommentList> {
     );
   }
 
-  _list(LocaleModel localeModel) {
+  _list(LocaleModel localeModel, S s) {
     int len = 0;
     if (_select == 0) {
       len = _commentList.length;
@@ -287,7 +289,7 @@ class _ForumCommentListState extends State<ForumCommentList> {
           if (index + 1 == _commentList.length && haveNext) {
             _findList();
           }
-          return _getCommentList(context, index, localeModel);
+          return _getCommentList(context, index, localeModel, s);
         } else {
           if (index + 1 == _likeList.length && haveNext1) {
             _findLikeList();
@@ -298,8 +300,7 @@ class _ForumCommentListState extends State<ForumCommentList> {
     );
   }
 
-  List<Widget> _getChildren(
-      List<dynamic> list, LocaleModel localeModel) {
+  List<Widget> _getChildren(List<dynamic> list, LocaleModel localeModel) {
     List<Widget> widgets = [];
     for (var vo in list) {
       widgets.add(
@@ -320,7 +321,8 @@ class _ForumCommentListState extends State<ForumCommentList> {
     return widgets;
   }
 
-  _getCommentList(BuildContext context, int index, LocaleModel localeModel) {
+  _getCommentList(
+      BuildContext context, int index, LocaleModel localeModel, S s) {
     GptForumCommentVo vo = _commentList[index];
     return GestureDetector(
       onTap: () =>
@@ -343,7 +345,7 @@ class _ForumCommentListState extends State<ForumCommentList> {
                   Column(
                     children: _getChildren(vo.children ?? [], localeModel),
                   ),
-                  _moreWidget(vo, index),
+                  _moreWidget(vo, index, s),
                 ],
               ),
             ),
@@ -404,10 +406,10 @@ class _ForumCommentListState extends State<ForumCommentList> {
     );
   }
 
-  _moreWidget(GptForumCommentVo vo, int index) {
-    String txt = '展开更多回复';
+  _moreWidget(GptForumCommentVo vo, int index, S s) {
+    String txt = s.moreComment;
     if (vo.children == null || vo.children!.isEmpty) {
-      txt = '展开${vo.child}条回复';
+      txt = '${s.open} ${vo.child} ${s.openMun}';
     }
     if (vo.child == 0 || vo.children?.length == vo.child) {
       return const SizedBox();
@@ -418,12 +420,18 @@ class _ForumCommentListState extends State<ForumCommentList> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(height: 0.5, width: 16, color: Colors.grey),
+          Container(height: 0.5, width: 12, color: Colors.grey),
           const SizedBox(width: 10),
-          Text(
-            txt,
-            style: const TextStyle(
-                fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey),
+          Expanded(
+            child: Text(
+              txt,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ),
           const Icon(Icons.keyboard_arrow_down, color: Colors.grey, size: 18)
         ],

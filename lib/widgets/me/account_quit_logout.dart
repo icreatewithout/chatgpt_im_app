@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 
 import '../../common/api.dart';
 import '../../common/common_utils.dart';
+import '../../generated/l10n.dart';
 
 class AccountQuitOrLogout extends StatefulWidget {
   const AccountQuitOrLogout({super.key});
@@ -60,6 +61,7 @@ class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
 
   @override
   Widget build(BuildContext context) {
+    var s = S.of(context);
     return Consumer<UserModel>(
       builder: (BuildContext context, UserModel userModel, Widget? child) {
         return Container(
@@ -78,9 +80,9 @@ class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
             children: [
               GestureDetector(
                 onTap: () => _quit(context),
-                child: const SizedBox(
+                child: SizedBox(
                   width: double.infinity,
-                  child: Text('退出登录'),
+                  child: Text(s.logout),
                 ),
               ),
               Container(
@@ -91,11 +93,11 @@ class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
               ),
               GestureDetector(
                 onTap: () => _logout(context),
-                child: const SizedBox(
+                child: SizedBox(
                   width: double.infinity,
                   child: Text(
-                    '注销账户',
-                    style: TextStyle(color: Colors.red),
+                    s.deleteAccount,
+                    style: const TextStyle(color: Colors.red),
                   ),
                 ),
               ),
@@ -105,9 +107,7 @@ class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
                   width: double.infinity,
                   child: Center(
                     child: LoadingAnimationWidget.fallingDot(
-                      color: Colors.grey,
-                      size: 80,
-                    ),
+                        color: Colors.grey, size: 80),
                   ),
                 ),
               ),

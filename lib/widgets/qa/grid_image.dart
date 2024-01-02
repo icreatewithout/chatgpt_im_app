@@ -10,33 +10,35 @@ import 'package:photo_view/photo_view.dart';
 
 import '../../common/calculate_image.dart';
 import '../../common/common_utils.dart';
+import '../../generated/l10n.dart';
 
 class GridImage {
   final List<dynamic> images;
   BuildContext? context;
+  final S s;
 
-  GridImage(this.images, {this.context});
+  GridImage(this.images, this.s, {this.context});
 
   showPicture() {
     switch (images.length) {
       case 1:
         return buildSingleImage(images[0]);
       case 2:
-        return SizedBox(child: buildGridImage(2, 1, 5, 5), width: 205);
+        return SizedBox(child: buildGridImage(2, 1, 5, 5, s), width: 205);
       case 3:
-        return buildGridImage(3, 1, 5, 5);
+        return buildGridImage(3, 1, 5, 5, s);
       case 4:
-        return SizedBox(child: buildGridImage(2, 1, 5, 5), width: 205);
+        return SizedBox(child: buildGridImage(2, 1, 5, 5, s), width: 205);
       case 5:
-        return buildGridImage(3, 1, 5, 5);
+        return buildGridImage(3, 1, 5, 5, s);
       case 6:
-        return buildGridImage(3, 1, 5, 5);
+        return buildGridImage(3, 1, 5, 5, s);
       case 7:
-        return buildGridImage(3, 1, 5, 5);
+        return buildGridImage(3, 1, 5, 5, s);
       case 8:
-        return buildGridImage(3, 1, 5, 5);
+        return buildGridImage(3, 1, 5, 5, s);
       case 9:
-        return buildGridImage(3, 1, 5, 5);
+        return buildGridImage(3, 1, 5, 5, s);
     }
   }
 
@@ -62,15 +64,14 @@ class GridImage {
         }
 
         return GestureDetector(
-          onTap: () => openBottomSheet(context, url),
-          child: CommonUtils.image(url, h, w, 0,  BoxFit.cover),
+          onTap: () => openBottomSheet(context, url, s),
+          child: CommonUtils.image(url, h, w, 0, BoxFit.cover),
         );
       },
     );
   }
 
-
-  buildGridImage(int crossAxisCount, double ratio, double cs, double ms,
+  buildGridImage(int crossAxisCount, double ratio, double cs, double ms, S s,
       {BoxFit? fit}) {
     return GridView(
       shrinkWrap: true,
@@ -84,15 +85,15 @@ class GridImage {
       children: [
         ...images.map(
           (url) => GestureDetector(
-            onTap: () => openBottomSheet(context!, url),
-            child: CommonUtils.image(url, 0, 0, 0,  BoxFit.cover),
+            onTap: () => openBottomSheet(context!, url, s),
+            child: CommonUtils.image(url, 0, 0, 0, BoxFit.cover),
           ),
         )
       ],
     );
   }
 
-  static openBottomSheet(BuildContext context, String url) =>
+  static openBottomSheet(BuildContext context, String url, S s) =>
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
@@ -127,7 +128,7 @@ class GridImage {
                     child: IconButton(
                       icon: const Icon(Icons.download,
                           color: Colors.white, size: 28),
-                      onPressed: () => downloadImage(url, context),
+                      onPressed: () => downloadImage(url, context, s),
                     ),
                   ),
                 ),
@@ -137,7 +138,7 @@ class GridImage {
         },
       );
 
-  static void downloadImage(String url, BuildContext context) async {
+  static void downloadImage(String url, BuildContext context, S s) async {
     Uint8List? list = await DioUtil().getBytesByUrl(url);
     if (list != null) {
       File file = File.fromUri(Uri.parse(url));
@@ -147,13 +148,13 @@ class GridImage {
         final result = await ImageGallerySaver.saveImage(file.readAsBytesSync(),
             quality: 50);
         if (result['isSuccess']) {
-          CommonUtils.showToast('已保存');
+          CommonUtils.showToast('Success');
           if (context.mounted) {
             Navigator.pop(context);
           }
         }
       } else {
-        CommonUtils.showToast('相册未授权');
+        CommonUtils.showToast(s.photoGranted);
       }
     }
   }

@@ -23,33 +23,95 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
 
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "auto": MessageLookupByLibrary.simpleMessage("Auto"),
-        "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
-        "change_theme": MessageLookupByLibrary.simpleMessage("Change Theme"),
-        "home": MessageLookupByLibrary.simpleMessage("Home"),
-        "language": MessageLookupByLibrary.simpleMessage("Language"),
-        "login": MessageLookupByLibrary.simpleMessage("Login"),
-        "loginTip":
-            MessageLookupByLibrary.simpleMessage("You are not Logged in"),
-        "logout": MessageLookupByLibrary.simpleMessage("Logout"),
-        "logoutTip": MessageLookupByLibrary.simpleMessage("OK to log out! "),
-        "noDescription": MessageLookupByLibrary.simpleMessage("No description"),
-        "ok": MessageLookupByLibrary.simpleMessage("Ok"),
-        "password": MessageLookupByLibrary.simpleMessage("User Password"),
-        "passwordRequired":
-            MessageLookupByLibrary.simpleMessage("password is required"),
-        "theme": MessageLookupByLibrary.simpleMessage("Theme"),
-        "title": MessageLookupByLibrary.simpleMessage("GitMe"),
-        "userName": MessageLookupByLibrary.simpleMessage("User Name"),
-        "userNameRequired":
-            MessageLookupByLibrary.simpleMessage("username is required"),
-        "find":
-            MessageLookupByLibrary.simpleMessage("Find"),
-        "qa":
-            MessageLookupByLibrary.simpleMessage("Q&A"),
-        "infoQ":
-            MessageLookupByLibrary.simpleMessage("InfoQ"),
-        "me":
-            MessageLookupByLibrary.simpleMessage("Me"),
+        "account": MessageLookupByLibrary.simpleMessage("Konto"),
+        "addImage": MessageLookupByLibrary.simpleMessage("Bilder hinzufügen"),
+        "cancel": MessageLookupByLibrary.simpleMessage("Stornieren"),
+        "code": MessageLookupByLibrary.simpleMessage("Bestätigungscode"),
+        "comment": MessageLookupByLibrary.simpleMessage("Kommentar"),
+        "commentText": MessageLookupByLibrary.simpleMessage("Kommentar"),
+        "delChat": MessageLookupByLibrary.simpleMessage("löschen"),
+        "deleteAccount": MessageLookupByLibrary.simpleMessage("Konto löschen"),
+        "editInfo": MessageLookupByLibrary.simpleMessage(
+            "Persönliche Informationen bearbeiten"),
+        "email": MessageLookupByLibrary.simpleMessage("Post"),
+        "emailErr":
+            MessageLookupByLibrary.simpleMessage("Fehler im E-Mail-Format"),
+        "emailHint": MessageLookupByLibrary.simpleMessage(
+            "Geben Sie Ihre E-Mail-Adresse ein, erhalten Sie den Bestätigungscode und geben Sie ihn ein"),
+        "emailLogin": MessageLookupByLibrary.simpleMessage("E-Mail-Login"),
+        "facebookLogin": MessageLookupByLibrary.simpleMessage("Facebook Login"),
+        "find": MessageLookupByLibrary.simpleMessage("OpenAi"),
+        "googleLogin": MessageLookupByLibrary.simpleMessage("Google-Login"),
+        "gpDes": MessageLookupByLibrary.simpleMessage("beschreiben"),
+        "gptDefaultDesVal":
+            MessageLookupByLibrary.simpleMessage("Nützlicher KI-Assistent"),
+        "gptDefaultVal": MessageLookupByLibrary.simpleMessage("Standardwert:"),
+        "gptDesHintText": MessageLookupByLibrary.simpleMessage(
+            "Zum Beispiel: Übersetzungsassistent"),
+        "gptHintText": MessageLookupByLibrary.simpleMessage("Name eingeben"),
+        "gptInstructions": MessageLookupByLibrary.simpleMessage("anweisen"),
+        "gptMessages": MessageLookupByLibrary.simpleMessage(
+            "Anzahl historischer Nachrichten, Standardwert: 1"),
+        "gptName": MessageLookupByLibrary.simpleMessage("Name"),
+        "gptTemperature": MessageLookupByLibrary.simpleMessage("Zufälligkeit"),
+        "hint": MessageLookupByLibrary.simpleMessage("Hinweis"),
+        "hintDelChat": MessageLookupByLibrary.simpleMessage(
+            "Löschen Sie die Sitzung auf jeden Fall"),
+        "hintText": MessageLookupByLibrary.simpleMessage(
+            "Schreibe deine Gedanken auf..."),
+        "hintText1": MessageLookupByLibrary.simpleMessage(
+            "Indem Sie OpenGPT beitreten, stimmen Sie den Nutzungsbedingungen und Datenschutzrichtlinien von OpenGPT zu"),
+        "hintText2": MessageLookupByLibrary.simpleMessage(
+            "Nutzungsbedingungen und Datenschutzbestimmungen"),
+        "inputCode": MessageLookupByLibrary.simpleMessage(
+            "Bitte geben Sie den Bestätigungscode ein"),
+        "inputComment":
+            MessageLookupByLibrary.simpleMessage("Geben Sie Ihre Meinung ein"),
+        "inputContent":
+            MessageLookupByLibrary.simpleMessage("Bitte geben Sie Inhalte ein"),
+        "inputEmail": MessageLookupByLibrary.simpleMessage(
+            "Bitte geben Sie Ihre E-Mail-Adresse ein"),
+        "language": MessageLookupByLibrary.simpleMessage("Sprache"),
+        "like": MessageLookupByLibrary.simpleMessage("wie"),
+        "likeText": MessageLookupByLibrary.simpleMessage("wie"),
+        "limitSize": MessageLookupByLibrary.simpleMessage(
+            "Sie können nur bis zu 9 Bilder auswählen"),
+        "login": MessageLookupByLibrary.simpleMessage("Anmeldung"),
+        "loginAnonymously": MessageLookupByLibrary.simpleMessage("Gast-Login"),
+        "loginTip": MessageLookupByLibrary.simpleMessage(
+            "Du bist noch nicht eingeloggt"),
+        "logout": MessageLookupByLibrary.simpleMessage("Abmelden"),
+        "logoutTip": MessageLookupByLibrary.simpleMessage(
+            "Bestätigen Sie die Abmeldung"),
+        "me": MessageLookupByLibrary.simpleMessage("ICH"),
+        "moreComment": MessageLookupByLibrary.simpleMessage(
+            "Erweitern Sie weitere Antworten"),
+        "ok": MessageLookupByLibrary.simpleMessage("Sicher"),
+        "open":
+            MessageLookupByLibrary.simpleMessage("Erweitern Sie 10 Antworten"),
+        "openMun":
+            MessageLookupByLibrary.simpleMessage("Erweitern Sie 10 Antworten"),
+        "photoGranted": MessageLookupByLibrary.simpleMessage(
+            "Das Album ist nicht autorisiert"),
+        "qa": MessageLookupByLibrary.simpleMessage("Gemeinschaft"),
+        "replay": MessageLookupByLibrary.simpleMessage("Antwort"),
+        "save": MessageLookupByLibrary.simpleMessage("veröffentlichen"),
+        "saveComment": MessageLookupByLibrary.simpleMessage("Kommentar..."),
+        "selectAudioFile":
+            MessageLookupByLibrary.simpleMessage("Wählen Sie ein Dokument aus"),
+        "selectModel": MessageLookupByLibrary.simpleMessage("Modell auswählen"),
+        "sendCode": MessageLookupByLibrary.simpleMessage(
+            "Senden Sie den Bestätigungscode"),
+        "sendDone":
+            MessageLookupByLibrary.simpleMessage("Bestätigungscode gesendet"),
+        "setting": MessageLookupByLibrary.simpleMessage("aufstellen"),
+        "shareMe": MessageLookupByLibrary.simpleMessage("Aktie"),
+        "storageGranted": MessageLookupByLibrary.simpleMessage(
+            "Die Speicherung ist nicht gestattet"),
+        "tosapp": MessageLookupByLibrary.simpleMessage(
+            "Nutzungsbedingungen und Datenschutzbestimmungen"),
+        "updateSetting": MessageLookupByLibrary.simpleMessage("aufstellen"),
+        "verify": MessageLookupByLibrary.simpleMessage("verifizieren"),
+        "xLogin": MessageLookupByLibrary.simpleMessage("XLogin")
       };
 }

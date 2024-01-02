@@ -17,7 +17,6 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:image_picker/image_picker.dart';
 
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:photo_view/photo_view.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/assets.dart';
@@ -285,10 +284,10 @@ class _ImagesMessageState extends State<ImagesMessage> {
     }
   }
 
-  void deleteChat(BuildContext context, MenuController controller) async {
+  void deleteChat(BuildContext context, MenuController controller, S s) async {
     controller.close();
     OkCancelResult result = await showOkCancelAlertDialog(
-        context: context, title: '提示', message: '确实删除该会话？');
+        context: context, title: s.hint, message: s.hintDelChat);
     if (result.name == 'ok') {
       ///删除会话，清除关联数据
       await ChatProvider().delete(_chat.id!);
@@ -315,7 +314,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
 
   @override
   Widget build(BuildContext context) {
-    var gm = S.of(context);
+    var s = S.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -331,16 +330,11 @@ class _ImagesMessageState extends State<ImagesMessage> {
         ),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            size: 20,
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          icon: const Icon(Icons.arrow_back_ios, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          buildMenuAnchor(),
+          buildMenuAnchor(s),
         ],
       ),
       body: SizedBox(
@@ -406,7 +400,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
                           SliverList(
                             delegate: SliverChildBuilderDelegate(
                               (context, index) {
-                                return buildChatMessage(messages[index]);
+                                return buildChatMessage(messages[index], s);
                               },
                               childCount: messages.length,
                             ),
@@ -417,7 +411,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
                   );
                 },
               ),
-              buildTextField(context),
+              buildTextField(context, s),
             ],
           ),
         ),
@@ -425,11 +419,11 @@ class _ImagesMessageState extends State<ImagesMessage> {
     );
   }
 
-  buildChatMessage(Message message) {
+  buildChatMessage(Message message, S s) {
     if (message.type == '1') {
       return userMessage(message);
     } else {
-      return chatMessage(message);
+      return chatMessage(message, s);
     }
   }
 
@@ -467,7 +461,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
     );
   }
 
-  Widget chatMessage(Message message) {
+  Widget chatMessage(Message message, S s) {
     return Container(
       padding: const EdgeInsets.all(8.0),
       child: Row(
@@ -478,7 +472,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
           Expanded(
             child: Container(
               alignment: Alignment.centerLeft,
-              child: buildChatMessages(message),
+              child: buildChatMessages(message, s),
             ),
           ),
         ],
@@ -486,7 +480,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
     );
   }
 
-  buildChatMessages(Message message) {
+  buildChatMessages(Message message, S s) {
     if (message.status != '200') {
       return Container(
         margin: const EdgeInsets.only(left: 8),
@@ -504,20 +498,20 @@ class _ImagesMessageState extends State<ImagesMessage> {
         ...images.map(
           (image) => Container(
             margin: const EdgeInsets.only(left: 8, bottom: 8),
-            child: buildImage(image),
+            child: buildImage(image, s),
           ),
         )
       ],
     );
   }
 
-  buildImage(Map<String, dynamic> data) {
+  buildImage(Map<String, dynamic> data, S s) {
     File file = File(data['path']);
     return CalculateImage.file(file, fileBuilder: (context, snapshot, file) {
       double w = snapshot.data!.width.toDouble() / 5.0;
       double h = snapshot.data!.height.toDouble() / 5.0;
       return GestureDetector(
-        onTap: () => ChatUtil.openBottomSheet(context, file),
+        onTap: () => ChatUtil.openBottomSheet(context, file, s),
         child: SizedBox(
           height: h,
           width: w,
@@ -539,7 +533,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
     );
   }
 
-  buildTextField(BuildContext context) {
+  buildTextField(BuildContext context, S s) {
     return Positioned(
       left: 0,
       right: 0,
@@ -566,7 +560,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
                   children: [
                     Expanded(
                         child: ChatUtil.textField(_textController, _focusNode,
-                            '请输入内容', () => send())),
+                            s.inputContent, () => send())),
                     InkWell(
                         onTap: () => send(),
                         child: Icon(Icons.send, color: Colors.blue.shade300)),
@@ -599,7 +593,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
     );
   }
 
-  buildMenuAnchor() {
+  buildMenuAnchor(S s) {
     late MenuController menuController;
     return MenuAnchor(
       builder:
@@ -618,13 +612,13 @@ class _ImagesMessageState extends State<ImagesMessage> {
       },
       menuChildren: [
         GestureDetector(
-          onTap: () => deleteChat(context, menuController),
-          child: buildMenu('删除会话', Icons.delete_forever),
+          onTap: () => deleteChat(context, menuController, s),
+          child: buildMenu(s.delChat, Icons.delete_forever),
         ),
         const PopupMenuDivider(),
         GestureDetector(
           onTap: () => updateChat(context, menuController),
-          child: buildMenu('更新配置', Icons.settings),
+          child: buildMenu(s.updateSetting, Icons.settings),
         ),
       ],
     );

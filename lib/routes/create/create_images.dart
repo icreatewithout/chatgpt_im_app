@@ -78,18 +78,14 @@ class _CreateImagesState extends State<CreateImages> {
     rfVal = val;
   }
 
-  void pop(BuildContext context) async {
-    if (modelVal == null) {
-      CommonUtils.showToast('请选择model');
-      return;
-    }
-
+  void pop(BuildContext context, S s) async {
     Chat chat = Chat();
     chat.type = MenuItems.images.text;
     chat.name = _nameController.text.isEmpty
         ? MenuItems.images.text
         : _nameController.text;
-    chat.des = _desController.text.isEmpty ? '图片创作助手' : _desController.text;
+    chat.des =
+        _desController.text.isEmpty ? s.gptDefaultDesVal : _desController.text;
     chat.model = modelVal;
     chat.apiKey = _keyController.text;
     chat.n = _nController.text.isEmpty ? '1' : _nController.text;
@@ -124,7 +120,7 @@ class _CreateImagesState extends State<CreateImages> {
 
   @override
   Widget build(BuildContext context) {
-    var gm = S.of(context);
+    var s = S.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -154,7 +150,7 @@ class _CreateImagesState extends State<CreateImages> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('选择模型（model）'),
+                      Text(s.selectModel),
                       const SizedBox(height: 10),
                       SelectWidgets(
                         hint: 'Select Your Model',
@@ -177,25 +173,28 @@ class _CreateImagesState extends State<CreateImages> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('基本信息'),
-                      const SizedBox(height: 10),
+                      Container(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(s.gptName)),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,
                         maxLength: 20,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '名称（name）',
+                        hintText: s.gptHintText,
                         controller: _nameController,
                       ),
-                      buildLine(),
+                      Container(
+                          padding: const EdgeInsets.only(top: 8, bottom: 8),
+                          child: Text(s.gpDes)),
                       OpenCnTextField(
                         height: 46,
                         radius: 10,
                         maxLength: 20,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '描述（des）,例如：图片创作助手',
+                        hintText: s.gptDesHintText,
                         controller: _desController,
                       ),
                       buildLine(),
@@ -223,7 +222,7 @@ class _CreateImagesState extends State<CreateImages> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('返回结果数量'),
+                      const Text('n'),
                       const SizedBox(height: 10),
                       OpenCnTextField(
                         height: 46,
@@ -233,7 +232,7 @@ class _CreateImagesState extends State<CreateImages> {
                         maxLength: 200,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '返回结果数量（n），默认值：1',
+                        hintText: 'n，${s.gptDefaultVal}1',
                         controller: _nController,
                       ),
                     ],
@@ -250,7 +249,7 @@ class _CreateImagesState extends State<CreateImages> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('size（size）'),
+                      const Text('size'),
                       const SizedBox(height: 10),
                       SelectWidgets(
                         hint: 'Select Image Size',
@@ -273,7 +272,7 @@ class _CreateImagesState extends State<CreateImages> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('style（style）'),
+                      const Text('style'),
                       const SizedBox(height: 10),
                       SelectWidgets(
                         hint: 'Select Image Style',
@@ -314,12 +313,12 @@ class _CreateImagesState extends State<CreateImages> {
                   padding: const EdgeInsets.only(
                       left: 20, right: 20, top: 15, bottom: 15),
                   child: OpenCnButton(
-                    title: '完成',
+                    title: s.ok,
                     radius: 20,
                     color: Colors.white,
                     bgColor: Colors.grey.shade600,
                     fw: FontWeight.bold,
-                    callBack: () => pop(context),
+                    callBack: () => pop(context, s),
                   ),
                 ),
               ],

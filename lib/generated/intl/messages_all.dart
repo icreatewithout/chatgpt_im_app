@@ -1,14 +1,3 @@
-// DO NOT EDIT. This is code generated via package:intl/generate_localized.dart
-// This is a library that looks up messages for specific locales by
-// delegating to the appropriate library.
-
-// Ignore issues from commonly used lints in this file.
-// ignore_for_file:implementation_imports, file_names, unnecessary_new
-// ignore_for_file:unnecessary_brace_in_string_interps, directives_ordering
-// ignore_for_file:argument_type_not_assignable, invalid_assignment
-// ignore_for_file:prefer_single_quotes, prefer_generic_function_type_aliases
-// ignore_for_file:comment_references
-
 import 'dart:async';
 
 import 'package:intl/intl.dart';
@@ -37,29 +26,30 @@ import 'messages_sv.dart' as messages_sv;
 import 'messages_tr.dart' as messages_tr;
 import 'messages_zh_cn.dart' as messages_zh_cn;
 
-typedef Future<dynamic> LibraryLoader();
+typedef LibraryLoader = Future<dynamic> Function();
+
 Map<String, LibraryLoader> _deferredLibraries = {
-  'cs': () => new Future.value(null),
-  'da': () => new Future.value(null),
-  'de': () => new Future.value(null),
-  'el': () => new Future.value(null),
-  'en': () => new Future.value(null),
-  'es': () => new Future.value(null),
-  'fi': () => new Future.value(null),
-  'fr': () => new Future.value(null),
-  'he': () => new Future.value(null),
-  'hu': () => new Future.value(null),
-  'it': () => new Future.value(null),
-  'ja': () => new Future.value(null),
-  'ko': () => new Future.value(null),
-  'nl': () => new Future.value(null),
-  'pl': () => new Future.value(null),
-  'pt': () => new Future.value(null),
-  'ru': () => new Future.value(null),
-  'sl': () => new Future.value(null),
-  'sv': () => new Future.value(null),
-  'tr': () => new Future.value(null),
-  'zh_CN': () => new Future.value(null),
+  'cs': () => Future.value('cs'),
+  'da': () => Future.value('da'),
+  'de': () => Future.value('de'),
+  'el': () => Future.value('el'),
+  'en': () => Future.value( 'en'),
+  'es': () => Future.value('es'),
+  'fi': () => Future.value('fi'),
+  'fr': () => Future.value('fr'),
+  'he': () => Future.value('he'),
+  'hu': () => Future.value('hu'),
+  'it': () => Future.value('it'),
+  'ja': () => Future.value('ja'),
+  'ko': () => Future.value('ko'),
+  'nl': () => Future.value('nl'),
+  'pl': () => Future.value('pl'),
+  'pt': () => Future.value('pt'),
+  'ru': () => Future.value('ru'),
+  'sl': () => Future.value('sl'),
+  'sv': () => Future.value('sv'),
+  'tr': () => Future.value('tr'),
+  'zh_CN': () => Future.value('zh_CN'),
 };
 
 MessageLookupByLibrary? _findExact(String localeName) {
@@ -107,7 +97,7 @@ MessageLookupByLibrary? _findExact(String localeName) {
     case 'zh_CN':
       return messages_zh_cn.messages;
     default:
-      return null;
+      return messages_en.messages;
   }
 }
 
@@ -117,13 +107,13 @@ Future<bool> initializeMessages(String localeName) async {
       localeName, (locale) => _deferredLibraries[locale] != null,
       onFailure: (_) => null);
   if (availableLocale == null) {
-    return new Future.value(false);
+    return Future.value(false);
   }
   var lib = _deferredLibraries[availableLocale];
-  await (lib == null ? new Future.value(false) : lib());
-  initializeInternalMessageLookup(() => new CompositeMessageLookup());
+  await (lib == null ? Future.value(false) : lib());
+  initializeInternalMessageLookup(() => CompositeMessageLookup());
   messageLookup.addLocale(availableLocale, _findGeneratedMessagesFor);
-  return new Future.value(true);
+  return Future.value(true);
 }
 
 bool _messagesExistFor(String locale) {

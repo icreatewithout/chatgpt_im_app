@@ -236,10 +236,10 @@ class _WhisperMessageState extends State<WhisperMessage>
     }
   }
 
-  void deleteChat(BuildContext context, MenuController controller) async {
+  void deleteChat(BuildContext context, MenuController controller, S s) async {
     controller.close();
     OkCancelResult result = await showOkCancelAlertDialog(
-        context: context, title: '提示', message: '确实删除该会话？');
+        context: context, title: s.hint, message: s.hintDelChat);
     if (result.name == 'ok') {
       ///删除会话，清除关联数据
       await ChatProvider().delete(_chat.id!);
@@ -317,7 +317,7 @@ class _WhisperMessageState extends State<WhisperMessage>
 
   @override
   Widget build(BuildContext context) {
-    var gm = S.of(context);
+    var s = S.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -333,16 +333,11 @@ class _WhisperMessageState extends State<WhisperMessage>
         ),
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back_ios,
-            size: 20,
-          ),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
+          icon: const Icon(Icons.arrow_back_ios, size: 20),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         actions: [
-          buildMenuAnchor(),
+          buildMenuAnchor(s),
         ],
       ),
       body: SizedBox(
@@ -419,7 +414,7 @@ class _WhisperMessageState extends State<WhisperMessage>
                     );
                   },
                 ),
-                buildTextField(context),
+                buildTextField(context, s),
               ],
             ),
           )),
@@ -543,7 +538,7 @@ class _WhisperMessageState extends State<WhisperMessage>
     );
   }
 
-  buildTextField(BuildContext context) {
+  buildTextField(BuildContext context, S s) {
     return Positioned(
       left: 0,
       right: 0,
@@ -585,7 +580,7 @@ class _WhisperMessageState extends State<WhisperMessage>
                                 ),
                                 child: Text(
                                   audioFile == null
-                                      ? 'Please select audio file.'
+                                      ? s.selectAudioFile
                                       : audioFileName!,
                                   style: const TextStyle(
                                       fontSize: 12, color: Colors.grey),
@@ -653,7 +648,7 @@ class _WhisperMessageState extends State<WhisperMessage>
     }
   }
 
-  buildMenuAnchor() {
+  buildMenuAnchor(S s) {
     late MenuController menuController;
     return MenuAnchor(
       builder:
@@ -672,13 +667,13 @@ class _WhisperMessageState extends State<WhisperMessage>
       },
       menuChildren: [
         GestureDetector(
-          onTap: () => deleteChat(context, menuController),
-          child: buildMenu('删除会话', Icons.delete_forever),
+          onTap: () => deleteChat(context, menuController, s),
+          child: buildMenu(s.delChat, Icons.delete_forever),
         ),
         const PopupMenuDivider(),
         GestureDetector(
           onTap: () => updateChat(context, menuController),
-          child: buildMenu('更新配置', Icons.settings),
+          child: buildMenu(s.updateSetting, Icons.settings),
         ),
       ],
     );

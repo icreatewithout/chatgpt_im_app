@@ -8,6 +8,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 
 import '../../common/api.dart';
 import '../../common/dio_util.dart';
+import '../../generated/l10n.dart';
 import '../../models/forum/gpt_forum.dart';
 import '../../models/result.dart';
 
@@ -34,8 +35,6 @@ class _ForumSheetState extends State<ForumSheet> {
 
   @override
   void initState() {
-    _imageHandler =
-        ImageHandler(del: (i) => _delete(i), select: () => _selectPicture());
     super.initState();
   }
 
@@ -55,12 +54,12 @@ class _ForumSheetState extends State<ForumSheet> {
     });
   }
 
-  Future<bool?> _selectPicture() async {
+  Future<bool?> _selectPicture(S s) async {
     if (_showLoading) {
       return false;
     }
     if (_images.length >= 9) {
-      return CommonUtils.showToast('最多只能选9张', tg: ToastGravity.TOP);
+      return CommonUtils.showToast(s.limitSize, tg: ToastGravity.TOP);
     }
     XFile? file = await _imageHandler.selectPicture();
     if (file != null) {
@@ -72,13 +71,13 @@ class _ForumSheetState extends State<ForumSheet> {
     return null;
   }
 
-  void _save(BuildContext context) async {
+  void _save(BuildContext context, S s) async {
     if (_showLoading) {
       return;
     }
 
     if (_controller.text.isEmpty) {
-      CommonUtils.showToast('请输入内容', tg: ToastGravity.TOP);
+      CommonUtils.showToast(s.inputContent, tg: ToastGravity.TOP);
       return;
     }
 
@@ -89,7 +88,6 @@ class _ForumSheetState extends State<ForumSheet> {
     try {
       if (_images.isNotEmpty) {
         Result result = await DioUtil().uploads(Api.forumUpload, _images);
-        debugPrint('uploads file result is $result');
         if (result.code == 200) {
           if (mounted) {
             _saveForum(context, urls: result.data['urls']);
@@ -148,19 +146,19 @@ class _ForumSheetState extends State<ForumSheet> {
     });
   }
 
-  Widget _getTextFieldDes() {
+  Widget _getTextFieldDes(S s) {
     return TextField(
       controller: _controller,
       maxLength: 1000,
       keyboardType: TextInputType.multiline,
       maxLines: null,
-      decoration: const InputDecoration(
+      decoration: InputDecoration(
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         isDense: true,
-        hintText: '写下你的想法...',
+        hintText: s.hintText,
         counterText: '',
-        hintStyle: TextStyle(fontSize: 16, color: Colors.grey),
+        hintStyle: const TextStyle(fontSize: 16, color: Colors.grey),
       ),
       onEditingComplete: () {
         FocusScopeNode currentFocus = FocusScope.of(context);
@@ -178,8 +176,15 @@ class _ForumSheetState extends State<ForumSheet> {
     }
   }
 
+  void _init(S s) {
+    _imageHandler =
+        ImageHandler(del: (i) => _delete(i), select: () => _selectPicture(s));
+  }
+
   @override
   Widget build(BuildContext context) {
+    var s = S.of(context);
+    _init(s);
     return Scaffold(
       body: Stack(
         children: [
@@ -211,7 +216,7 @@ class _ForumSheetState extends State<ForumSheet> {
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _getTextFieldDes(),
+                        _getTextFieldDes(s),
                         _imageHandler.showPicture(_images),
                       ],
                     ),
@@ -245,10 +250,10 @@ class _ForumSheetState extends State<ForumSheet> {
                         children: [
                           const Icon(Icons.add, color: Colors.blue, size: 16),
                           GestureDetector(
-                            onTap: () => _selectPicture(),
-                            child: const Text(
-                              '添加图片',
-                              style: TextStyle(
+                            onTap: () => _selectPicture(s),
+                            child: Text(
+                              s.addImage,
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                                 color: Colors.blue,
@@ -281,23 +286,22 @@ class _ForumSheetState extends State<ForumSheet> {
                   children: [
                     GestureDetector(
                       onTap: () => _cancel(context),
-                      child: const Text(
-                        '取消',
-                        style: TextStyle(
+                      child: Text(
+                        s.cancel,
+                        style: const TextStyle(
                             color: Colors.grey, fontWeight: FontWeight.bold),
                       ),
                     ),
                     GestureDetector(
-                      onTap: () => _save(context),
+                      onTap: () => _save(context, s),
                       child: _showLoading
                           ? LoadingAnimationWidget.fallingDot(
                               color: Colors.red, size: 30)
-                          : const Text(
-                              '发表',
-                              style: TextStyle(
-                                color: Colors.blue,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          : Text(
+                              s.save,
+                              style: const TextStyle(
+                                  color: Colors.blue,
+                                  fontWeight: FontWeight.bold),
                             ),
                     )
                   ],

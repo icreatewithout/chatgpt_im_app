@@ -23,33 +23,100 @@ class MessageLookup extends MessageLookupByLibrary {
   final messages = _notInlinedMessages(_notInlinedMessages);
 
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "auto": MessageLookupByLibrary.simpleMessage("Auto"),
-        "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
-        "change_theme": MessageLookupByLibrary.simpleMessage("Change Theme"),
-        "home": MessageLookupByLibrary.simpleMessage("Home"),
-        "language": MessageLookupByLibrary.simpleMessage("Language"),
-        "login": MessageLookupByLibrary.simpleMessage("Login"),
-        "loginTip":
-            MessageLookupByLibrary.simpleMessage("You are not Logged in"),
-        "logout": MessageLookupByLibrary.simpleMessage("Logout"),
-        "logoutTip": MessageLookupByLibrary.simpleMessage("OK to log out! "),
-        "noDescription": MessageLookupByLibrary.simpleMessage("No description"),
-        "ok": MessageLookupByLibrary.simpleMessage("Ok"),
-        "password": MessageLookupByLibrary.simpleMessage("User Password"),
-        "passwordRequired":
-            MessageLookupByLibrary.simpleMessage("password is required"),
-        "theme": MessageLookupByLibrary.simpleMessage("Theme"),
-        "title": MessageLookupByLibrary.simpleMessage("GitMe"),
-        "userName": MessageLookupByLibrary.simpleMessage("User Name"),
-        "userNameRequired":
-            MessageLookupByLibrary.simpleMessage("username is required"),
-        "find":
-            MessageLookupByLibrary.simpleMessage("Find"),
-        "qa":
-            MessageLookupByLibrary.simpleMessage("Q&A"),
-        "infoQ":
-            MessageLookupByLibrary.simpleMessage("InfoQ"),
-        "me":
-            MessageLookupByLibrary.simpleMessage("Me"),
+        "account": MessageLookupByLibrary.simpleMessage("Compte"),
+        "addImage": MessageLookupByLibrary.simpleMessage("ajouter des photos"),
+        "cancel": MessageLookupByLibrary.simpleMessage("Annuler"),
+        "code": MessageLookupByLibrary.simpleMessage("Le code de vérification"),
+        "comment": MessageLookupByLibrary.simpleMessage("Commentaire"),
+        "commentText": MessageLookupByLibrary.simpleMessage("Commentaire"),
+        "delChat": MessageLookupByLibrary.simpleMessage("supprimer"),
+        "deleteAccount":
+            MessageLookupByLibrary.simpleMessage("Supprimer le compte"),
+        "editInfo": MessageLookupByLibrary.simpleMessage(
+            "Modifier les informations personnelles"),
+        "email": MessageLookupByLibrary.simpleMessage("Mail"),
+        "emailErr":
+            MessageLookupByLibrary.simpleMessage("Erreur de format d\'e-mail"),
+        "emailHint": MessageLookupByLibrary.simpleMessage(
+            "Entrez votre email, recevez et remplissez le code de vérification"),
+        "emailLogin":
+            MessageLookupByLibrary.simpleMessage("Connexion par e-mail"),
+        "facebookLogin":
+            MessageLookupByLibrary.simpleMessage("Identifiant Facebook"),
+        "find": MessageLookupByLibrary.simpleMessage("OpenAi"),
+        "googleLogin": MessageLookupByLibrary.simpleMessage("Connexion Google"),
+        "gpDes": MessageLookupByLibrary.simpleMessage("décrire"),
+        "gptDefaultDesVal":
+            MessageLookupByLibrary.simpleMessage("Assistant IA utile"),
+        "gptDefaultVal":
+            MessageLookupByLibrary.simpleMessage("valeur par défaut:"),
+        "gptDesHintText": MessageLookupByLibrary.simpleMessage(
+            "Par exemple : assistant de traduction"),
+        "gptHintText": MessageLookupByLibrary.simpleMessage("Entrez le nom"),
+        "gptInstructions": MessageLookupByLibrary.simpleMessage("instruire"),
+        "gptMessages": MessageLookupByLibrary.simpleMessage(
+            "Nombre de messages historiques, valeur par défaut : 1"),
+        "gptName": MessageLookupByLibrary.simpleMessage("nom"),
+        "gptTemperature": MessageLookupByLibrary.simpleMessage("le hasard"),
+        "hint": MessageLookupByLibrary.simpleMessage("indice"),
+        "hintDelChat": MessageLookupByLibrary.simpleMessage(
+            "Supprimer définitivement la session"),
+        "hintText":
+            MessageLookupByLibrary.simpleMessage("écris tes pensées..."),
+        "hintText1": MessageLookupByLibrary.simpleMessage(
+            "En rejoignant OpenGPT, vous acceptez les conditions d\'utilisation et la politique de confidentialité d\'OpenGPT."),
+        "hintText2": MessageLookupByLibrary.simpleMessage(
+            "Conditions d\'utilisation et politique de confidentialité"),
+        "inputCode": MessageLookupByLibrary.simpleMessage(
+            "veuillez entrer le code de vérification"),
+        "inputComment":
+            MessageLookupByLibrary.simpleMessage("Entrez votre avis"),
+        "inputContent":
+            MessageLookupByLibrary.simpleMessage("Veuillez saisir le contenu"),
+        "inputEmail":
+            MessageLookupByLibrary.simpleMessage("veuillez saisir votre email"),
+        "language": MessageLookupByLibrary.simpleMessage("langue"),
+        "like": MessageLookupByLibrary.simpleMessage("comme"),
+        "likeText": MessageLookupByLibrary.simpleMessage("comme"),
+        "limitSize": MessageLookupByLibrary.simpleMessage(
+            "Vous ne pouvez sélectionner que 9 images maximum"),
+        "login": MessageLookupByLibrary.simpleMessage("Se connecter"),
+        "loginAnonymously":
+            MessageLookupByLibrary.simpleMessage("Connexion invité"),
+        "loginTip": MessageLookupByLibrary.simpleMessage(
+            "Vous n\'êtes pas encore connecté"),
+        "logout": MessageLookupByLibrary.simpleMessage("se déconnecter"),
+        "logoutTip":
+            MessageLookupByLibrary.simpleMessage("Confirmer la déconnexion"),
+        "me": MessageLookupByLibrary.simpleMessage("je"),
+        "moreComment":
+            MessageLookupByLibrary.simpleMessage("Développer plus de réponses"),
+        "ok": MessageLookupByLibrary.simpleMessage("Bien sûr"),
+        "open": MessageLookupByLibrary.simpleMessage("Développer 10 réponses"),
+        "openMun":
+            MessageLookupByLibrary.simpleMessage("Développer 10 réponses"),
+        "photoGranted": MessageLookupByLibrary.simpleMessage(
+            "L\'album n\'est pas autorisé"),
+        "qa": MessageLookupByLibrary.simpleMessage("Communauté"),
+        "replay": MessageLookupByLibrary.simpleMessage("répondre"),
+        "save": MessageLookupByLibrary.simpleMessage("publier"),
+        "saveComment": MessageLookupByLibrary.simpleMessage("Commentaire..."),
+        "selectAudioFile":
+            MessageLookupByLibrary.simpleMessage("Sélectionnez un document"),
+        "selectModel":
+            MessageLookupByLibrary.simpleMessage("Sélectionnez le modèle"),
+        "sendCode": MessageLookupByLibrary.simpleMessage(
+            "Envoyer le code de vérification"),
+        "sendDone":
+            MessageLookupByLibrary.simpleMessage("code de verification envoyé"),
+        "setting": MessageLookupByLibrary.simpleMessage("installation"),
+        "shareMe": MessageLookupByLibrary.simpleMessage("partager"),
+        "storageGranted": MessageLookupByLibrary.simpleMessage(
+            "Le stockage n\'est pas autorisé"),
+        "tosapp": MessageLookupByLibrary.simpleMessage(
+            "Conditions d\'utilisation et politique de confidentialité"),
+        "updateSetting": MessageLookupByLibrary.simpleMessage("installation"),
+        "verify": MessageLookupByLibrary.simpleMessage("vérifier"),
+        "xLogin": MessageLookupByLibrary.simpleMessage("XLConnexion")
       };
 }

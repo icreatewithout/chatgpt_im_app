@@ -71,7 +71,7 @@ class _ForumDetailState extends State<ForumDetail> {
 
   @override
   Widget build(BuildContext context) {
-    var gm = S.of(context);
+    var s = S.of(context);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -93,7 +93,7 @@ class _ForumDetailState extends State<ForumDetail> {
                 color: Colors.grey.shade100,
                 padding:
                     const EdgeInsets.only(bottom: kBottomNavigationBarHeight),
-                child: buildView(localeModel, userModel, context),
+                child: buildView(localeModel, userModel, context, s),
               );
             },
           ),
@@ -119,7 +119,7 @@ class _ForumDetailState extends State<ForumDetail> {
   }
 
   buildView(
-      LocaleModel localeModel, UserModel userModel, BuildContext context) {
+      LocaleModel localeModel, UserModel userModel, BuildContext context, S s) {
     return isDone
         ? SingleChildScrollView(
             child: Column(
@@ -143,8 +143,8 @@ class _ForumDetailState extends State<ForumDetail> {
                       const SizedBox(height: 8),
                       buildText(forum),
                       const SizedBox(height: 8),
-                      buildImage(forum, context),
-                      buildCL(forum),
+                      buildImage(forum, context, s),
+                      buildCL(forum, s),
                     ],
                   ),
                 ),
@@ -158,8 +158,8 @@ class _ForumDetailState extends State<ForumDetail> {
                       left: 15, right: 15, top: 10, bottom: 10),
                   child: ForumCommentList(
                     key: commentGlobalKey,
-                    callBack: (id, name, uid) =>
-                        bottomBarGlobalKey.currentState?.setId(id, name, uid),
+                    callBack: (id, name, uid) => bottomBarGlobalKey.currentState
+                        ?.setId(id, name, uid, s),
                     id: forum.id ?? '',
                     forum: forum,
                     localeModel: localeModel,
@@ -204,24 +204,24 @@ class _ForumDetailState extends State<ForumDetail> {
     return Text(forum.des!, style: const TextStyle(fontSize: 16));
   }
 
-  buildImage(GptForum forum, BuildContext context) {
+  buildImage(GptForum forum, BuildContext context, S s) {
     if (forum.pictures == null || forum.pictures!.isEmpty) {
       return const SizedBox();
     }
-    return GridImage(forum.pictures!, context: context).showPicture();
+    return GridImage(forum.pictures!, s, context: context).showPicture();
   }
 
-  buildCL(GptForum forum) {
+  buildCL(GptForum forum, S s) {
     return Container(
       padding: const EdgeInsets.only(top: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('${forum.like}推荐',
+          Text('${forum.like}${s.like}',
               style: const TextStyle(fontSize: 12, color: Colors.grey)),
           const Text('・', style: TextStyle(fontSize: 12, color: Colors.grey)),
-          Text('${forum.comment}评论',
+          Text('${forum.comment}${s.comment}',
               style: const TextStyle(fontSize: 12, color: Colors.grey)),
         ],
       ),

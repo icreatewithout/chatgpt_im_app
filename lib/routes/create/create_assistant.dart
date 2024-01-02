@@ -5,7 +5,6 @@ import 'package:chatgpt_im/widgets/find/menu_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../common/common_utils.dart';
 import '../../generated/l10n.dart';
 import '../../models/gpt/chat.dart';
 import '../../states/LocaleModel.dart';
@@ -73,19 +72,15 @@ class _CreateAssistantState extends State<CreateAssistant> {
     rfVal = val;
   }
 
-  void pop(BuildContext context) async {
-    if (modelVal == null) {
-      CommonUtils.showToast('请选择model');
-      return;
-    }
-
+  void pop(BuildContext context, S s) async {
     Chat chat = Chat();
     chat.id = null;
     chat.type = MenuItems.assistant.text;
     chat.name = _nameController.text.isEmpty
         ? MenuItems.assistant.text
         : _nameController.text;
-    chat.des = _desController.text.isEmpty ? '一个有用的智能助手' : _desController.text;
+    chat.des =
+        _desController.text.isEmpty ? s.gptDefaultDesVal : _desController.text;
     chat.model = modelVal;
     chat.apiKey = _keyController.text;
     chat.temperature = _temperatureController.text.isEmpty
@@ -130,7 +125,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
 
   @override
   Widget build(BuildContext context) {
-    var gm = S.of(context);
+    var s = S.of(context);
     return Scaffold(
       resizeToAvoidBottomInset: true,
       appBar: AppBar(
@@ -161,7 +156,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('选择模型（model）'),
+                      Text(s.selectModel),
                       const SizedBox(height: 10),
                       SelectWidgets(
                         hint: 'Select Your Model',
@@ -186,25 +181,25 @@ class _CreateAssistantState extends State<CreateAssistant> {
                     children: [
                       Container(
                           padding: const EdgeInsets.only(bottom: 8),
-                          child: const Text('名称（Name）')),
+                          child: Text(s.gptName)),
                       OpenCnTextField(
                           height: 46,
                           radius: 10,
                           maxLength: 20,
                           padding: const EdgeInsets.only(left: 10, right: 10),
                           bgColor: Colors.grey.shade200,
-                          hintText: '输入一个名称',
+                          hintText: s.gptHintText,
                           controller: _nameController),
                       Container(
                           padding: const EdgeInsets.only(top: 8, bottom: 8),
-                          child: const Text('指示（Instructions）')),
+                          child: Text(s.gptInstructions)),
                       OpenCnTextField(
                           height: 46,
                           radius: 10,
                           maxLength: 20,
                           padding: const EdgeInsets.only(left: 10, right: 10),
                           bgColor: Colors.grey.shade200,
-                          hintText: '翻译助手',
+                          hintText: s.gptDesHintText,
                           controller: _desController),
                       Container(
                           padding: const EdgeInsets.only(top: 8, bottom: 8),
@@ -232,7 +227,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('随机性（temperature）'),
+                      const Text('temperature'),
                       const SizedBox(height: 10),
                       OpenCnTextField(
                         height: 46,
@@ -241,12 +236,12 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         maxLength: 200,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '默认值：1.0',
+                        hintText: '${s.gptDefaultVal}1.0',
                         controller: _temperatureController,
                       ),
                       Container(
                         padding: const EdgeInsets.only(top: 8, bottom: 8),
-                        child: const Text('Seed（Seed）'),
+                        child: const Text('Seed'),
                       ),
                       OpenCnTextField(
                         height: 46,
@@ -260,7 +255,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                       ),
                       Container(
                         padding: const EdgeInsets.only(top: 8, bottom: 8),
-                        child: const Text('Token数量（maxTokens）'),
+                        child: const Text('maxTokens'),
                       ),
                       OpenCnTextField(
                         height: 46,
@@ -269,12 +264,12 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         maxLength: 200,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '默认值：500',
+                        hintText: '${s.gptDefaultVal}500',
                         controller: _maxTokensController,
                       ),
                       Container(
                         padding: const EdgeInsets.only(top: 8, bottom: 8),
-                        child: const Text('返回结果数量（n）'),
+                        child: const Text('n'),
                       ),
                       OpenCnTextField(
                         height: 46,
@@ -284,12 +279,12 @@ class _CreateAssistantState extends State<CreateAssistant> {
                         maxLength: 200,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: '默认值：1',
+                        hintText: '${s.gptDefaultVal}1',
                         controller: _nController,
                       ),
                       Container(
                         padding: const EdgeInsets.only(top: 8, bottom: 8),
-                        child: const Text('历史消息数量'),
+                        child: const Text('messages'),
                       ),
                       OpenCnTextField(
                           height: 46,
@@ -298,7 +293,7 @@ class _CreateAssistantState extends State<CreateAssistant> {
                           maxLength: 200,
                           padding: const EdgeInsets.only(left: 10, right: 10),
                           bgColor: Colors.grey.shade200,
-                          hintText: '历史消息（message size），默认值：1',
+                          hintText: s.gptMessages,
                           controller: _sizeController),
                     ],
                   ),
@@ -332,12 +327,12 @@ class _CreateAssistantState extends State<CreateAssistant> {
                   padding: const EdgeInsets.only(
                       left: 20, right: 20, top: 15, bottom: 15),
                   child: OpenCnButton(
-                    title: '完成',
+                    title: s.ok,
                     radius: 20,
                     color: Colors.white,
                     bgColor: Colors.grey.shade600,
                     fw: FontWeight.bold,
-                    callBack: () => pop(context),
+                    callBack: () => pop(context, s),
                   ),
                 ),
               ],

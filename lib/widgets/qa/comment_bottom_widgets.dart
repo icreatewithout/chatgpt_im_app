@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import '../../generated/l10n.dart';
 import '../../models/forum/gpt_forum.dart';
 import '../../models/forum/gpt_forum_comment_vo.dart';
 import '../../routes/login_page.dart';
@@ -35,7 +36,7 @@ class _ForumCommentBottomBarState extends State<ForumCommentBottomBar> {
   String type = '1';
   String? _replayId = null;
   String? _prentId = null;
-  String _name = '发表评论...';
+  String _name = '';
   bool isSub = false;
 
   bool get isTextEmpty => _controller.text.isEmpty; //输入框是否为空
@@ -81,9 +82,9 @@ class _ForumCommentBottomBarState extends State<ForumCommentBottomBar> {
   }
 
   ///提交评论
-  void _sub(BuildContext context) async {
+  void _sub(BuildContext context, S s) async {
     if (_controller.text.isEmpty) {
-      CommonUtils.showToast('输入您的观点');
+      CommonUtils.showToast(s.inputComment);
       return;
     }
     setState(() {
@@ -105,7 +106,7 @@ class _ForumCommentBottomBarState extends State<ForumCommentBottomBar> {
         setState(() {
           type = '1';
           _controller.clear();
-          _name = '发表评论...';
+          _name = s.saveComment;
           _replayId = null;
           _prentId = null;
           widget.forum.comment = widget.forum.comment! + 1;
@@ -132,11 +133,11 @@ class _ForumCommentBottomBarState extends State<ForumCommentBottomBar> {
     });
   }
 
-  void setId(String prentId, String name, String replayId) {
+  void setId(String prentId, String name, String replayId, S s) {
     setState(() {
       _prentId = prentId;
       _replayId = replayId;
-      _name = '回复$name';
+      _name = '${s.replay}$name';
       _openKeyboard();
     });
   }
@@ -149,8 +150,16 @@ class _ForumCommentBottomBarState extends State<ForumCommentBottomBar> {
     });
   }
 
+  void _setName(S s) {
+    setState(() {
+      _name = s.saveComment;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    var s = S.of(context);
+    _setName(s);
     return SafeArea(
       child: Container(
         height: double.infinity,
@@ -174,56 +183,61 @@ class _ForumCommentBottomBarState extends State<ForumCommentBottomBar> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Expanded(flex: 1, child: _buildTextField(context)),
-                    _buildSuffix(),
+                    _buildTextField(context, s),
+                    _buildSuffix(s),
                   ],
                 ),
               ),
             ),
-            _buildRightWidget(context),
+            _buildRightWidget(context, s),
           ],
         ),
       ),
     );
   }
 
-  _buildTextField(BuildContext context) {
-    return TextField(
-      controller: _controller,
-      maxLength: 1000,
-      focusNode: _focusNode,
-      keyboardType: TextInputType.multiline,
-      maxLines: 10,
-      decoration: InputDecoration(
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          isDense: true,
-          hintText: _name,
-          counterText: '',
-          hintStyle: const TextStyle(fontSize: 14, color: Colors.grey)),
-      style: const TextStyle(fontSize: 14),
-      textInputAction: TextInputAction.done,
-      onTap: () => setState(() {
-        type = '2';
-      }),
-      onEditingComplete: () {
-        debugPrint('------------');
-        FocusScopeNode currentFocus = FocusScope.of(context);
-        if (!currentFocus.hasPrimaryFocus &&
-            currentFocus.focusedChild != null) {
-          FocusManager.instance.primaryFocus!.unfocus();
-          setState(() {
-            type = '1';
-            _name = '发表评论...';
-            _prentId = null;
-            _replayId = null;
-          });
-        }
-      },
+  _buildTextField(BuildContext context, S s) {
+    return Expanded(
+      child: TextField(
+        controller: _controller,
+        maxLength: 1000,
+        focusNode: _focusNode,
+        keyboardType: TextInputType.multiline,
+        maxLines: 10,
+        decoration: InputDecoration(
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            isDense: true,
+            hintText: _name,
+            counterText: '',
+            hintStyle: const TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+              overflow: TextOverflow.ellipsis,
+            )),
+        style: const TextStyle(fontSize: 14),
+        textInputAction: TextInputAction.done,
+        onTap: () => setState(() {
+          type = '2';
+        }),
+        onEditingComplete: () {
+          FocusScopeNode currentFocus = FocusScope.of(context);
+          if (!currentFocus.hasPrimaryFocus &&
+              currentFocus.focusedChild != null) {
+            FocusManager.instance.primaryFocus!.unfocus();
+            setState(() {
+              type = '1';
+              _name = s.saveComment;
+              _prentId = null;
+              _replayId = null;
+            });
+          }
+        },
+      ),
     );
   }
 
-  _buildRightWidget(BuildContext context) {
+  _buildRightWidget(BuildContext context, S s) {
     if (type == '1') {
       return Expanded(
         flex: 2,
@@ -233,7 +247,7 @@ class _ForumCommentBottomBarState extends State<ForumCommentBottomBar> {
         ),
       );
     } else {
-      return _buildSub(context);
+      return _buildSub(context, s);
     }
   }
 
@@ -269,13 +283,13 @@ class _ForumCommentBottomBarState extends State<ForumCommentBottomBar> {
     );
   }
 
-  _buildSub(BuildContext context) {
+  _buildSub(BuildContext context, S s) {
     return !isSub
         ? InkWell(
-            onTap: () => _sub(context),
+            onTap: () => _sub(context, s),
             child: Container(
               padding: const EdgeInsets.only(left: 20),
-              child: const Text('发表', style: TextStyle(color: Colors.blue)),
+              child: Text(s.save, style: const TextStyle(color: Colors.blue)),
             ),
           )
         : Container(
@@ -285,13 +299,13 @@ class _ForumCommentBottomBarState extends State<ForumCommentBottomBar> {
           );
   }
 
-  _buildSuffix() {
+  _buildSuffix(S s) {
     if (!isTextEmpty) {
       return SizedBox(
         child: InkWell(
           onTap: () => setState(() {
             type = '1';
-            _name = '发表评论...';
+            _name = s.saveComment;
             _prentId = null;
             _replayId = null;
             _controller.clear();

@@ -35,9 +35,10 @@ class DioUtil {
   );
 
   static void init() {
-    debugPrint('token is ${Global.profile.token}');
     if (Global.isRelease) {
       dio.options.baseUrl = Api.releaseUrl;
+    }else{
+      debugPrint('token is ${Global.profile.token}');
     }
 
     // 设置用户token（可能是null，代表未登录）

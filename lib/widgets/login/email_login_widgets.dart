@@ -20,9 +20,10 @@ typedef CallBack = void Function();
 class EmailLoginPage extends StatefulWidget {
   static const String path = "/email/login";
 
-  const EmailLoginPage({super.key, required this.callBack});
+  const EmailLoginPage({super.key, required this.callBack, required this.s});
 
   final CallBack callBack;
+  final S s;
 
   @override
   State<EmailLoginPage> createState() => _EmailLoginPageState();
@@ -31,13 +32,13 @@ class EmailLoginPage extends StatefulWidget {
 class _EmailLoginPageState extends State<EmailLoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
-  Timer? _timer = null;
-  String _sendTxt = '';
-  bool _isSending = false;
+  Timer? _timer;
+  String _sendTxt='';
   bool _loading = false;
 
   @override
   void initState() {
+    _sendTxt = widget.s.sendCode;
     super.initState();
   }
 
@@ -51,53 +52,51 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
     }
   }
 
-  void _countdown(S s) {
+  void _countdown() {
     if (_timer != null && _timer!.isActive) {
       return;
     }
     int i = 60;
     _timer = Timer.periodic(const Duration(milliseconds: 1000), (timer) {
+      debugPrint('-----------$i');
       i--;
       if (i == 0) {
         _timer!.cancel();
         setState(() {
-          _sendTxt = s.sendCode;
-          _isSending = false;
+          _sendTxt = widget.s.sendCode;
         });
       } else {
         setState(() {
-          _sendTxt = '$i 秒';
+          _sendTxt = '$i ss';
         });
       }
     });
   }
 
-  void _sendCode(S s) async {
-    if (_isSending) {
+  void _sendCode() async {
+    if (_timer != null && _timer!.isActive) {
       return;
     }
 
     if (_emailController.text.isEmpty) {
-      CommonUtils.showToast(s.inputEmail);
+      CommonUtils.showToast(widget.s.inputEmail);
       return;
     }
 
     if (!CommonUtils.regexEmail(_emailController.text)) {
-      CommonUtils.showToast(s.emailErr);
+      CommonUtils.showToast(widget.s.emailErr);
       return;
     }
 
     setState(() {
       _loading = true;
-      _isSending = true;
     });
 
     try {
       Result result =
           await DioUtil().post('${Api.sendCode}${_emailController.text}');
       if (result.code == 200) {
-        _countdown(s);
-        CommonUtils.showToast(s.sendDone);
+        _countdown();
       } else {
         CommonUtils.showToast(result.message);
       }
@@ -106,24 +105,23 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
     } finally {
       setState(() {
         _loading = false;
-        _isSending = false;
       });
     }
   }
 
-  void _login(BuildContext context, S s) async {
+  void _login(BuildContext context) async {
     if (_emailController.text.isEmpty) {
-      CommonUtils.showToast(s.inputEmail);
+      CommonUtils.showToast(widget.s.inputEmail);
       return;
     }
 
     if (!CommonUtils.regexEmail(_emailController.text)) {
-      CommonUtils.showToast(s.emailErr);
+      CommonUtils.showToast(widget.s.emailErr);
       return;
     }
 
     if (_codeController.text.isEmpty) {
-      CommonUtils.showToast(s.inputCode);
+      CommonUtils.showToast(widget.s.inputCode);
       return;
     }
 
@@ -171,16 +169,9 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
     );
   }
 
-  void _setTxt(S s) {
-    setState(() {
-      _sendTxt = s.sendCode;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
-    var s = S.of(context);
-    _setTxt(s);
     return SingleChildScrollView(
       child: SizedBox(
         height: MediaQuery.of(context).size.height -
@@ -195,14 +186,15 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                 SizedBox(
                   height: 40,
                   child: Text(
-                    s.emailLogin,
+                    widget.s.emailLogin,
                     style: const TextStyle(
                         fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                 ),
-                SizedBox(
+                Container(
+                  padding: const EdgeInsets.only(left: 20, right: 20),
                   height: 40,
-                  child: Text(s.emailHint),
+                  child: Text(widget.s.emailHint),
                 ),
                 Container(
                   alignment: Alignment.topLeft,
@@ -211,7 +203,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _label(s.email),
+                      _label(widget.s.email),
                       const SizedBox(height: 8),
                       OpenCnTextField(
                         height: 50,
@@ -219,11 +211,11 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                         maxLength: 45,
                         padding: const EdgeInsets.only(left: 10, right: 10),
                         bgColor: Colors.grey.shade200,
-                        hintText: s.inputEmail,
+                        hintText: widget.s.inputEmail,
                         controller: _emailController,
                       ),
                       const SizedBox(height: 40),
-                      _label(s.code),
+                      _label(widget.s.code),
                       const SizedBox(height: 8),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -239,7 +231,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                               padding:
                                   const EdgeInsets.only(left: 10, right: 10),
                               bgColor: Colors.grey.shade200,
-                              hintText: s.inputCode,
+                              hintText: widget.s.inputCode,
                               controller: _codeController,
                             ),
                           ),
@@ -254,7 +246,7 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
                               size: 14,
                               height: 45,
                               bgColor: Colors.grey.shade600,
-                              callBack: () => _sendCode(s),
+                              callBack: () => _sendCode(),
                             ),
                           ),
                         ],
@@ -270,22 +262,22 @@ class _EmailLoginPageState extends State<EmailLoginPage> {
               right: 0,
               bottom: kBottomNavigationBarHeight,
               child: OpenCnButton(
-                title: s.verify,
+                title: widget.s.verify,
                 left: 50,
                 right: 50,
                 radius: 20,
                 color: Colors.white,
                 bgColor: Colors.grey.shade600,
                 fw: FontWeight.bold,
-                callBack: () => _login(context, s),
+                callBack: () => _login(context),
               ),
             ),
             Visibility(
               visible: _loading,
               child: Center(
                 child: LoadingAnimationWidget.fallingDot(
-                  color: Colors.grey,
-                  size: 80,
+                  color: Colors.red,
+                  size: 40,
                 ),
               ),
             ),

@@ -5,6 +5,7 @@ import 'package:chatgpt_im/widgets/me/account_quit_logout.dart';
 import 'package:chatgpt_im/widgets/me/setting_widgets.dart';
 import 'package:chatgpt_im/widgets/me/user_logged_widgets.dart';
 import 'package:chatgpt_im/widgets/me/user_not_logged_in_widgets.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:provider/provider.dart';
 
 import '../../common/global.dart';
@@ -21,6 +22,8 @@ class MeWidgets extends StatefulWidget {
 }
 
 class _MeWidgetsState extends State<MeWidgets> {
+  bool showLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -29,14 +32,6 @@ class _MeWidgetsState extends State<MeWidgets> {
   @override
   void dispose() {
     super.dispose();
-  }
-
-  int _select = 0;
-
-  void _oonTabMenu(index) {
-    setState(() {
-      _select = index;
-    });
   }
 
   void _openSheet(BuildContext context) {
@@ -57,6 +52,12 @@ class _MeWidgetsState extends State<MeWidgets> {
         );
       },
     );
+  }
+
+  void show(bool b) {
+    setState(() {
+      showLoading = b;
+    });
   }
 
   @override
@@ -119,7 +120,7 @@ class _MeWidgetsState extends State<MeWidgets> {
                                     fontWeight: FontWeight.bold),
                               ),
                             ),
-                            AccountQuitOrLogout(showLoading: () => {}),
+                            AccountQuitOrLogout(showLoading: (val) => show(val)),
                           ],
                         ),
                       )
@@ -128,7 +129,13 @@ class _MeWidgetsState extends State<MeWidgets> {
                 );
               },
             ),
-          )
+          ),
+          showLoading
+              ? Center(
+                  child: LoadingAnimationWidget.fallingDot(
+                      color: Colors.red, size: 30),
+                )
+              : const SizedBox(),
         ],
       ),
     );

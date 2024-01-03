@@ -53,10 +53,13 @@ class _UserNotLoggedInState extends State<UserNotLoggedIn> {
                 ),
               ),
               const SizedBox(width: 20),
-              Text(
-                s.loginTip,
-                style: const TextStyle(
-                    fontWeight: FontWeight.bold, letterSpacing: 1),
+              Expanded(
+                child: Text(
+                  s.loginTip,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, letterSpacing: 1),
+
+                ),
               ),
             ],
           ),

@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.of(context).pushNamed(EmailLoginPage.path);
   }
 
-  void showEmailLoginSheet(BuildContext context) {
+  void showEmailLoginSheet(BuildContext context, S s) {
     showModalBottomSheet(
       useSafeArea: true,
       isScrollControlled: true,
@@ -54,6 +54,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
               ),
               child: EmailLoginPage(
+                s: s,
                 callBack: () => {
                   Navigator.of(context).pop(),
                 },
@@ -121,7 +122,7 @@ class _LoginPageState extends State<LoginPage> {
                         color: Colors.white,
                         fw: FontWeight.bold,
                         size: 15,
-                        callBack: () => showEmailLoginSheet(context),
+                        callBack: () => showEmailLoginSheet(context, s),
                       ),
                       OpenCnButton(
                         title: s.googleLogin,
@@ -182,7 +183,7 @@ class _LoginPageState extends State<LoginPage> {
               right: 40,
               bottom: kBottomNavigationBarHeight,
               child: Container(
-                padding: const EdgeInsets.only(left: 40, right: 40),
+                padding: const EdgeInsets.only(left: 10, right: 10),
                 child: RichText(
                   textAlign: TextAlign.center,
                   text: TextSpan(

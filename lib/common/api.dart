@@ -6,7 +6,7 @@ class Api {
   static const String sendCode = "/auth/send/by/";
   static const String login = "/auth/login/by/";
   static const String logout = "/auth/logout";
-  static const String delAccount = "/auth/user/del/account";
+  static const String delAccount = "/auth/user/delete/account";
   static const String updateInfo = "/auth/user/update";
   static const String uploadAvatar = "/auth/user/upload";
 

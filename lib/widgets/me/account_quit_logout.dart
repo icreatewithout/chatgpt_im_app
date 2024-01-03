@@ -31,6 +31,7 @@ class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
   }
 
   void _quit(BuildContext context) async {
+    widget.showLoading(true);
     try {
       Result result = await DioUtil().get(Api.logout);
       if (result.code == 200) {
@@ -47,10 +48,13 @@ class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
       }
     } catch (_) {
       CommonUtils.showToast('error');
+    } finally {
+      widget.showLoading(false);
     }
   }
 
   void _logout(BuildContext context) async {
+    widget.showLoading(true);
     try {
       Result result = await DioUtil().delete(Api.delAccount);
       if (result.code == 200) {
@@ -67,6 +71,8 @@ class _AccountQuitOrLogoutState extends State<AccountQuitOrLogout> {
       }
     } catch (_) {
       CommonUtils.showToast('error');
+    } finally {
+      widget.showLoading(false);
     }
   }
 

@@ -60,8 +60,6 @@ class _MyInfoState extends State<MyInfo> {
           });
           Result result =
               await DioUtil().upload(Api.uploadAvatar, localPath, file.name);
-          debugPrint('${result.code}');
-          debugPrint('${result.data}');
           if (result.code == 200) {
             setState(() {
               userVo!.avatarUrl = result.data;

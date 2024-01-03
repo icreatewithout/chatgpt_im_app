@@ -81,7 +81,6 @@ class _ImagesMessageState extends State<ImagesMessage> {
   void updateChatInfo() async {
     Chat? chat = await ChatProvider().get(widget.arguments['id']);
     if (chat != null) {
-      debugPrint('${chat.toJson()}');
       setState(() {
         _chat = chat;
       });
@@ -221,27 +220,37 @@ class _ImagesMessageState extends State<ImagesMessage> {
         String path = '';
         if (data.haveUrl) {
           Uint8List? bytes = await DioUtil().getBytesByUrl(data.url!);
-          if (bytes != null) {
+          if (bytes != null && bytes.isNotEmpty) {
             path = await ChatUtil.saveFile(
                 _path, '${DateTime.now().millisecondsSinceEpoch}.png', bytes);
           }
-        } else {
+          images.add(
+            {
+              'path': path,
+              'url': data.url,
+              'b64Json': data.b64Json,
+              'haveUrl': data.haveUrl,
+              'revisedPrompt': data.revisedPrompt
+            },
+          );
+        } else if (data.haveB64Json) {
           Uint8List bytes = base64.decode(data.b64Json!);
           path = await ChatUtil.saveFile(
               _path, '${DateTime.now().millisecondsSinceEpoch}.png', bytes);
+          images.add(
+            {
+              'path': path,
+              'url': data.url,
+              'b64Json': data.b64Json,
+              'haveUrl': data.haveUrl,
+              'revisedPrompt': data.revisedPrompt
+            },
+          );
         }
 
-        images.add(
-          {
-            'path': path,
-            'url': data.url,
-            'b64Json': data.b64Json,
-            'haveUrl': data.haveUrl,
-            'revisedPrompt': data.revisedPrompt
-          },
-        );
       }
-      receive(json.encode(images), '200');
+      receive(images.isNotEmpty ? json.encode(images) : 'Empty message...',
+          images.isNotEmpty ? '200' : '500');
     } on RequestFailedException catch (e) {
       receive(e.message, '${e.statusCode}');
     } catch (e) {
@@ -492,7 +501,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
       );
     }
 
-    List<dynamic> images = json.decode(message.message!);
+    List<dynamic> images = json.decode(message.message ?? '{}');
     return Column(
       children: [
         ...images.map(

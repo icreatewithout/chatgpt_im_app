@@ -395,13 +395,12 @@ class _QaWidgetsState extends State<QaWidgets> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
       ),
-      constraints: const BoxConstraints(maxHeight: 120),
+      constraints: const BoxConstraints(maxHeight: 140),
       child: CarouselSlider(
         options: CarouselOptions(viewportFraction: 1.0, autoPlay: true),
         items: [
-          buildSliderItem('欢迎来到OpenGPT社区', '在这里是匿名的、安全的，在使用过程中您的一切信息都会被加密！'),
-          buildSliderItem('提示', '如果您在使用中，遇到问题请与我联系：agdhhjfhtdh585@gmail.com！'),
-          buildSliderItem('注销账户与信息安全', '您在使用应用时只有社区功能会记录您的信息，您可以联系我们删除!'),
+          buildSliderItem('Welcome to OpenGPT', 'This is an anonymous, open ChatGPT tool APP.'),
+          buildSliderItem('Tips', 'If you encounter any problems, please contact me: agdhhjfhtdh585@gmail.com.'),
         ],
       ),
     );
@@ -423,7 +422,7 @@ class _QaWidgetsState extends State<QaWidgets> {
           Text(
             des,
             style: const TextStyle(fontSize: 15, color: Colors.grey),
-            maxLines: 2,
+            maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
         ],

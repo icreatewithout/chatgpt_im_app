@@ -94,7 +94,6 @@ class _WhisperMessageState extends State<WhisperMessage>
   void updateChatInfo() async {
     Chat? chat = await ChatProvider().get(widget.arguments['id']);
     if (chat != null) {
-      debugPrint('${chat.toJson()}');
       setState(() {
         _chat = chat;
       });

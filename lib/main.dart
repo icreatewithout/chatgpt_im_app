@@ -57,8 +57,8 @@ class MyApp extends StatelessWidget {
                 } else {
                   //如果系统语言不是中文简体或美国英语，则默认使用美国英语
                   tempLocale = const Locale.fromSubtags(
-                    languageCode: 'zh',
-                    countryCode: 'CN',
+                    languageCode: 'en',
+                    countryCode: 'US',
                   );
                 }
                 return tempLocale;

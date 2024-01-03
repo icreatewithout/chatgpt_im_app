@@ -36,7 +36,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Modifier les informations personnelles"),
         "email": MessageLookupByLibrary.simpleMessage("Mail"),
         "emailErr":
-            MessageLookupByLibrary.simpleMessage("Erreur de format d\'e-mail"),
+            MessageLookupByLibrary.simpleMessage("Erreur de format dMyCommente-mail"),
         "emailHint": MessageLookupByLibrary.simpleMessage(
             "Entrez votre email, recevez et remplissez le code de vérification"),
         "emailLogin":
@@ -60,13 +60,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "gptTemperature": MessageLookupByLibrary.simpleMessage("le hasard"),
         "hint": MessageLookupByLibrary.simpleMessage("indice"),
         "hintDelChat": MessageLookupByLibrary.simpleMessage(
-            "Supprimer définitivement la session"),
+            "Êtes-vous sûr de le supprimer ?"),
         "hintText":
             MessageLookupByLibrary.simpleMessage("écris tes pensées..."),
         "hintText1": MessageLookupByLibrary.simpleMessage(
-            "En rejoignant OpenGPT, vous acceptez les conditions d\'utilisation et la politique de confidentialité d\'OpenGPT."),
+            "En rejoignant OpenGPT, vous acceptez les conditions dMyCommentutilisation et la politique de confidentialité dMyCommentOpenGPT."),
         "hintText2": MessageLookupByLibrary.simpleMessage(
-            "Conditions d\'utilisation et politique de confidentialité"),
+            "Conditions dMyCommentutilisation et politique de confidentialité"),
         "inputCode": MessageLookupByLibrary.simpleMessage(
             "veuillez entrer le code de vérification"),
         "inputComment":
@@ -84,7 +84,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "loginAnonymously":
             MessageLookupByLibrary.simpleMessage("Connexion invité"),
         "loginTip": MessageLookupByLibrary.simpleMessage(
-            "Vous n\'êtes pas encore connecté"),
+            "Vous nMyCommentêtes pas encore connecté"),
         "logout": MessageLookupByLibrary.simpleMessage("se déconnecter"),
         "logoutTip":
             MessageLookupByLibrary.simpleMessage("Confirmer la déconnexion"),
@@ -96,7 +96,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "openMun":
             MessageLookupByLibrary.simpleMessage("Développer 10 réponses"),
         "photoGranted": MessageLookupByLibrary.simpleMessage(
-            "L\'album n\'est pas autorisé"),
+            "LMyCommentalbum nMyCommentest pas autorisé"),
         "qa": MessageLookupByLibrary.simpleMessage("Communauté"),
         "replay": MessageLookupByLibrary.simpleMessage("répondre"),
         "save": MessageLookupByLibrary.simpleMessage("publier"),
@@ -112,11 +112,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "setting": MessageLookupByLibrary.simpleMessage("installation"),
         "shareMe": MessageLookupByLibrary.simpleMessage("partager"),
         "storageGranted": MessageLookupByLibrary.simpleMessage(
-            "Le stockage n\'est pas autorisé"),
+            "Le stockage nMyCommentest pas autorisé"),
         "tosapp": MessageLookupByLibrary.simpleMessage(
-            "Conditions d\'utilisation et politique de confidentialité"),
+            "Conditions dMyCommentutilisation et politique de confidentialité"),
         "updateSetting": MessageLookupByLibrary.simpleMessage("installation"),
         "verify": MessageLookupByLibrary.simpleMessage("vérifier"),
-        "xLogin": MessageLookupByLibrary.simpleMessage("XLConnexion")
+        "xLogin": MessageLookupByLibrary.simpleMessage("XLConnexion"),
+        "avatar": MessageLookupByLibrary.simpleMessage("avatar"),
+        "nickname": MessageLookupByLibrary.simpleMessage("Surnom"),
+        "mine": MessageLookupByLibrary.simpleMessage("le mien"),
+        "feedback": MessageLookupByLibrary.simpleMessage("écris ta question"),
+        "myContent": MessageLookupByLibrary.simpleMessage("mon contenu"),
+        "myComment": MessageLookupByLibrary.simpleMessage("mon commentaire"),
       };
 }

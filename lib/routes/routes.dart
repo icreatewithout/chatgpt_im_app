@@ -3,6 +3,8 @@ import 'package:chatgpt_im/routes/message/chat_message_page.dart';
 import 'package:chatgpt_im/routes/message/fine_message_page.dart';
 import 'package:chatgpt_im/routes/message/images_message_page.dart';
 import 'package:chatgpt_im/routes/message/transcription_message_page.dart';
+import 'package:chatgpt_im/routes/my_comment.dart';
+import 'package:chatgpt_im/routes/my_content.dart';
 import 'package:chatgpt_im/routes/my_files.dart';
 import 'package:flutter/material.dart';
 
@@ -48,6 +50,8 @@ final routes = <String, WidgetBuilder>{
   ForumDetail.path: (BuildContext context, {arguments}) =>
       ForumDetail(arguments: arguments),
   MyInfo.path: (BuildContext context, {arguments}) => const MyInfo(),
+  MyContent.path: (BuildContext context, {arguments}) => const MyContent(),
+  MyComment.path: (BuildContext context, {arguments}) => const MyComment(),
 };
 
 RouteFactory routeFactory = (RouteSettings settings) {

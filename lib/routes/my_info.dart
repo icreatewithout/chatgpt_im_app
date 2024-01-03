@@ -167,8 +167,8 @@ class _MyInfoState extends State<MyInfo> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('头像',
-                                style: TextStyle(
+                            Text(s.avatar,
+                                style: const TextStyle(
                                     fontSize: 18,
                                     color: Colors.grey,
                                     fontWeight: FontWeight.w500)),
@@ -182,8 +182,8 @@ class _MyInfoState extends State<MyInfo> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          const Text('昵称',
-                              style: TextStyle(
+                          Text(s.nickname,
+                              style: const TextStyle(
                                   fontSize: 18,
                                   color: Colors.grey,
                                   fontWeight: FontWeight.w500)),

@@ -56,7 +56,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "gptTemperature": MessageLookupByLibrary.simpleMessage("Zufälligkeit"),
         "hint": MessageLookupByLibrary.simpleMessage("Hinweis"),
         "hintDelChat": MessageLookupByLibrary.simpleMessage(
-            "Löschen Sie die Sitzung auf jeden Fall"),
+            "Möchten Sie es wirklich löschen?"),
         "hintText": MessageLookupByLibrary.simpleMessage(
             "Schreibe deine Gedanken auf..."),
         "hintText1": MessageLookupByLibrary.simpleMessage(
@@ -112,6 +112,12 @@ class MessageLookup extends MessageLookupByLibrary {
             "Nutzungsbedingungen und Datenschutzbestimmungen"),
         "updateSetting": MessageLookupByLibrary.simpleMessage("aufstellen"),
         "verify": MessageLookupByLibrary.simpleMessage("verifizieren"),
-        "xLogin": MessageLookupByLibrary.simpleMessage("XLogin")
+        "xLogin": MessageLookupByLibrary.simpleMessage("XLogin"),
+        "avatar": MessageLookupByLibrary.simpleMessage("Benutzerbild"),
+        "nickname": MessageLookupByLibrary.simpleMessage("Spitzname"),
+        "mine": MessageLookupByLibrary.simpleMessage("meins"),
+        "feedback": MessageLookupByLibrary.simpleMessage("schreibe deine Frage"),
+        "myContent": MessageLookupByLibrary.simpleMessage("mein Inhalt"),
+        "myComment": MessageLookupByLibrary.simpleMessage("mein Kommentar"),
       };
 }

@@ -1,3 +1,6 @@
+import 'package:chatgpt_im/routes/login_page.dart';
+import 'package:chatgpt_im/routes/my_comment.dart';
+import 'package:chatgpt_im/routes/my_content.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:chatgpt_im/common/dio_util.dart';
@@ -48,10 +51,11 @@ class _ForumCommentState extends State<ForumComment> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               GestureDetector(
-                onTap: () => {},
+                onTap: () => Navigator.of(context).pushNamed(
+                    userModel.isLogin ? MyContent.path : LoginPage.path),
                 child: SizedBox(
                   width: double.infinity,
-                  child: Text('我的内容'),
+                  child: Text(s.myContent),
                 ),
               ),
               Container(
@@ -61,10 +65,11 @@ class _ForumCommentState extends State<ForumComment> {
                     border: Border(bottom: BorderSide(width: 0.1))),
               ),
               GestureDetector(
-                onTap: () => {},
+                onTap: () => Navigator.of(context).pushNamed(
+                    userModel.isLogin ? MyComment.path : LoginPage.path),
                 child: SizedBox(
                   width: double.infinity,
-                  child: Text('我的评论'),
+                  child: Text(s.myComment),
                 ),
               ),
             ],

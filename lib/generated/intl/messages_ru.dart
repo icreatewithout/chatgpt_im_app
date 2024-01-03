@@ -61,7 +61,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "gptTemperature": MessageLookupByLibrary.simpleMessage("случайность"),
         "hint": MessageLookupByLibrary.simpleMessage("намекать"),
         "hintDelChat":
-            MessageLookupByLibrary.simpleMessage("Обязательно удалите сеанс"),
+            MessageLookupByLibrary.simpleMessage("Вы уверены, что удалите его?"),
         "hintText":
             MessageLookupByLibrary.simpleMessage("запишите свои мысли..."),
         "hintText1": MessageLookupByLibrary.simpleMessage(
@@ -116,6 +116,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Условия обслуживания и политика конфиденциальности"),
         "updateSetting": MessageLookupByLibrary.simpleMessage("настраивать"),
         "verify": MessageLookupByLibrary.simpleMessage("проверять"),
-        "xLogin": MessageLookupByLibrary.simpleMessage("XВойти")
+        "xLogin": MessageLookupByLibrary.simpleMessage("XВойти"),
+        "avatar": MessageLookupByLibrary.simpleMessage("аватар"),
+        "nickname": MessageLookupByLibrary.simpleMessage("Никнейм"),
+        "mine": MessageLookupByLibrary.simpleMessage("мой "),
+        "feedback":
+            MessageLookupByLibrary.simpleMessage("напишите свой вопрос..."),
+        "myContent": MessageLookupByLibrary.simpleMessage("мой контент"),
+        "myComment": MessageLookupByLibrary.simpleMessage("мой комментарий"),
       };
 }

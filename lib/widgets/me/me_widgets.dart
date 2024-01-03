@@ -7,7 +7,10 @@ import 'package:chatgpt_im/widgets/me/user_logged_widgets.dart';
 import 'package:chatgpt_im/widgets/me/user_not_logged_in_widgets.dart';
 import 'package:provider/provider.dart';
 
+import '../../common/global.dart';
+import '../../routes/login_page.dart';
 import '../../states/UserModel.dart';
+import '../qa/create_forum_sheet.dart';
 import 'forum_comment.dart';
 
 class MeWidgets extends StatefulWidget {
@@ -36,6 +39,26 @@ class _MeWidgetsState extends State<MeWidgets> {
     });
   }
 
+  void _openSheet(BuildContext context) {
+    if (!Global.profile.status) {
+      Navigator.of(context).pushNamed(LoginPage.path);
+      return;
+    }
+
+    showModalBottomSheet(
+      useSafeArea: false,
+      isScrollControlled: true,
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (BuildContext context) {
+        return ForumSheet(
+          type: '2',
+          callBack: (val) => {},
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var s = S.of(context);
@@ -44,6 +67,11 @@ class _MeWidgetsState extends State<MeWidgets> {
         elevation: 0,
         centerTitle: true,
         title: Text(s.me, style: const TextStyle(fontSize: 16)),
+        actions: [
+          IconButton(
+              onPressed: () => _openSheet(context),
+              icon: const Icon(Icons.bug_report))
+        ],
       ),
       body: Stack(
         children: [
@@ -64,7 +92,7 @@ class _MeWidgetsState extends State<MeWidgets> {
                       Container(
                         margin: const EdgeInsets.only(left: 20),
                         child: Text(
-                          '我的',
+                          s.mine,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),

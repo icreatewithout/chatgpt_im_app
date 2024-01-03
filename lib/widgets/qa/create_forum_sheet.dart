@@ -18,9 +18,11 @@ class ForumSheet extends StatefulWidget {
   const ForumSheet({
     super.key,
     required this.callBack,
+    required this.type,
   });
 
   final CallBack callBack;
+  final String type;
 
   @override
   State<ForumSheet> createState() => _ForumSheetState();
@@ -113,7 +115,7 @@ class _ForumSheetState extends State<ForumSheet> {
 
   void _saveForum(BuildContext context, {List<dynamic>? urls}) async {
     Map<String, dynamic>? map = {
-      'type': '1',
+      'type': widget.type,
       'des': _controller.text,
     };
 
@@ -127,6 +129,8 @@ class _ForumSheetState extends State<ForumSheet> {
         widget.callBack(GptForum.fromJson(result.data));
         if (mounted) {
           Navigator.of(context).pop();
+          CommonUtils.showToast('success',
+              tg: ToastGravity.TOP, toast: Toast.LENGTH_LONG);
         }
       } else {
         CommonUtils.showToast(result.message,
@@ -156,7 +160,7 @@ class _ForumSheetState extends State<ForumSheet> {
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
         isDense: true,
-        hintText: s.hintText,
+        hintText: widget.type == '1' ? s.hintText : s.feedback,
         counterText: '',
         hintStyle: const TextStyle(fontSize: 16, color: Colors.grey),
       ),

@@ -15,4 +15,5 @@ class Assets {
   static const String liked = 'assets/liked.png';
   static const String read = 'assets/read.png';
   static const String comment = 'assets/comment.png';
+  static const String reply = 'assets/reply.png';
 }

@@ -38,8 +38,8 @@ class _QaWidgetsState extends State<QaWidgets> {
   int pageNum = 1;
   final int pageSize = 10;
   bool showLoad = false;
-  int select = 0;
-  String type= '1';
+  String select = '1';
+  String type = '1';
 
   @override
   void initState() {
@@ -58,6 +58,7 @@ class _QaWidgetsState extends State<QaWidgets> {
 
   Future<void> findPage() async {
     Map<String, dynamic>? map = {
+      'type': type,
       'pageNum': pageNum,
       'pageSize': pageSize,
     };
@@ -66,11 +67,13 @@ class _QaWidgetsState extends State<QaWidgets> {
       if (result.code == 200) {
         List<dynamic> res =
             result.data!['content'].map((e) => GptForum.fromJson(e)).toList();
-        setState(() {
-          list.addAll(res);
-          pageNum++;
-          isLast = result.data!['last'];
-        });
+        if (mounted) {
+          setState(() {
+            list.addAll(res);
+            pageNum++;
+            isLast = result.data!['last'];
+          });
+        }
       } else {
         CommonUtils.showToast(result.message,
             tg: ToastGravity.TOP, toast: Toast.LENGTH_LONG);
@@ -83,14 +86,19 @@ class _QaWidgetsState extends State<QaWidgets> {
     } finally {
       _controller.finishLoad(
           isLast ? IndicatorResult.noMore : IndicatorResult.success);
+      setState(() {
+        showLoad = false;
+      });
     }
   }
 
   Future<void> onRefresh() async {
-    setState(() {
-      pageNum = 1;
-      list.removeRange(0, list.length);
-    });
+    if (mounted) {
+      setState(() {
+        pageNum = 1;
+        list.removeRange(0, list.length);
+      });
+    }
     await findPage();
     _controller.finishRefresh();
     _controller.resetFooter();
@@ -109,6 +117,7 @@ class _QaWidgetsState extends State<QaWidgets> {
       backgroundColor: Colors.transparent,
       builder: (BuildContext context) {
         return ForumSheet(
+          type: '1',
           callBack: (val) => _insertInfo(val),
         );
       },
@@ -121,9 +130,14 @@ class _QaWidgetsState extends State<QaWidgets> {
     });
   }
 
-  void _chaneSelect(int i) {
+  void _chaneSelect(String i) {
     setState(() {
       select = i;
+      type = i;
+      pageNum = 1;
+      list.removeRange(0, list.length);
+      showLoad = true;
+      findPage();
     });
   }
 
@@ -207,7 +221,7 @@ class _QaWidgetsState extends State<QaWidgets> {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           GestureDetector(
-            onTap: () => _chaneSelect(0),
+            onTap: () => _chaneSelect('1'),
             child: Column(
               children: [
                 const Text(
@@ -215,12 +229,12 @@ class _QaWidgetsState extends State<QaWidgets> {
                   style:
                       TextStyle(fontWeight: FontWeight.w600, letterSpacing: 1),
                 ),
-                buildLine(0)
+                buildLine('1')
               ],
             ),
           ),
           GestureDetector(
-              onTap: () => _chaneSelect(1),
+              onTap: () => _chaneSelect('2'),
               child: Column(
                 children: [
                   const Text(
@@ -228,7 +242,7 @@ class _QaWidgetsState extends State<QaWidgets> {
                     style: TextStyle(
                         fontWeight: FontWeight.w600, letterSpacing: 1),
                   ),
-                  buildLine(1)
+                  buildLine('2')
                 ],
               )),
         ],
@@ -236,7 +250,7 @@ class _QaWidgetsState extends State<QaWidgets> {
     );
   }
 
-  buildLine(int i) {
+  buildLine(String i) {
     return Container(
       margin: const EdgeInsets.only(top: 2),
       width: 20,

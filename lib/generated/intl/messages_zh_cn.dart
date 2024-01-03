@@ -49,7 +49,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "gptName" : MessageLookupByLibrary.simpleMessage("名称"),
     "gptTemperature" : MessageLookupByLibrary.simpleMessage("随机性"),
     "hint" : MessageLookupByLibrary.simpleMessage("提示"),
-    "hintDelChat" : MessageLookupByLibrary.simpleMessage("确实删除该会话？"),
+    "hintDelChat" : MessageLookupByLibrary.simpleMessage("确定删除吗？"),
     "hintText" : MessageLookupByLibrary.simpleMessage("写下你的想法..."),
     "hintText1" : MessageLookupByLibrary.simpleMessage("加入OpenGPT，表示您已同意OpenGPT的"),
     "hintText2" : MessageLookupByLibrary.simpleMessage("服务条款和隐私政策"),
@@ -86,6 +86,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "tosapp" : MessageLookupByLibrary.simpleMessage("服务条款和隐私政策"),
     "updateSetting" : MessageLookupByLibrary.simpleMessage("设置"),
     "verify" : MessageLookupByLibrary.simpleMessage("验证"),
-    "xLogin" : MessageLookupByLibrary.simpleMessage("X登录")
+    "xLogin" : MessageLookupByLibrary.simpleMessage("X登录"),
+    "avatar" : MessageLookupByLibrary.simpleMessage("头像"),
+    "nickname" : MessageLookupByLibrary.simpleMessage("昵称"),
+    "mine" : MessageLookupByLibrary.simpleMessage("我的"),
+    "feedback" : MessageLookupByLibrary.simpleMessage("写下你遇到的问题..."),
+    "myContent" : MessageLookupByLibrary.simpleMessage("我的观点"),
+    "myComment" : MessageLookupByLibrary.simpleMessage("我的评论"),
   };
 }

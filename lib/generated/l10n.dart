@@ -200,7 +200,7 @@ class S {
   }
 
   String get hintDelChat {
-    return Intl.message('Are you sure you want to delete this chat?',
+    return Intl.message('Are you sure to delete it?',
         name: 'hintDelChat', desc: '', args: []);
   }
 
@@ -324,6 +324,30 @@ class S {
   String get storageGranted {
     return Intl.message('Not allowed to obtain storage permissions',
         name: 'storageGranted', desc: '', args: []);
+  }
+
+  String get avatar {
+    return Intl.message('avatar', name: 'avatar', desc: '', args: []);
+  }
+
+  String get nickname {
+    return Intl.message('nickname ', name: 'nickname', desc: '', args: []);
+  }
+
+  String get mine {
+    return Intl.message('mine', name: 'mine', desc: '', args: []);
+  }
+
+  String get feedback {
+    return Intl.message('write your question...', name: 'feedback', desc: '', args: []);
+  }
+
+  String get myContent {
+    return Intl.message('My Content', name: 'myContent', desc: '', args: []);
+  }
+
+  String get myComment {
+    return Intl.message('My Comment', name: 'myComment', desc: '', args: []);
   }
 }
 

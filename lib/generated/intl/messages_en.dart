@@ -55,8 +55,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "gptName": MessageLookupByLibrary.simpleMessage("Name"),
         "gptTemperature": MessageLookupByLibrary.simpleMessage("Temperature"),
         "hint": MessageLookupByLibrary.simpleMessage("prompt"),
-        "hintDelChat": MessageLookupByLibrary.simpleMessage(
-            "Are you sure you want to delete this chat?"),
+        "hintDelChat":
+            MessageLookupByLibrary.simpleMessage("Are you sure to delete it?"),
         "hintText":
             MessageLookupByLibrary.simpleMessage("Write down your thoughts..."),
         "hintText1": MessageLookupByLibrary.simpleMessage(
@@ -109,6 +109,13 @@ class MessageLookup extends MessageLookupByLibrary {
             "Terms of Service and Privacy Policy"),
         "updateSetting": MessageLookupByLibrary.simpleMessage("Setting"),
         "verify": MessageLookupByLibrary.simpleMessage("Verify"),
-        "xLogin": MessageLookupByLibrary.simpleMessage("X Login")
+        "xLogin": MessageLookupByLibrary.simpleMessage("X Login"),
+        "avatar": MessageLookupByLibrary.simpleMessage("avatar"),
+        "nickname": MessageLookupByLibrary.simpleMessage("nickname"),
+        "mine": MessageLookupByLibrary.simpleMessage("Mine"),
+        "feedback":
+            MessageLookupByLibrary.simpleMessage("write your question..."),
+        "myContent": MessageLookupByLibrary.simpleMessage("My Content"),
+        "myComment": MessageLookupByLibrary.simpleMessage("My Comment"),
       };
 }

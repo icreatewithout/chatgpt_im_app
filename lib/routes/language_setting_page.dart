@@ -53,8 +53,6 @@ class _LanguageSettingPageState extends State<LanguageSettingPage> {
                   child: ListView(
                     shrinkWrap: true,
                     children: [
-                      buildLanguageItem("中文简体", "zh_CN", localeModel),
-                      buildLine(),
                       buildLanguageItem("English", "en_US", localeModel),
                       buildLine(),
                       buildLanguageItem("Français", "fr_FR", localeModel),
@@ -68,6 +66,9 @@ class _LanguageSettingPageState extends State<LanguageSettingPage> {
                       buildLanguageItem("한국어", "ko_KR", localeModel),
                       buildLine(),
                       buildLanguageItem("Русский язык", "ru_RU", localeModel),
+                      buildLine(),
+                      buildLanguageItem("中文简体", "zh_CN", localeModel),
+
                     ],
                   ),
                 ),

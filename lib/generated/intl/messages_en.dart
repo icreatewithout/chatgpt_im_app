@@ -91,7 +91,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "openMun": MessageLookupByLibrary.simpleMessage("replies"),
         "photoGranted": MessageLookupByLibrary.simpleMessage(
             "Not allowed to obtain album permissions"),
-        "qa": MessageLookupByLibrary.simpleMessage("Q&A"),
+        "qa": MessageLookupByLibrary.simpleMessage("Forum"),
         "replay": MessageLookupByLibrary.simpleMessage("Reply"),
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveComment":

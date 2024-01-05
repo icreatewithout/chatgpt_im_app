@@ -60,8 +60,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "gptName": MessageLookupByLibrary.simpleMessage("имя"),
         "gptTemperature": MessageLookupByLibrary.simpleMessage("случайность"),
         "hint": MessageLookupByLibrary.simpleMessage("намекать"),
-        "hintDelChat":
-            MessageLookupByLibrary.simpleMessage("Вы уверены, что удалите его?"),
+        "hintDelChat": MessageLookupByLibrary.simpleMessage(
+            "Вы уверены, что удалите его?"),
         "hintText":
             MessageLookupByLibrary.simpleMessage("запишите свои мысли..."),
         "hintText1": MessageLookupByLibrary.simpleMessage(
@@ -124,5 +124,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("напишите свой вопрос..."),
         "myContent": MessageLookupByLibrary.simpleMessage("мой контент"),
         "myComment": MessageLookupByLibrary.simpleMessage("мой комментарий"),
+        "views": MessageLookupByLibrary.simpleMessage("Вид"),
+        "fb": MessageLookupByLibrary.simpleMessage("обратная связь"),
       };
 }

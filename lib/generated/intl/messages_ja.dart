@@ -99,5 +99,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("質問を書いてください"),
         "myContent": MessageLookupByLibrary.simpleMessage("私のコンテンツ"),
         "myComment": MessageLookupByLibrary.simpleMessage("私のコメント"),
+        "views": MessageLookupByLibrary.simpleMessage("ビュー"),
+        "fb": MessageLookupByLibrary.simpleMessage("フィードバック"),
       };
 }

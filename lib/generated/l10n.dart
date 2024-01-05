@@ -349,6 +349,14 @@ class S {
   String get myComment {
     return Intl.message('My Comment', name: 'myComment', desc: '', args: []);
   }
+
+  String get views {
+    return Intl.message('Views', name: 'views', desc: '', args: []);
+  }
+
+  String get fb {
+    return Intl.message('Feedback', name: 'fb', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

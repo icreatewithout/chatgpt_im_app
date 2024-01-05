@@ -35,8 +35,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "editInfo": MessageLookupByLibrary.simpleMessage(
             "Modifier les informations personnelles"),
         "email": MessageLookupByLibrary.simpleMessage("Mail"),
-        "emailErr":
-            MessageLookupByLibrary.simpleMessage("Erreur de format dMyCommente-mail"),
+        "emailErr": MessageLookupByLibrary.simpleMessage(
+            "Erreur de format dMyCommente-mail"),
         "emailHint": MessageLookupByLibrary.simpleMessage(
             "Entrez votre email, recevez et remplissez le code de vérification"),
         "emailLogin":
@@ -124,5 +124,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("écris ta question"),
         "myContent": MessageLookupByLibrary.simpleMessage("mon contenu"),
         "myComment": MessageLookupByLibrary.simpleMessage("mon commentaire"),
+        "views": MessageLookupByLibrary.simpleMessage("Voir"),
+        "fb": MessageLookupByLibrary.simpleMessage("retour"),
       };
 }

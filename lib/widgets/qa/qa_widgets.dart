@@ -186,7 +186,7 @@ class _QaWidgetsState extends State<QaWidgets> {
                           childCount: 1,
                         ),
                       ),
-                      SliverPinnedHeader(child: buildTabBar()),
+                      SliverPinnedHeader(child: buildTabBar(s)),
                       SliverList(
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
@@ -212,7 +212,7 @@ class _QaWidgetsState extends State<QaWidgets> {
     );
   }
 
-  buildTabBar() {
+  buildTabBar(S s) {
     return Container(
       color: Colors.grey.shade100,
       margin: const EdgeInsets.only(left: 16, right: 16),
@@ -224,10 +224,10 @@ class _QaWidgetsState extends State<QaWidgets> {
             onTap: () => _chaneSelect('1'),
             child: Column(
               children: [
-                const Text(
-                  '最新观点',
-                  style:
-                      TextStyle(fontWeight: FontWeight.w600, letterSpacing: 1),
+                Text(
+                  s.views,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, letterSpacing: 1),
                 ),
                 buildLine('1')
               ],
@@ -237,9 +237,9 @@ class _QaWidgetsState extends State<QaWidgets> {
               onTap: () => _chaneSelect('2'),
               child: Column(
                 children: [
-                  const Text(
-                    '建议反馈',
-                    style: TextStyle(
+                   Text(
+                    s.fb,
+                    style:const TextStyle(
                         fontWeight: FontWeight.w600, letterSpacing: 1),
                   ),
                   buildLine('2')
@@ -399,8 +399,10 @@ class _QaWidgetsState extends State<QaWidgets> {
       child: CarouselSlider(
         options: CarouselOptions(viewportFraction: 1.0, autoPlay: true),
         items: [
-          buildSliderItem('Welcome to OpenGPT', 'This is an anonymous, open ChatGPT tool APP.'),
-          buildSliderItem('Tips', 'If you encounter any problems, please contact me: agdhhjfhtdh585@gmail.com.'),
+          buildSliderItem('Welcome to OpenGPT',
+              'This is an anonymous, open ChatGPT tool APP.'),
+          buildSliderItem('Tips',
+              'If you encounter any problems, please contact me: agdhhjfhtdh585@gmail.com.'),
         ],
       ),
     );

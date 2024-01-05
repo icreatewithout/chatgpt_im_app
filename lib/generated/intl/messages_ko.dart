@@ -97,5 +97,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "feedback": MessageLookupByLibrary.simpleMessage("질문을 작성하세요"),
         "myContent": MessageLookupByLibrary.simpleMessage("내 콘텐츠"),
         "myComment": MessageLookupByLibrary.simpleMessage("내 댓글"),
+        "views": MessageLookupByLibrary.simpleMessage("보다"),
+        "fb": MessageLookupByLibrary.simpleMessage("피드백"),
       };
 }

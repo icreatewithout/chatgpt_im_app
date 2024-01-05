@@ -120,8 +120,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "avatar": MessageLookupByLibrary.simpleMessage("avatar"),
         "nickname": MessageLookupByLibrary.simpleMessage("Soprannome"),
         "mine": MessageLookupByLibrary.simpleMessage("mio"),
-        "feedback": MessageLookupByLibrary.simpleMessage("scrivi la tua domanda"),
+        "feedback":
+            MessageLookupByLibrary.simpleMessage("scrivi la tua domanda"),
         "myContent": MessageLookupByLibrary.simpleMessage("il mio contenuto"),
         "myComment": MessageLookupByLibrary.simpleMessage("il mio commento"),
+        "views": MessageLookupByLibrary.simpleMessage("Visualizzazione"),
+        "fb": MessageLookupByLibrary.simpleMessage("feedback"),
       };
 }

@@ -117,5 +117,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("write your question..."),
         "myContent": MessageLookupByLibrary.simpleMessage("My Content"),
         "myComment": MessageLookupByLibrary.simpleMessage("My Comment"),
+        "views": MessageLookupByLibrary.simpleMessage("Views"),
+        "fb": MessageLookupByLibrary.simpleMessage("Feedback"),
       };
 }

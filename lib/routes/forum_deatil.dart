@@ -163,8 +163,8 @@ class _ForumDetailState extends State<ForumDetail> {
                     children: [
                       Row(
                         children: [
-                          CommonUtils.image(
-                              forum.userVo!.avatarUrl, 30, 30, 4, BoxFit.cover),
+                          CommonUtils.avatar(forum.userVo!.avatarUrl,
+                              w: 30, h: 30, radius: 5),
                           const SizedBox(width: 8),
                           Text(forum.userVo!.nickName ?? 'error name.',
                               overflow: TextOverflow.ellipsis)
@@ -251,8 +251,8 @@ class _ForumDetailState extends State<ForumDetail> {
           child: SizedBox(
             child: Row(
               children: [
-                CommonUtils.image(
-                    forum.userVo!.avatarUrl, 30, 30, 4, BoxFit.cover),
+                CommonUtils.avatar(forum.userVo!.avatarUrl,
+                    w: 30, h: 30, radius: 5),
                 const SizedBox(width: 8),
                 Text(forum.userVo!.nickName ?? 'error name.',
                     overflow: TextOverflow.ellipsis)

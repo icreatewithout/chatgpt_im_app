@@ -501,7 +501,7 @@ class _ImagesMessageState extends State<ImagesMessage> {
       );
     }
 
-    List<dynamic> images = json.decode(message.message ?? '{}');
+    List<dynamic> images = json.decode(message.message ?? '[]');
     return Column(
       children: [
         ...images.map(

@@ -400,7 +400,7 @@ class _QaWidgetsState extends State<QaWidgets> {
         options: CarouselOptions(viewportFraction: 1.0, autoPlay: true),
         items: [
           buildSliderItem('Welcome to OpenGPT',
-              'This is an anonymous, open ChatGPT tool APP.'),
+              'OpenGPT is an intelligent chatbot based on ChatGPT, which is portable and easy to use.'),
           buildSliderItem('Tips',
               'If you encounter any problems, please contact me: agdhhjfhtdh585@gmail.com.'),
         ],

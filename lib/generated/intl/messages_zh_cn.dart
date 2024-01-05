@@ -93,5 +93,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "feedback" : MessageLookupByLibrary.simpleMessage("写下你遇到的问题..."),
     "myContent" : MessageLookupByLibrary.simpleMessage("我的观点"),
     "myComment" : MessageLookupByLibrary.simpleMessage("我的评论"),
+    "views": MessageLookupByLibrary.simpleMessage("新观点"),
+    "fb": MessageLookupByLibrary.simpleMessage("问题"),
   };
 }

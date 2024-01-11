@@ -15,10 +15,10 @@ class Result<T> {
   @JsonKey(name: 'data')
   T? data;
 
-  static Result err([int? code, String? message]) {
+  static Result err({int? code, String? message}) {
     Map<String, dynamic> json = {
       'code': code ?? 500,
-      'message': message ?? '操作失败'
+      'message': message ?? 'error:$code'
     };
     return Result.fromJson(json, (json) => json);
   }

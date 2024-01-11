@@ -37,7 +37,7 @@ class DioUtil {
   static void init() {
     if (Global.isRelease) {
       dio.options.baseUrl = Api.releaseUrl;
-    }else{
+    } else {
       debugPrint('token is ${Global.profile.token}');
     }
 
@@ -54,48 +54,48 @@ class DioUtil {
     Response res = await dio.get(api, queryParameters: handleData(data ?? {}));
 
     if (res.statusCode == 401) {
-      return Result.err(401, res.statusMessage);
+      return Result.err(code: 401, message: res.statusMessage);
     }
     if (res.statusCode == 200) {
       return Result.fromJson(res.data, (json) => res.data['data']);
     }
-    return Result.err();
+    return Result.err(code: res.statusCode, message: res.statusMessage);
   }
 
   Future<Result> post(String api, {Map<String, dynamic>? data}) async {
     Response res =
         await dio.post(api, data: json.encode(handleData(data ?? {})));
     if (res.statusCode == 401) {
-      return Result.err(401, res.statusMessage);
+      return Result.err(code: 401, message: res.statusMessage);
     }
     if (res.statusCode == 200) {
       return Result.fromJson(res.data, (json) => res.data['data']);
     }
-    return Result.err();
+    return Result.err(code: res.statusCode, message: res.statusMessage);
   }
 
   Future<Result> put(String api, {Map<String, dynamic>? data}) async {
     Response res =
         await dio.put(api, data: json.encode(handleData(data ?? {})));
     if (res.statusCode == 401) {
-      return Result.err(401, res.statusMessage);
+      return Result.err(code: 401, message: res.statusMessage);
     }
     if (res.statusCode == 200) {
       return Result.fromJson(res.data, (json) => res.data['data']);
     }
-    return Result.err();
+    return Result.err(code: res.statusCode, message: res.statusMessage);
   }
 
   Future<Result> delete(String api, [Map<String, dynamic>? data]) async {
     Response res =
         await dio.delete(api, data: json.encode(handleData(data ?? {})));
     if (res.statusCode == 401) {
-      return Result.err(401, res.statusMessage);
+      return Result.err(code: 401, message: res.statusMessage);
     }
     if (res.statusCode == 200) {
       return Result.fromJson(res.data, (json) => res.data['data']);
     }
-    return Result.err();
+    return Result.err(code: res.statusCode, message: res.statusMessage);
   }
 
   Future<Result> upload(String api, String localPath, String name) async {
@@ -105,13 +105,13 @@ class DioUtil {
 
     Response res = await dio.post(api, data: fd);
     if (res.statusCode == 401) {
-      return Result.err(401, res.statusMessage);
+      return Result.err(code: 401, message: res.statusMessage);
     }
 
     if (res.statusCode == 200 && res.data['code'] == 200) {
       return Result.fromJson(res.data, (json) => res.data['data']);
     }
-    return Result.err();
+    return Result.err(message: res.statusMessage);
   }
 
   Future<Result> uploads(String api, List<XFile> files) async {
@@ -129,13 +129,13 @@ class DioUtil {
 
     Response res = await dio.post(api, data: fd);
     if (res.statusCode == 401) {
-      return Result.err(401, res.statusMessage);
+      return Result.err(code: 401, message: res.statusMessage);
     }
 
     if (res.statusCode == 200 && res.data['code'] == 200) {
       return Result.fromJson(res.data, (json) => res.data['data']);
     }
-    return Result.err();
+    return Result.err(code: res.statusCode, message: res.statusMessage);
   }
 
   Future<Uint8List?> getBytesByUrl(String url) async {

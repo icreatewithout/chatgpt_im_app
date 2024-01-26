@@ -20,9 +20,7 @@ GptForumCommentVo _$GptForumCommentVoFromJson(Map<String, dynamic> json) =>
       ..time = json['time'] as String?
       ..des = json['des'] as String?
       ..child = json['child'] as int?
-      ..children = (json['children'] as List<dynamic>?)
-          ?.map((e) => GptForumCommentVo.fromJson(e as Map<String, dynamic>))
-          .toList();
+      ..children = json['children'] as List<dynamic>?;
 
 Map<String, dynamic> _$GptForumCommentVoToJson(GptForumCommentVo instance) =>
     <String, dynamic>{

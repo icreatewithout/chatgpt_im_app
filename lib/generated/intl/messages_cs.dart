@@ -37,7 +37,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "emailHint" : MessageLookupByLibrary.simpleMessage("输入邮箱，接收并填入验证码"),
     "emailLogin" : MessageLookupByLibrary.simpleMessage("邮箱登录"),
     "facebookLogin" : MessageLookupByLibrary.simpleMessage("Facebook登录"),
-    "find" : MessageLookupByLibrary.simpleMessage("OpenAi"),
+    "find" : MessageLookupByLibrary.simpleMessage("Chat"),
     "googleLogin" : MessageLookupByLibrary.simpleMessage("Google登录"),
     "gpDes" : MessageLookupByLibrary.simpleMessage("描述"),
     "gptDefaultDesVal" : MessageLookupByLibrary.simpleMessage("有用的AI助手"),

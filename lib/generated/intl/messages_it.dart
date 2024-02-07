@@ -42,7 +42,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "emailLogin": MessageLookupByLibrary.simpleMessage("E-mail di accesso"),
         "facebookLogin":
             MessageLookupByLibrary.simpleMessage("accesso a Facebook"),
-        "find": MessageLookupByLibrary.simpleMessage("OpenAi"),
+        "find": MessageLookupByLibrary.simpleMessage("Chat"),
         "googleLogin": MessageLookupByLibrary.simpleMessage("Accesso a Google"),
         "gpDes": MessageLookupByLibrary.simpleMessage("descrivere"),
         "gptDefaultDesVal":

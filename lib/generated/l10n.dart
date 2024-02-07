@@ -63,7 +63,7 @@ class S {
   }
 
   String get find {
-    return Intl.message('OpenAi', name: 'find', desc: '', args: []);
+    return Intl.message('Chat', name: 'find', desc: '', args: []);
   }
 
   String get qa {

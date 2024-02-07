@@ -40,7 +40,7 @@ class MessageLookup extends MessageLookupByLibrary {
             "Geben Sie Ihre E-Mail-Adresse ein, erhalten Sie den Bestätigungscode und geben Sie ihn ein"),
         "emailLogin": MessageLookupByLibrary.simpleMessage("E-Mail-Login"),
         "facebookLogin": MessageLookupByLibrary.simpleMessage("Facebook Login"),
-        "find": MessageLookupByLibrary.simpleMessage("OpenAi"),
+        "find": MessageLookupByLibrary.simpleMessage("Chat"),
         "googleLogin": MessageLookupByLibrary.simpleMessage("Google-Login"),
         "gpDes": MessageLookupByLibrary.simpleMessage("beschreiben"),
         "gptDefaultDesVal":

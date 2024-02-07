@@ -520,7 +520,7 @@ class _ChatMessageState extends State<ChatMessage> {
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Image.asset(Assets.ic_launcher_72, width: 46),
+          Image.asset(Assets.ic_launcher_144, width: 46),
           Expanded(
             child: Container(
               alignment: Alignment.centerLeft,

@@ -59,7 +59,7 @@ class CommonUtils {
   static avatar(String? url,
       {double? w, double? h, double? radius, BoxFit? fit}) {
     if (url == null) {
-      return Image.asset(Assets.ic_launcher_48,
+      return Image.asset(Assets.ic_launcher_144,
           width: w ?? 20, height: h ?? 200, fit: fit ?? BoxFit.cover);
     }
     return image(url, h ?? 20, w ?? 20, radius ?? 0, fit ?? BoxFit.cover);
